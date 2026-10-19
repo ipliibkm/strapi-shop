@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-booking-base
+      author: platform
+      changes:
+        - createTable:
+            tableName: booking
+            columns:
+              - column: {name: id, type: uuid, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: resource_id, type: varchar(128), constraints: {nullable: false}}
+              - column: {name: starts_at, type: timestamp with time zone, constraints: {nullable: false}}
+              - column: {name: ends_at, type: timestamp with time zone, constraints: {nullable: false}}
+              - column: {name: status, type: varchar(24), constraints: {nullable: false}}
+              - column: {name: created_at, type: timestamp with time zone, constraints: {nullable: false}}
+        - createIndex:
+            tableName: booking
+            indexName: ix_booking_resource_start
+            columns:
+              - column: {name: resource_id}
+              - column: {name: starts_at}
+        - createTable:
+            tableName: external_busy_block
+            columns:
+              - column: {name: id, type: uuid, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: resource_id, type: varchar(128), constraints: {nullable: false}}
+              - column: {name: google_calendar_id, type: varchar(512), constraints: {nullable: false}}
+              - column: {name: google_event_id, type: varchar(512), constraints: {nullable: false}}
+              - column: {name: starts_at, type: timestamp with time zone, constraints: {nullable: false}}
+              - column: {name: ends_at, type: timestamp with time zone, constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: external_busy_block
+            columnNames: google_calendar_id,google_event_id
+            constraintName: uq_google_busy_event
