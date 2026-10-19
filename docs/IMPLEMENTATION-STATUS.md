@@ -80,3 +80,12 @@ Added Angular Material + Tailwind setup wizard with company details, first opera
 - [ ] Prefer secured BFF + HttpOnly cookies before full production deployment; current SPA holds token in session storage.
 - [ ] Configure same-origin reverse proxy for `/api/v1` in deployed Angular admin.
 See [OIDC-AUTH.md](OIDC-AUTH.md).
+
+## Customer storefront UI — 2026-10-19
+- [x] Replace the original placeholder with responsive Home, Services, Shop, About, and Contact views.
+- [x] Add mobile navigation, sample service cards, and Material + Tailwind styles.
+- [x] Add a static nginx container for the storefront on localhost port 8081, included in Compose.
+- [ ] Verify the Angular production build and Docker image end-to-end. No successful build proof in this session.
+- [ ] Connect real CMS content, branding, media, booking, products, and customer forms. Sample pages are not transactional.
+- [ ] Add SEO-ready SSR or prerendering and deployment TLS before public launch.
+See [STOREFRONT.md](STOREFRONT.md).
