@@ -1,1 +1,86 @@
-{"$schema":"./node_modules/@angular/cli/lib/config/schema.json","version":1,"newProjectRoot":"apps","projects":{"admin":{"projectType":"application","root":"apps/admin","sourceRoot":"apps/admin/src","prefix":"ip-admin","architect":{"build":{"builder":"@angular/build:application","options":{"outputPath":"dist/admin","index":"apps/admin/src/index.html","browser":"apps/admin/src/main.ts","tsConfig":"apps/admin/tsconfig.app.json","styles":["apps/admin/src/styles.css"]}},"serve":{"builder":"@angular/build:dev-server","options":{"buildTarget":"admin:build"}}}},"storefront":{"projectType":"application","root":"apps/storefront","sourceRoot":"apps/storefront/src","prefix":"ip-storefront","architect":{"build":{"builder":"@angular/build:application","options":{"outputPath":"dist/storefront","index":"apps/storefront/src/index.html","browser":"apps/storefront/src/main.ts","tsConfig":"apps/storefront/tsconfig.app.json","styles":["apps/storefront/src/styles.css"]}},"serve":{"builder":"@angular/build:dev-server","options":{"buildTarget":"storefront:build"}}}},"setup":{"projectType":"application","root":"apps/setup","sourceRoot":"apps/setup/src","prefix":"ip-setup","architect":{"build":{"builder":"@angular/build:application","options":{"outputPath":"dist/setup","index":"apps/setup/src/index.html","browser":"apps/setup/src/main.ts","tsConfig":"apps/setup/tsconfig.app.json","styles":["apps/setup/src/styles.css"]}},"serve":{"builder":"@angular/build:dev-server","options":{"buildTarget":"setup:build"}}}}}}
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "apps",
+  "projects": {
+    "admin": {
+      "projectType": "application",
+      "root": "apps/admin",
+      "sourceRoot": "apps/admin/src",
+      "prefix": "ip-admin",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/admin",
+            "index": "apps/admin/src/index.html",
+            "browser": "apps/admin/src/main.ts",
+            "tsConfig": "apps/admin/tsconfig.app.json",
+            "styles": [
+              "apps/admin/src/styles.css"
+            ]
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "admin:build"
+          }
+        }
+      }
+    },
+    "storefront": {
+      "projectType": "application",
+      "root": "apps/storefront",
+      "sourceRoot": "apps/storefront/src",
+      "prefix": "ip-storefront",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/storefront",
+            "index": "apps/storefront/src/index.html",
+            "browser": "apps/storefront/src/main.ts",
+            "tsConfig": "apps/storefront/tsconfig.app.json",
+            "styles": [
+              "apps/storefront/src/styles.css"
+            ]
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "storefront:build"
+          }
+        }
+      }
+    },
+    "setup": {
+      "projectType": "application",
+      "root": "apps/setup",
+      "sourceRoot": "apps/setup/src",
+      "prefix": "ip-setup",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/setup",
+            "index": "apps/setup/src/index.html",
+            "browser": "apps/setup/src/main.ts",
+            "tsConfig": "apps/setup/tsconfig.app.json",
+            "styles": [
+              "apps/setup/src/styles.css"
+            ]
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "setup:build",
+            "proxyConfig": "apps/setup/proxy.conf.json"
+          }
+        }
+      }
+    }
+  }
+}
