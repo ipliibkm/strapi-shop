@@ -45,3 +45,28 @@ Strapi-native REST can be consumed through a hardened BFF; do not claim these ex
 
 ## Contract governance
 OpenAPI 3.1 + JSON Schema; version every public contract and async event; error schemas, permissions/scopes, HTTP caching, cursor pagination, request idempotency key and retry policy. Consumers generate typed Angular clients; consumer-driven compatibility tests; schema evolution policy and sample fixtures. Contract first, implementation later.
+
+
+## New admin and integration models and API work items (2026-10-19)
+All paths below are proposals **not implemented**; exact names need OpenAPI-first approval.
+
+### Application-owned tables (Liquibase)
+- `GoogleConnection` (staff/owner association, provider subject, scopes, encrypted token reference, expiry, sync status, last error, revocation timestamps)
+- `GoogleCalendarBinding` (staff/resource/calendar ID, direction and visibility/privacy policies)
+- `ExternalEventMapping`, `CalendarSyncCheckpoint`, `CalendarChannelSubscription`, `CalendarConflict`, `CalendarBusyProjection`
+- `OutboundNotification`, `EmailDeliveryAttempt`, `ReminderPreference`, `EmailTemplateReference`
+- `ThemeDefinition`, `ThemeVersion`, `ThemeAssignment`, `UserAppearancePreference`, `BrandAssetReference`, `ThemeAuditEvent`
+- Booking operations additionally require `BookingGroup`, `GroupSession`, `BookingRoster`, `ResourceAllocation`, `CapacityReservation`, `CalendarAdminAudit` when validated against the group-event requirements.
+- `GoogleConnection` holds no raw credential in ordinary read responses; token values never enter logs or analytics.
+
+### Internal authenticated operations API candidates
+- `GET /api/v1/admin/bookings`, `POST /api/v1/admin/bookings`, `PATCH /api/v1/admin/bookings/{id}`, `POST /api/v1/admin/bookings/{id}/reschedule`, `POST /api/v1/admin/bookings/{id}/cancel`
+- `GET /api/v1/admin/calendar`, `GET /api/v1/admin/resources/{id}/availability`, `GET /api/v1/admin/group-sessions`, `GET /api/v1/admin/group-sessions/{id}/roster`
+- `GET /api/v1/admin/integrations/google`, `POST /api/v1/admin/integrations/google/connect`, `POST /api/v1/admin/integrations/google/disconnect`, `GET /api/v1/admin/integrations/google/sync-status` (OAuth callbacks dedicated, secured routes)
+- `GET /api/v1/admin/themes`, `GET /api/v1/admin/themes/{id}/preview`, `PUT /api/v1/admin/appearance`, `PUT /api/v1/admin/appearance/default` (privileged action for site-wide theme)
+
+### Security and correctness contracts
+- OAuth 2.0 offline authorization and Google scopes are separately consented: Calendar events/freebusy for synchronization, optional Gmail `gmail.send` for email. Do not request full Gmail inbox/read access as a side effect.
+- Define conflict matrix: booking confirmed vs Google event deleted, moved, overlapping or calendar disconnected; user chooses resolution workflow.
+- Customer booking identifiers are opaque; admin role and resource ownership policy checked server-side for every staff calendar operation.
+- Theme settings are tokenized, validated presets with theme schema versions; no arbitrary HTML/JS/CSS injection. Per-user preference needs precedence over global default defined.
