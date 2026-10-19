@@ -67,3 +67,16 @@ Added Angular Material + Tailwind setup wizard with company details, first opera
 - [ ] Implement Stripe Connect or account-specific Stripe setup flow with webhook signing.
 - [ ] Reconcile browser setup business details with Strapi profile.
 - [ ] Run automated builds, startup and integration tests. No successful build or test result was available in this turn.
+
+## External OIDC sign-in foundation — 2026-10-19
+- [x] Add Spring Boot OAuth2 resource server and conditional JWT-protected API chain.
+- [x] Check JWT signature, issuer, expiry and configured API audience. Require OPERATOR in the token's `roles` claim for administrator APIs.
+- [x] Disable the local development Basic auth chain when OIDC mode is enabled.
+- [x] Add OIDC public-client Authorization Code + PKCE integration in Angular with login, callback, logout, and bearer-token interceptor.
+- [x] Keep first setup operator password separate from OIDC identity.
+- [ ] Select/configure the real OIDC provider, MFA and first-user enrollment; not implemented.
+- [ ] Add OIDC provider-backed integration tests, token lifecycle tests and access policies for other roles.
+- [ ] Verify Java and Angular builds. Dependencies were not installed or tested in this session.
+- [ ] Prefer secured BFF + HttpOnly cookies before full production deployment; current SPA holds token in session storage.
+- [ ] Configure same-origin reverse proxy for `/api/v1` in deployed Angular admin.
+See [OIDC-AUTH.md](OIDC-AUTH.md).
