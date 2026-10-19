@@ -10,3 +10,6 @@ dist/
 .idea/
 .DS_Store
 coverage/
+
+config/business.json
+.setup-state.json
