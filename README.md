@@ -44,3 +44,9 @@ Optional: `platform-integrations` for enough independently deployed connectors, 
 2. Approve service boundaries in ARCHITECTURE.
 3. Specify models/endpoints in DOMAIN-AND-API.
 4. Execute phased checklists in IMPLEMENTATION-BACKLOG.
+
+
+## Approved baseline (2026-10-19)
+**Decision record:** Spring Boot modular transactional backend, single-business deployment, Stripe-first extensible payments, appointments/resource bookings/group events, custom Angular admin with complete booking management, **Angular Material + Storybook shared design system**, admin-selectable UI theme presets, Google Calendar account connection and optional Gmail API send integration, Docker Compose on one VPS, PostgreSQL, Liquibase for application-owned tables, Strapi for CMS-owned tables. Deliver in phases; **documentation only**.
+
+**Boundary clarification still pending:** 11 private repo names were approved earlier, but the user questioned whether projects should be separated. Recommend one **private monorepo with 11 logical packages** plus one Spring Boot modular monolith, instead of 11 repos and many microservices. Do not confuse logical modules, Git repositories, container services and database schemas. See [decision register](docs/DECISIONS.md) for questions to finalize.
