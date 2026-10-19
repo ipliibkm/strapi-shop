@@ -171,3 +171,34 @@ Contracts (P3) precede production API consumption. Domain schema migrations (P7/
 **Goal**, **Scope**, **Inputs/decisions**, **Owning repo**, **API/schema changes**, **Dependent issues**, **Detailed numbered tasks**, **Acceptance tests (Given/When/Then)**, **Security/privacy review**, **Observability**, **Migration/rollback**, **Documentation**, **Out of scope**, **Evidence**, **Done criteria**.
 
 **Definition of done**: security/privacy checks complete; unit+integration+contract+E2E (where applicable) passing; migration forward/backward compatible or documented irreversibility; metrics/logs/traces; documentation/API spec; controlled rollout and rollback; PR review; no hard-coded secrets.
+
+## Approved changes and new implementation tasks (2026-10-19)
+All remain **not implemented**. Prior references to independently deployed commerce and booking microservices are **logical ownership boundaries**, not required deployment boundaries. Prefer a modular Spring Boot monolith, one VPS Compose installation and one application transactional database (with schemas/roles isolated from Strapi). The previously approved 11 private repository names are awaiting confirmation after the question whether separation is necessary; a monorepo is recommended for simpler synchronized releases.
+
+### Updated P0/P1 governance
+- [ ] N-01 Resolve monorepo vs 11 repositories explicitly; if monorepo chosen, document 11 logical workspaces/modules under one GitHub repo and translate repo creation tasks accordingly.
+- [ ] N-02 Draw runtime topology, module dependency diagram and DB schema ownership; avoid accidental microservice proliferation.
+- [ ] N-03 Finalize Google Calendar/Gmail integration mode/account mapping, OAuth scopes, account revocation and UX.
+- [ ] N-04 Approve theme policy (admin only or storefront too, global vs user choice), permitted preset/customization model, branding, validation and rollback.
+
+### Updated P5/P9 design system + custom admin
+- [ ] N-05 Select Angular Material as base, document Material theming and shared UI library architecture, component wrappers/extensions, Storybook compatibility and token contracts.
+- [ ] N-06 Design curated theme presets, light/dark variants, preview/persist/select UI, contrast checks and accessible calendar colors, migration/versioning of theme definitions.
+- [ ] N-07 Require **all** custom admin pages (operations dashboard, order/inventory, booking management, staff calendars, resource management, settings, theme picker) to consume the shared design-system library.
+- [ ] N-08 Detail booking admin features: list/search/filter, calendars per staff/resource/week, status transitions, manual booking, edit/cancel/reschedule, capacity, group rosters, drag-and-drop conflict-safe transactions, Google account sync health, audit timeline and reminders.
+- [ ] N-09 Clarify Strapi native editor UI vs bespoke Angular editor features; prefer Strapi native only for CMS editorial operations in first stages.
+
+### Updated P8/P10 calendar/email integration
+- [ ] N-10 Specify Google Cloud project, OAuth consent screen, client app registration, redirect URIs, production verification, account connection/disconnection, refresh-token encryption, least-privilege Google Calendar scopes.
+- [ ] N-11 Implement *plan only*: free/busy import, appointment event creation/update/delete, resource/calendar mapping, provider event ID mapping, sync cursor, webhook subscription renewals and polling fallback.
+- [ ] N-12 Specify source-of-truth rules: Google busy periods may restrict availability; booking holds and confirmation must be serialized against PostgreSQL, not treated as Google transactions.
+- [ ] N-13 Document two-way external edits, DST/recurrence, conflicting events, multi-account failures, expired tokens, quota/retry and reconciliation.
+- [ ] N-14 Decide optional Gmail API `gmail.send` for booking confirmations, reminders, cancellations; add explicit consent, rate/limit tests, dedupe, templates, SPF/DKIM/DMARC operational checks and a provider fallback strategy.
+- [ ] N-15 Test OAuth reconnect, revoked access, sync lag, duplicate calendar notifications, conflicting group bookings, multi-resource holds and outgoing email retry behavior.
+
+### Revised acceptance gates
+- Admin booking flows and theme switching demonstrated using *only shared design-system components* (Angular Material based).
+- Native Strapi editor remains protected and separated from operational admin permissions.
+- Google integration cannot create duplicate confirmed bookings or reveal nonauthorized private event details.
+- Website-only profile runs without Google/Stripe modules being enabled.
+- Compose deploy validated on declared VPS budget and recoverable off-host backups.
