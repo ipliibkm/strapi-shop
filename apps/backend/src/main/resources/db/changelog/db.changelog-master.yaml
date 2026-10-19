@@ -31,3 +31,6 @@ databaseChangeLog:
             tableName: external_busy_block
             columnNames: google_calendar_id,google_event_id
             constraintName: uq_google_busy_event
+
+  - include:
+      file: db/changelog/002-initial-setup.yaml
