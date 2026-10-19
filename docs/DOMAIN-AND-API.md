@@ -70,3 +70,17 @@ All paths below are proposals **not implemented**; exact names need OpenAPI-firs
 - Define conflict matrix: booking confirmed vs Google event deleted, moved, overlapping or calendar disconnected; user chooses resolution workflow.
 - Customer booking identifiers are opaque; admin role and resource ownership policy checked server-side for every staff calendar operation.
 - Theme settings are tokenized, validated presets with theme schema versions; no arbitrary HTML/JS/CSS injection. Per-user preference needs precedence over global default defined.
+
+## FINAL additions — bespoke Angular editor and two-way Google contract (2026-10-19)
+**All ordinary content editing takes place in custom Angular admin.** Strapi stays API/schema management backend, not a business-facing UI.
+
+### BFF endpoints and content models to specify in OpenAPI (proposals, not implemented)
+`GET /api/v1/admin/content/types` (authorized editor schema and capabilities only), `GET /api/v1/admin/content/{type}`, `POST /api/v1/admin/content/{type}`, `GET/PATCH/DELETE /api/v1/admin/content/{type}/{documentId}`, `POST /api/v1/admin/content/{type}/{documentId}/publish`, `POST .../unpublish`, `POST .../preview`, `GET .../revisions`, `POST .../restore`; admin media upload/link, relations, validation, SEO/locale and navigation endpoints. Strapi 5 Document Service semantics, draft/publish, locales and dynamic zones need an explicit adapter specification and security/permissions model. Revision history is not to be assumed built-in without checking selected Strapi version/plugin license.
+
+`GET /api/v1/admin/calendar/connections`, `POST /api/v1/admin/calendar/connections/connect`, OAuth callback, `DELETE /api/v1/admin/calendar/connections/{id}`, `GET /api/v1/admin/calendar/conflicts`, `POST /api/v1/admin/calendar/conflicts/{id}/resolve`, `GET /api/v1/admin/calendar/sync-health`, `POST /api/v1/admin/calendar/resync` (admin audited).
+`GET /api/v1/admin/appearance/themes`, `PUT /api/v1/admin/appearance/me` (admin user), `PUT /api/v1/admin/appearance/storefront` (authorized publishing), `GET /api/v1/admin/appearance/preview` (no visitor publication). Public storefront theme resolution/API with cache invalidation and SSR awareness.
+`GET /api/v1/admin/notifications/delivery`, `POST /api/v1/admin/notifications/test-send` (rate limited), `GET /api/v1/admin/integrations/gmail` (send-only scope and consent).
+
+### State/consistency rules
+Source of truth: platform booking records are authoritative; external Google event changes are processed via import/matching/conflict rules decided in B01; never blindly cancel bookings. Use event ID plus calendar + organizer identity, sync tokens and etag/revision; watch lifecycle renewal, retry/backoff/dedupe, full resync after invalidated tokens. Secure OAuth tokens; least privilege scopes and redacted busy-only projections where full event content not necessary. Gmail send-only queue supports idempotent messages, status/retry, provider quota and revoked-consent states.
+Themes: `ThemeDefinition`, `ThemeVersion`, `AdminUserThemePreference`, `StorefrontPublishedTheme`, `ThemePublicationAudit`; distinct settings and authorization boundaries.
