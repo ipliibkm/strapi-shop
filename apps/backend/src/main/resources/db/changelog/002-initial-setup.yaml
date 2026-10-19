@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-initial-setup
+      author: platform
+      changes:
+        - createTable:
+            tableName: installation_state
+            columns:
+              - column: {name: id, type: integer, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: company_json, type: jsonb, constraints: {nullable: false}}
+              - column: {name: modules_json, type: jsonb, constraints: {nullable: false}}
+              - column: {name: admin_theme, type: varchar(24), constraints: {nullable: false}}
+              - column: {name: storefront_theme, type: varchar(24), constraints: {nullable: false}}
+              - column: {name: created_at, type: timestamp with time zone, constraints: {nullable: false}}
+        - createTable:
+            tableName: initial_operator
+            columns:
+              - column: {name: id, type: uuid, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: email, type: varchar(254), constraints: {nullable: false}}
+              - column: {name: password_hash, type: varchar(255), constraints: {nullable: false}}
+              - column: {name: created_at, type: timestamp with time zone, constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: initial_operator
+            columnNames: email
+            constraintName: uq_initial_operator_email
