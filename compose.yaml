@@ -47,9 +47,11 @@ services:
       JWT_SECRET: ${STRAPI_JWT_SECRET:?Set STRAPI_JWT_SECRET}
       TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:?Set STRAPI_TRANSFER_TOKEN_SALT}
       ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY:?Set STRAPI_ENCRYPTION_KEY}
+      BUSINESS_SETUP_FILE: /opt/app/config/business.json
     ports: ['127.0.0.1:1337:1337']
     volumes:
       - cmsuploads:/opt/app/public/uploads
+      - ./config/business.json:/opt/app/config/business.json:ro
     depends_on:
       postgres: {condition: service_healthy}
     networks: [internal]
