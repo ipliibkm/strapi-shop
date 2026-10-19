@@ -1,6 +1,6 @@
-# Architecture Decision Register — User Input Needed
+# Architecture Decision Register — Approved and Pending
 
-None of these is silently resolved. Suggested defaults are non-binding and recorded for review.
+The proposal table below is historical. Approved choices and remaining questions are documented in the superseding section at the end.
 
 | ID | Question | Proposed starting default | Why it matters |
 | --- | --- | --- | --- |
@@ -51,3 +51,23 @@ For each ID record: chosen option, owner, date, rationale, consequences, ADR lin
 8. **Scope:** deliver a complete staged commerce+booking solution or first a minimal website template with add-on modules?
 
 Return decision choices before anyone generates scaffolds. Defaults can be used to continue planning, but must never be misrepresented as approved requirements.
+
+
+## Approved choices — 2026-10-19 (supersedes proposed defaults above)
+**Approved:** D01 full modular platform, phased delivery; D02 single business per deployment; D03 private proposed 11 GitHub repositories (creation still pending); D06 Stripe first, extensible payment adapters; D09 appointments + resource rental + group events (specific business rules still open); D11 Angular Material + Storybook; D12 single VPS with Docker Compose; D13 Java/Spring Boot for transactional core. In addition: admin frontend must be custom Angular using shared UI library, with full booking management; runtime-selectable themes administrated in the dashboard. Google account connection for Calendar and optional Gmail email sending requested. **Google Calendar API** and **Gmail API** are different products/scopes; never parse Gmail messages to run calendar availability.
+
+**Architecture adjustment:** 11 GitHub repositories were previously **proposed**, and their names and private visibility were approved, but logical separation does not imply 11 independently deployed microservices. Recommended **modular Spring Boot monolith** containing separate commerce, booking, calendar integration and worker modules; separate Strapi process, Angular storefront SSR, Angular admin and optional worker execution, PostgreSQL with CMS/application isolation. The user is now questioning whether even the GitHub repositories need separating. Treat the 11-repo choice as **provisional pending clarification on repository boundaries**, without undoing the approved privacy choice. A single monorepo with the same 11 logical projects is the lower-overhead alternative; no need to create either set without reconfirming this tradeoff.
+
+### Remaining architecture-critical decisions (prioritized)
+- R01 (BLOCKING): Does 'separated' mean GitHub repositories, backend services, databases, or all? Recommend **single monorepo** and modular-monolith Spring backend on one VPS; retain separate DB/schema ownership for Strapi vs Liquibase.
+- R02 (BLOCKING): Google integration authorization: which Google accounts connect (business owner only, multiple staff, every customer)? One-way export vs two-way sync vs availability imports; allow syncing private event details or only busy windows? OAuth consent, offline tokens, revocation, refresh rotation, verification and webhook/polling recovery required.
+- R03 (BLOCKING): Gmail function: use Gmail API **to send booking confirmations/reminders** or also read/parse incoming messages? Recommend send-only gmail.send scope, and choose production transactional email provider if sending quotas/deliverability require it.
+- R04 (BLOCKING): Booking requirements: individual staff appointments, pooled resources, group classes, ticketed events, max group capacity, waitlists, recurring patterns, deposits, cancellation cutoffs and conflict priority; whether Google busy times block new bookings.
+- R05 (BLOCKING): Themes: admin-only or admin + public storefront? Built-in themes + custom branding, editable design tokens and preview, per-user preference versus global site setting, publishing approval and accessibility contrast. Recommend theme catalog curated by developers; admin can select/preview/assign themes, with persisted per-user preference and optional global default. Arbitrary admin-supplied CSS/code not allowed.
+- R06 (BLOCKING): Should Angular custom admin replace *all* Strapi editing UI or coexist with protected Strapi editorial admin? Recommend coexist; use Angular for operations including bookings and commerce, Strapi native admin restricted to CMS editors, with optional editorial screens later.
+- R07: Business operations region, tax country, currencies, locales, physical/digital products, delivery and invoicing.
+- R08: Staff/customer auth provider, guest checkout, MFA, roles and scopes.
+- R09: Stripe payments details: Checkout vs Elements, wallets, recurring payments, deposits, capture/refund policies.
+- R10: Single VPS specs, DNS/domains/TLS, object storage, external backups, RPO/RTO, secrets and scaling thresholds.
+- R11: Analytics/search/transactional email providers, regulated data/consent/legal pages and data residency.
+- R12: Technical versions and package/tool compatibility must be checked and pinned immediately before coding; no unverified version pin.
