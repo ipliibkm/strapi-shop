@@ -14,6 +14,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 // Explicit opt-in local development only; never activate on public production instances.
 @Configuration
 @Profile("dev")
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="platform.auth.enabled",havingValue="false",matchIfMissing=true)
 public class DevSecurityConfiguration {
  @Bean @Order(1) SecurityFilterChain devApi(HttpSecurity http) throws Exception {
   return http.securityMatcher("/api/v1/**")
