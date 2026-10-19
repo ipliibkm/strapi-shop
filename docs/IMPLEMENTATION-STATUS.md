@@ -1,3 +1,5 @@
+> **Writing standard:** Follow [WRITING-STYLE.md](WRITING-STYLE.md). Earlier text in this file has not received a complete language review.
+
 # Implementation status — 2026-10-19
 This is an **initial unverified scaffold**, NOT production-ready and NOT a working shop, Google Calendar connection or completed editor. All frontend pages are placeholders; backend routes other than actuator are deliberately denied until authentication.
 
