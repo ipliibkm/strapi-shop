@@ -1,0 +1,16 @@
+{
+  "kind":"singleType",
+  "collectionName":"business_profiles",
+  "info":{"singularName":"business-profile","pluralName":"business-profiles","displayName":"Business Profile"},
+  "options":{"draftAndPublish":false},
+  "attributes":{
+    "name":{"type":"string","required":true},
+    "slug":{"type":"uid","targetField":"name","required":true},
+    "contactEmail":{"type":"email","required":true},
+    "timezone":{"type":"string","required":true},
+    "localeCode":{"type":"string","required":true},
+    "currency":{"type":"string","required":true},
+    "address":{"type":"text"},
+    "phone":{"type":"string"}
+  }
+}
