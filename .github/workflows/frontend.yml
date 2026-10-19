@@ -1,0 +1,16 @@
+name: angular-build
+on:
+  push:
+    paths: ['apps/admin/**','apps/storefront/**','packages/ui/**','package.json','angular.json','tsconfig.json','.postcssrc.json','.github/workflows/frontend.yml']
+  pull_request:
+    paths: ['apps/admin/**','apps/storefront/**','packages/ui/**','package.json','angular.json','tsconfig.json','.postcssrc.json','.github/workflows/frontend.yml']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:admin && npm run build:storefront
