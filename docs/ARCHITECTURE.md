@@ -121,3 +121,7 @@ OAuth separate consent for minimal Gmail send scope; send booking confirmations 
 
 ### Deployable set on VPS
 Ingress/TLS -> Angular storefront SSR, custom admin SPA/SSR, Spring Boot app, Strapi headless service, PostgreSQL database server (isolated CMS and application DBs), worker/queue services only if needed, observability, scheduled backup. Docker Compose is **not high availability**. External backups and restore tests required.
+
+## Google busy-time conflict contract and Tailwind rule
+Google external busy blocks take precedence over requested bookings. Before commit, refresh/reconcile known Google changes as far as consistency budget allows, verify local busy projection freshness and perform a serialized PostgreSQL lock/check of overlapping holds/bookings/busy blocks. If overlap (including a newly synchronized Google event), reject with HTTP 409 and `AVAILABILITY_CONFLICT`, sending refreshed free slots or a recalculation URL/version. UI must show a clear human error and reload choices; do not automatically shift a paid appointment, silently drop external events or promise immediate external consistency during provider outage. Define Google API unavailable/freshness policy before accepting potentially conflicting bookings.
+Both Angular applications use **Angular Material for accessible primitives + Tailwind 4 for utility styling**, one shared token/theming package, independent theme selections, CSS isolation. Angular Material component theme configuration and Tailwind/PostCSS pipeline must be tested together.
