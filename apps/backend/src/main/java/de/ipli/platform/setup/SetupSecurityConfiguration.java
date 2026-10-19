@@ -16,6 +16,7 @@ public class SetupSecurityConfiguration {
   // The token is required for writes. No cookie-based authentication is used here.
   return http.securityMatcher("/setup/api/**").csrf(c->c.disable())
     .authorizeHttpRequests(a->a.requestMatchers("/setup/api/status").permitAll()
-      .requestMatchers("/setup/api/complete").permitAll().anyRequest().denyAll()).build();
+      .requestMatchers("/setup/api/complete").permitAll()
+      .requestMatchers("/setup/api/checks").permitAll().anyRequest().denyAll()).build();
  }
 }
