@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 export interface Booking { id:string; resourceId:string; startsAt:string; endsAt:string; status:string; }
 export interface Availability { available:boolean; resourceId:string; startsAt:string; endsAt:string; }
 export interface BookingRequest {resourceId:string; startsAt:string; endsAt:string;}
-export class AvailabilityConflict extends Error { constructor(public readonly correlationId:string){ super('The slot is no longer available. The list has been refreshed. Please choose again.'); } }
+export class AvailabilityConflict extends Error { constructor(public readonly correlationId:string){ super('This time is not available. The app checked availability again. Select another time.'); } }
 @Injectable({providedIn:'root'})
 export class BookingApi {
  private http=inject(HttpClient);
