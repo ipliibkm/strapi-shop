@@ -55,6 +55,9 @@ import {IpliShellComponent} from '@ipli/ui';
  </mat-step>
  <mat-step><ng-template matStepLabel>Verify and save</ng-template>
  <p class="my-3">Company: {{company.name}}. Modules: {{modules.join(', ')}}.</p>
+ <button mat-stroked-button [disabled]="checking()" (click)="verify()">Check system settings</button>
+ @for(check of checks();track check.id){<p class="my-2" role="status">{{check.id}}: {{check.status}}. {{check.message}}</p>}
+ <p class="my-2">A saved setting does not mean that Google or Stripe is connected.</p>
  <p class="my-2">Run the local setup script to get the setup token. Keep the token private.</p>
  <mat-form-field class="w-full"><mat-label>One-time setup token</mat-label><input matInput type="password" autocomplete="off" [(ngModel)]="token"></mat-form-field>
  <button mat-button matStepperPrevious>Back</button>
@@ -67,7 +70,9 @@ class SetupApp {
  company={name:'',contactEmail:'',timezone:'Europe/Berlin',locale:'de',currency:'EUR',address:'',phone:''};
  admin={email:'',password:''};
  modules=['website'];adminTheme='light';storefrontTheme='light';token='';
- message=signal('');saving=signal(false);
+ message=signal('');saving=signal(false);checking=signal(false);
+ checks=signal<{id:string;status:string;message:string}[]>([]);
+ async verify(){this.checking.set(true);try{this.checks.set(await firstValueFrom(this.http.get<{id:string;status:string;message:string}[]>('/setup/api/checks')));}catch{this.message.set('The system check failed. Check the server connection.');}finally{this.checking.set(false);}}
  validCompany(){return !!this.company.name.trim()&&this.company.contactEmail.includes('@')&&!!this.company.timezone.trim()&&this.company.currency.length===3;}
  validAdmin(){return this.admin.email.includes('@')&&this.admin.password.length>=14;}
  toggle(module:string,checked:boolean){this.modules=checked?[...this.modules,module]:this.modules.filter(x=>x!==module);}
@@ -75,7 +80,7 @@ class SetupApp {
   try{const r=await firstValueFrom(this.http.post<{message:string}>('/setup/api/complete',
     {company:this.company,admin:this.admin,modules:this.modules,adminTheme:this.adminTheme,storefrontTheme:this.storefrontTheme},
     {headers:{'X-Setup-Token':this.token}}));
-    this.message.set(r.message);this.admin.password='';this.token='';
+    this.message.set(r.message);this.admin.password='';this.token='';await this.verify();
   }catch(e:any){this.message.set(e?.error?.message||'The server did not save the settings. Check the token and try again.');}
   finally{this.saving.set(false);}
  }
