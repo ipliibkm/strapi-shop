@@ -59,3 +59,7 @@ Optional: `platform-integrations` for enough independently deployed connectors, 
 **Themes:** admin and storefront each have independently selectable themes; theme management/preview in custom admin.
 **Status:** documentation and planning only; NO implementation.
 See [finalized decisions](docs/DECISIONS.md), [architecture](docs/ARCHITECTURE.md), [backlog](docs/IMPLEMENTATION-BACKLOG.md).
+
+
+## Initial business setup wizard (development/staging scaffold)
+On a machine with Docker Compose v2 and Python 3.10+, run `sh setup.sh` to enter business details, generate .env secrets, start services, wait for health and launch interactive Strapi technical admin creation. Full details and limitations: [First-run setup](docs/FIRST-RUN-SETUP.md). **Not production-ready**, and it does not provision the custom Angular admin login yet.
