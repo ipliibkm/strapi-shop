@@ -1,2 +1,21 @@
 @import "tailwindcss";
-html,body{margin:0;min-height:100%;font-family:Inter,Arial,sans-serif}body{background:var(--ipli-bg);color:var(--ipli-fg)}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+html,body{margin:0;min-height:100%;font-family:'DM Sans',Arial,sans-serif}
+body{background:#fff;color:#172032}
+button{cursor:pointer}
+.site-header{box-shadow:0 2px 14px #1e293b06}
+.brand-mark{display:grid;place-items:center;width:42px;height:42px;background:#222c34;color:white;border-radius:13px;font-size:22px;font-family:Georgia,serif}
+.nav-link{position:relative;padding:8px 0;color:#334155}
+.active-link:after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:#c08043}
+.hero{background:linear-gradient(130deg,#f9f7f2 0%,#fffaf5 60%,#f3f0ea 100%)}
+.eyebrow{font-size:12px;letter-spacing:.22em;font-weight:700;color:#a86c39}
+.hero-title{font-size:clamp(4.2rem,8.3vw,8.5rem);line-height:.98;font-weight:700;letter-spacing:-.065em}
+.serif-accent,.section-title i{font-family:Georgia,serif;font-weight:400;color:#ba7b4b}
+.hero-visual{background:#b9a08f}
+.visual-gradient{background:radial-gradient(circle at 72% 32%,#f6dbbe 0,#cca98f 30%,transparent 60%),linear-gradient(135deg,#6f736c,#a88974 45%,#ad6b4a)}
+.section-title{font-size:clamp(2.8rem,5vw,5rem);line-height:1.1;letter-spacing:-.045em;font-weight:700}
+.service-card{background:#f8f6f2;transition:transform .2s,box-shadow .2s}
+.service-card:hover{transform:translateY(-4px);box-shadow:0 14px 40px #1f293712}
+.statement{background:#f8f6f2}
+.inner-hero{padding:110px 24px;text-align:center;background:#f8f6f2}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
