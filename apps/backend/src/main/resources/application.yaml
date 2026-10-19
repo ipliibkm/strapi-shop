@@ -14,3 +14,11 @@ management:
     web:
       exposure:
         include: health,info
+
+platform:
+  auth:
+    enabled: ${PLATFORM_AUTH_ENABLED:false}
+    authority: ${PLATFORM_OIDC_ISSUER:}
+    client-id: ${PLATFORM_OIDC_CLIENT_ID:}
+    audience: ${PLATFORM_OIDC_AUDIENCE:}
+spring.security.oauth2.resourceserver.jwt.issuer-uri: ${PLATFORM_OIDC_ISSUER:}
