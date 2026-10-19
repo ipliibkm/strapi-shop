@@ -25,6 +25,10 @@ services:
       SPRING_DATASOURCE_USERNAME: platform
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       PLATFORM_SETUP_TOKEN: ${PLATFORM_SETUP_TOKEN:?Run setup.sh to generate a setup token}
+      PLATFORM_AUTH_ENABLED: ${PLATFORM_AUTH_ENABLED:-false}
+      PLATFORM_OIDC_ISSUER: ${PLATFORM_OIDC_ISSUER:-}
+      PLATFORM_OIDC_AUDIENCE: ${PLATFORM_OIDC_AUDIENCE:-}
+      PLATFORM_OIDC_CLIENT_ID: ${PLATFORM_OIDC_CLIENT_ID:-}
     healthcheck:
       test: [CMD, curl, -fsS, 'http://127.0.0.1:8080/actuator/health']
       interval: 10s
