@@ -202,3 +202,40 @@ All remain **not implemented**. Prior references to independently deployed comme
 - Google integration cannot create duplicate confirmed bookings or reveal nonauthorized private event details.
 - Website-only profile runs without Google/Stripe modules being enabled.
 - Compose deploy validated on declared VPS budget and recoverable off-host backups.
+
+## FINAL SUPERSEDING CHANGESET — implementation tasks (2026-10-19)
+Earlier instructions to create 11 separate GitHub repositories and to rely on Strapi native editing for business users are **cancelled**. The following are planning checkboxes, not implementation.
+
+### P0/P1 monorepo setup
+- [ ] F01 Verify existing `ipliibkm/strapi-shop` repository visibility; set **PRIVATE** (requires repo administration permission and a deliberate settings action).
+- [ ] F02 Create one repository architecture and source folder strategy for apps, packages, backend modules, infrastructure, tests and docs; cancel 11 repo creation.
+- [ ] F03 Define monorepo build orchestration for Angular/Storybook + Gradle/Maven Java + Strapi/Node, cache, path-aware CI, integrated release manifest, contribution/code ownership.
+- [ ] F04 Replace per-repo cross-service packaging assumptions with clearly bounded Spring modules and intra-monorepo contracts/CI.
+
+### Custom editorial admin, not native Strapi editing
+- [ ] F05 Inventory every Strapi editable collection/single type and permitted Angular admin workflows.
+- [ ] F06 Define Spring Boot content BFF, Strapi API authentication, admin RBAC/content permissions, media security, audit and short-lived browser auth.
+- [ ] F07 Plan Angular schema-driven CRUD + page builder with controlled component registry, dynamic zones, relation pickers, rich-text security, locale and SEO editors.
+- [ ] F08 Plan draft/preview/review/publish, version history/restore, media uploads, navigation, redirects, forms, content migrations and error recovery.
+- [ ] F09 Test every configured content type from Angular without needing native Strapi editor, including forbidden actions and editorial workflow states; native admin maintenance-only.
+- [ ] F10 Determine how admin models and Strapi content schemas remain in sync without regenerating UI manually for each change.
+
+### Full booking/admin workflows
+- [ ] F11 Plan booking/admin screens via shared UI library: schedules, resource calendar, staff calendar, appointment editor, group attendance/capacity, waitlist, reschedule/cancel, conflict review, notifications, dashboard and audit trail.
+- [ ] F12 Plan Google Calendar OAuth onboarding/reconnect and calendar mapping management screen; Google authorization scope/verification checklist.
+- [ ] F13 Specify bidirectional event change detection, webhook/watch renewal, incremental sync checkpoints, privacy filtering, edit/delete resolution and replay.
+- [ ] F14 Test concurrent bookings and Google-sourced changes never overriding a confirmed booking without approved conflict policy.
+- [ ] F15 Plan Gmail send-only confirmation/reminder dispatcher, templates, quota/rate recovery, dedupe, opt-out/permission audit and delivery status.
+
+### Independent themed UI applications
+- [ ] F16 Specify Angular Material shared UI package consumed by **both** applications; Storybook, component contracts, visual/a11y tests.
+- [ ] F17 Define admin user theme + published storefront theme as independent settings; theme roles, live preview, catalog, accessible presets, safe tokens, persistence and rollback.
+- [ ] F18 Test theme switching independently, responsive forms/tables/calendars, reduced-motion, screen-reader labels, color contrast and no global style leakage.
+
+### Blocking acceptance requirements
+- One GitHub private monorepo only; no extra repositories.
+- Operational and editorial admin functional workflows **all** accessible through custom Angular + shared UI library.
+- Stripe, Google Calendar, and Gmail integrations must be disableable per deployment profile.
+- Google two-way sync must be idempotent, recoverable, privacy-safe and conflict-aware; external events must not bypass booking consistency.
+- Independent theme selection for admin and storefront with safe versioned presets.
+- Single VPS deployment must demonstrate offsite restore, network isolation and documented lack of HA.
