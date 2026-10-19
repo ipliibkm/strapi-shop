@@ -56,3 +56,14 @@ See [FIRST-RUN-SETUP.md](FIRST-RUN-SETUP.md).
 Added Angular Material + Tailwind setup wizard with company details, first operator record, modules, themes, integration guidance and a one-time setup API. The API stores a BCrypt password hash and a PostgreSQL setup state. It uses a separate setup token. See [BROWSER-SETUP.md](BROWSER-SETUP.md).
 
 **Still incomplete:** production OIDC sign-in, live Google/Gmail/Stripe account connections, branded asset uploads, Strapi profile reconciliation, automated environment verification, secure token rotation/disable, production TLS and access isolation. Build and end-to-end tests have not been executed successfully.
+
+## Setup verification increment — 2026-10-19
+- [x] Add `GET /setup/api/checks` for DB, installation state, Google configuration, Stripe configuration and identity configuration. Checks are read-only. They do not validate live external connections.
+- [x] Add setup wizard **Check system settings** control with visible status messages.
+- [x] Add initial unit tests for invalid bootstrap setup tokens.
+- [x] Add clear provider onboarding steps in `docs/INTEGRATIONS-ONBOARDING.md`.
+- [ ] Make production OIDC enrollment functional. Current initial operator password hash is not a usable account.
+- [ ] Implement OAuth authorization code flow for Google Calendar and Gmail. No real Google connection exists.
+- [ ] Implement Stripe Connect or account-specific Stripe setup flow with webhook signing.
+- [ ] Reconcile browser setup business details with Strapi profile.
+- [ ] Run automated builds, startup and integration tests. No successful build or test result was available in this turn.
