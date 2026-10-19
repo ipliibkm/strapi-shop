@@ -72,3 +72,52 @@ Both Angular applications depend on **one separately versioned Angular Material-
 
 ### Required proof of production readiness for single VPS
 RAM/CPU/disk sizing, sustained request concurrency, DB max connections, DNS/TLS automation, immutable image builds, ingress/network isolation, hardening and secret handling; encrypted automated **off-host** PostgreSQL/WAL and object storage backups; restoration rehearsal; monitoring/alerts even if VPS fails (prefer external heartbeat); upgrade/rollback, power outage and disk-full scenarios; document no multi-host HA. License/vendor viability and security GDPR obligations.
+
+## FINALIZED system architecture — authoritative (2026-10-19)
+Earlier text describing 11 independent repositories or keeping the native Strapi editor for business editorial staff is **obsolete**. The system is organized in **one private monorepo** with logical module boundaries:
+
+```
+/
+  apps/
+    storefront/          # Angular SSR public website/storefront
+    admin/               # Angular custom content, booking, commerce & settings admin
+    cms/                 # Strapi headless content API/server
+    backend/             # Spring Boot modular monolith entrypoint
+  packages/
+    ui/                  # Angular Material wrappers, themed tokens, Storybook
+    contracts/           # OpenAPI schemas, generated TS clients/event schemas
+  backend-modules/
+    commerce/
+    booking/
+    calendar-google/
+    notifications-gmail/
+    identity/
+    content-bff/
+    workers/
+  infrastructure/
+    compose/
+    database/liquibase/
+    monitoring/
+    deployment/
+  testing/
+    integration/
+    e2e/
+    security/
+  docs/
+```
+The directory names are planning candidates, not created filesystem layout. Build tooling (Gradle/Maven, Nx/Angular workspace, Storybook setup), release strategy, ownership and CI path filters must be decided. Strapi uses own CMS database/schema management; Spring Boot modules use Liquibase-managed application schema; can use one PostgreSQL host with isolated DBs/roles.
+
+### ALL content editing in Angular admin
+Business editors must NEVER need native Strapi admin for regular content work. Angular custom admin contains page builder with typed/versioned components, CRUD for all selected content types, media/library uploads, relations, locale switching, draft/review/publish/unpublish, revisions/restore, content previews, SEO/redirects, forms and navigation management, permissions, validated inputs, moderation and audit logs. Angular `apps/admin` uses `packages/ui` exclusively as the design system with Angular Material. Admin request goes through authenticated Spring Boot BFF/Strapi adapter (or audited equivalent): no Strapi privileged API token in browser, server-side content permissions enforced, CSRF/authorization and upload security. Strapi native admin remains provisioned for maintenance only and blocked from public/editor routes.
+
+### Two independent themes
+Admin user selects admin theme independently of the **published storefront theme**. A design token set covers Material theme palette, typography, density, shape, dark/light accessibility, responsive behavior. Provide theme catalog, preview (without publishing), versioned theme presets, publish/revert, user preferences, protected roles and WCAG tests. Resolve per-user/storefront-global priority via B07; no arbitrary script/style injection.
+
+### Two-way Google Calendar synchronization
+Connected user OAuth with least-privilege Calendar scopes and encrypted rotating refresh tokens. Booking system authoritative for holds/confirmed bookings; Google-side edits/imports must be reconciled according to B01. Publish platform bookings into mapped Google calendars; watch/poll incremental Google changes back into the platform; maintain external IDs, etags, sync tokens, watch channel renewals and retries. Detect and expose conflicts, cancellations, deletions, permission revocation, expired tokens and DST mismatches; avoid silently erasing real confirmed bookings. Google events can block availability but cannot bypass PostgreSQL concurrency-safe reservations. **Two-way synchronization is not identical to blindly mirroring every event field or treating personal events as customer bookings.**
+
+### Gmail send-only
+OAuth separate consent for minimal Gmail send scope; send booking confirmations and reminders via background jobs with durable delivery history, retry/dedupe, rate-limit/quotas, account reconnect, opt-outs where relevant. No Gmail read permission. Service fallback for bulk/transactional email deliverability unresolved.
+
+### Deployable set on VPS
+Ingress/TLS -> Angular storefront SSR, custom admin SPA/SSR, Spring Boot app, Strapi headless service, PostgreSQL database server (isolated CMS and application DBs), worker/queue services only if needed, observability, scheduled backup. Docker Compose is **not high availability**. External backups and restore tests required.
