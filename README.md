@@ -67,3 +67,7 @@ See [finalized decisions](docs/DECISIONS.md), [architecture](docs/ARCHITECTURE.m
 
 ## Initial business setup wizard (development/staging scaffold)
 On a machine with Docker Compose v2 and Python 3.10+, run `sh setup.sh` to enter business details, generate .env secrets, start services, wait for health and launch interactive Strapi technical admin creation. Full details and limitations: [First-run setup](docs/FIRST-RUN-SETUP.md). **Not production-ready**, and it does not provision the custom Angular admin login yet.
+
+
+## Customer website preview
+The Docker Compose configuration now contains a customer storefront on **http://127.0.0.1:8081**. It has Home, Services, Shop, About, and Contact views. This is a sample UI, not an active shop or booking platform. For local use run `sh setup.sh` and open the website address. See [STOREFRONT.md](docs/STOREFRONT.md). The image build has not yet passed a full integration test.
