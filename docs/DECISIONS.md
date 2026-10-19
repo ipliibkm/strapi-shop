@@ -71,3 +71,35 @@ Return decision choices before anyone generates scaffolds. Defaults can be used 
 - R10: Single VPS specs, DNS/domains/TLS, object storage, external backups, RPO/RTO, secrets and scaling thresholds.
 - R11: Analytics/search/transactional email providers, regulated data/consent/legal pages and data residency.
 - R12: Technical versions and package/tool compatibility must be checked and pinned immediately before coding; no unverified version pin.
+
+## FINAL APPROVED DECISIONS — 2026-10-19 — AUTHORITATIVE
+This section **supersedes** all earlier proposal/default/provisional language in this document.
+
+| ID | Status | Decision |
+| --- | --- | --- |
+| D01 | APPROVED | Full modular platform, phased rollout |
+| D02 | APPROVED | Single business per deployment |
+| D03 | APPROVED | **One private GitHub monorepo** at `ipliibkm/strapi-shop`, logically separated modules/packages. Do not create 11 repositories. Verify/enforce private visibility, which is a separate account operation. |
+| D06 | APPROVED | Stripe first; provider adapter contract allows others later |
+| D09 | APPROVED | Individual appointments, resources and group events |
+| D11 | APPROVED | Angular Material-based shared Angular UI library, Storybook |
+| D12 | APPROVED | Single VPS production Docker Compose deployment, no HA assumption |
+| D13 | APPROVED | Java / Spring Boot modular monolith for transactional backend |
+| R01 | APPROVED | Monorepo + modular-monolith deployment, not microservice-per-module |
+| R02 | APPROVED IN PRINCIPLE | Google Calendar **two-way sync** (platform to Google and Google to platform); rules governing deletes/conflicts/authority still blocking |
+| R03 | APPROVED | Gmail API **send only**, booking confirmations/reminders (cancellations subject to notification rules); no Gmail inbox reading |
+| R05 | APPROVED | Independent theme selection/branding for custom Angular admin and public Angular storefront |
+| R06 | APPROVED | **All editorial content authoring/editing via custom Angular admin**, backed by secured Strapi API/BFF; native Strapi admin must not be exposed as editor workflow |
+| ADM01 | APPROVED | Custom admin uses shared Angular Material UI library for content, commerce, bookings, calendars, dashboards and themes |
+
+### Remaining BLOCKING decisions, in priority order
+- **B01 Google two-way sync conflict & authority policy:** Google-created events imported as (a) authoritative bookings, (b) external busy blocks, or (c) proposals requiring approval? Recommend external events as **busy blocks** and platform confirmed bookings as only customer-booking records; when Google moves/deletes platform-managed events, flag conflicts rather than silently cancel customer bookings. Define precedence, cancellation, webhook retries, per-resource mapping, private event visibility, ownership, quotas and repair UI.
+- **B02 Strapi editing integration:** Which content types are exposed in custom Angular editor, especially dynamic zones, draft/publish, media, localization, workflows, version history, preview? Recommend **BFF/server-side integration** with service credentials (never browser admin/API token), schema-driven forms mapped per content type, restricted roles and audit trails. Decide if custom admin must attain 100% feature parity with Strapi's Content Manager; this has significant cost.
+- **B03 Google OAuth and calendar accounts:** Business-owned Workspace vs personal Gmail accounts; one owner/multiple staff calendars; scopes, token hosting, Google verification and OAuth app mode, import volume and background synchronization limits.
+- **B04 Auth/RBAC:** Customers and staff identity provider, MFA, passwordless/social sign-in, guest checkout, role model, tenant isolation future compatibility, and how Angular admin authenticates to backend/Strapi.
+- **B05 Commerce & legal:** Selling geography, physical/digital/services, tax/VAT, shipping and invoice provider, Stripe Checkout vs Elements, deposit/capture/refund, guest purchase, local privacy/consumer compliance.
+- **B06 Booking business rules:** Number of simultaneous resources/attendees, group capacity and recurrence, schedules and time zones, hold duration, payments/deposits, waitlists, cancellation/reschedule, staff approval, external busy blocks vs bookable records.
+- **B07 Theme scope contract:** themes per-admin-user vs organization-wide defaults, storefront global theme vs consumer theme preference, preset-only vs controlled token editing, theme publishing/a11y review.
+- **B08 Single VPS operations:** capacity/budget/domain/DNS, object storage, email quotas/deliverability, outbound SMTP fallback, backup RPO/RTO, offsite restore, monitoring and secrets.
+- **B09 Supported version matrix:** validate latest compatible Strapi v5 release, Angular 22 minor/Node, Angular Material, Storybook, Java LTS/Spring Boot/Liquibase, PostgreSQL, drivers and security fixes before generating apps.
+- **B10 Feature flags/integrations:** desired core vs optional modules, operational analytics/search provider, webhook/queue strategy, CRM/newsletter, media, shipping and support.
