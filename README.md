@@ -1,3 +1,7 @@
+> **Writing standard:** Use [ASD-STE100-style English](docs/WRITING-STYLE.md) for all text. This project uses simplified technical English. It does not claim formal ASD-STE100 compliance.
+>
+> **Current status:** The project has an initial scaffold. It is not ready for production. The approved design uses one monorepo.
+
 # Composable Strapi Commerce & Website Platform — Architecture and Delivery Plan
 
 > PLANNING ONLY. No application code, infrastructure or production service is implemented here.
