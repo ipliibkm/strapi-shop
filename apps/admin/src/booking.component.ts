@@ -33,7 +33,7 @@ export class BookingComponent {
   this.busy.set(true);this.free.set(false);
   try {const r=await this.api.create({resourceId,startsAt,endsAt});this.notice.set('Booking created: '+r.id);}
   catch(e) {
-   if(e instanceof AvailabilityConflict){this.notice.set(e.message);await this.refresh(resourceId,startsAt,endsAt);}
+   if(e instanceof AvailabilityConflict){await this.refresh(resourceId,startsAt,endsAt);this.notice.set(e.message+(this.free()?' The slot appears available again; please verify before retrying.':''));}
    else this.notice.set('Booking failed. Authentication or server availability may be required.');
   }finally{this.busy.set(false);}
  }
