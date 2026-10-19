@@ -2,8 +2,14 @@ const fs = require('node:fs');
 module.exports = {
  async bootstrap({ strapi }) {
   const path = process.env.BUSINESS_SETUP_FILE || '/opt/app/config/business.json';
-  if (!fs.existsSync(path)) return;
-  const source = JSON.parse(fs.readFileSync(path,'utf8'));
+  let source;
+  try {
+    if (!fs.statSync(path).isFile()) return;
+    source = JSON.parse(fs.readFileSync(path,'utf8'));
+  } catch (error) {
+    strapi.log.warn(`Business setup file is not usable: ${error.message}`);
+    return;
+  }
   const docs = strapi.documents('api::business-profile.business-profile');
   const existing = await docs.findFirst();
   if (existing) return; // Existing business data is never overwritten by restart.
