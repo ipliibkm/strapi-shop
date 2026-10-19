@@ -1,0 +1,60 @@
+name: ipli-platform
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: platform
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: platform
+      CMS_DB_PASSWORD: ${CMS_DB_PASSWORD:?Set CMS_DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infrastructure/database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U platform -d platform']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [internal]
+  backend:
+    build: ./apps/backend
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/platform
+      SPRING_DATASOURCE_USERNAME: platform
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports: ['127.0.0.1:8080:8080']
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [internal]
+  cms:
+    build: ./apps/cms
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: '1337'
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: '5432'
+      DATABASE_NAME: cms
+      DATABASE_USERNAME: cms
+      DATABASE_PASSWORD: ${CMS_DB_PASSWORD:?Set CMS_DB_PASSWORD in .env}
+      APP_KEYS: ${STRAPI_APP_KEYS:?Set STRAPI_APP_KEYS}
+      API_TOKEN_SALT: ${STRAPI_API_TOKEN_SALT:?Set STRAPI_API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${STRAPI_ADMIN_JWT_SECRET:?Set STRAPI_ADMIN_JWT_SECRET}
+      JWT_SECRET: ${STRAPI_JWT_SECRET:?Set STRAPI_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:?Set STRAPI_TRANSFER_TOKEN_SALT}
+      ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY:?Set STRAPI_ENCRYPTION_KEY}
+    ports: ['127.0.0.1:1337:1337']
+    volumes:
+      - cmsuploads:/opt/app/public/uploads
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [internal]
+networks:
+  internal: {}
+volumes:
+  pgdata: {}
+  cmsuploads: {}
