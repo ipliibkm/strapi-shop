@@ -8,7 +8,7 @@
 Build a reusable, production-deployable platform for content-driven websites, ecommerce, bookings/calendar, payments and operational admin, with interchangeable modules and a shared Angular design system. Do not equate automatic Strapi content APIs with a secure commerce transaction engine.
 
 ## Baseline
-- Strapi 5.x, pin an explicit verified release (v5.58.0 current as of 2026-10-19); TypeScript, PostgreSQL for CMS-owned models.
+- Strapi 5.x, pin an explicit verified release (the latest supported Strapi v5 patch verified during implementation); TypeScript, PostgreSQL for CMS-owned models.
 - Angular 22.x, standalone components, signals, SSR/hybrid rendering and hydration for indexed storefronts.
 - PostgreSQL with **separate databases or schemas and roles** for Strapi and business transactional services.
 - Liquibase for **application-owned tables only**, never for Strapi-managed tables. Strapi schema sync and Strapi migrations own the CMS database.
