@@ -103,3 +103,8 @@ This section **supersedes** all earlier proposal/default/provisional language in
 - **B08 Single VPS operations:** capacity/budget/domain/DNS, object storage, email quotas/deliverability, outbound SMTP fallback, backup RPO/RTO, offsite restore, monitoring and secrets.
 - **B09 Supported version matrix:** validate latest compatible Strapi v5 release, Angular 22 minor/Node, Angular Material, Storybook, Java LTS/Spring Boot/Liquibase, PostgreSQL, drivers and security fixes before generating apps.
 - **B10 Feature flags/integrations:** desired core vs optional modules, operational analytics/search provider, webhook/queue strategy, CRM/newsletter, media, shipping and support.
+
+## Approved implementation updates — 2026-10-19
+- **B01 RESOLVED:** Google Calendar external events are authoritative **busy-time blockers**. On a last-moment conflict the server rejects the attempted reservation with **HTTP 409**, a structured `AVAILABILITY_CONFLICT` error and a fresh availability version/slot list. The UI displays an error, refreshes available slots and asks the user to select again. It must NEVER override external Google events. Full two-way synchronization still requires mapping/deletion/ACL rules but does not change this conflict policy.
+- **UI APPROVED:** Angular Material **and Tailwind CSS 4** used together, and shared UI consumed in admin and storefront. Semantic tokens govern both to prevent diverging themes.
+- **Remain recommended defaults:** central OIDC with MFA, Stripe Checkout first, staff Google OAuth, user-level admin theme and global published storefront theme, transactional email deliverability fallback, validated versions, offsite backups. Further business-specific details not approved by these defaults.
