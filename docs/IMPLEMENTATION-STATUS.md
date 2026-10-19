@@ -51,3 +51,8 @@ Files committed to GitHub; no network-enabled build/test execution performed in 
 - [ ] Implement full custom Angular first-run business/admin onboarding with OIDC and initial operator roles; current admin step creates only the technical Strapi admin account.
 - [ ] Implement TLS/reverse proxy, offsite backups, restoration, role isolation and readiness/security tests before declaring business one-click deployment production-ready.
 See [FIRST-RUN-SETUP.md](FIRST-RUN-SETUP.md).
+
+## Browser setup milestone
+Added Angular Material + Tailwind setup wizard with company details, first operator record, modules, themes, integration guidance and a one-time setup API. The API stores a BCrypt password hash and a PostgreSQL setup state. It uses a separate setup token. See [BROWSER-SETUP.md](BROWSER-SETUP.md).
+
+**Still incomplete:** production OIDC sign-in, live Google/Gmail/Stripe account connections, branded asset uploads, Strapi profile reconciliation, automated environment verification, secure token rotation/disable, production TLS and access isolation. Build and end-to-end tests have not been executed successfully.
