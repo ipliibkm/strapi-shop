@@ -239,3 +239,11 @@ Earlier instructions to create 11 separate GitHub repositories and to rely on St
 - Google two-way sync must be idempotent, recoverable, privacy-safe and conflict-aware; external events must not bypass booking consistency.
 - Independent theme selection for admin and storefront with safe versioned presets.
 - Single VPS deployment must demonstrate offsite restore, network isolation and documented lack of HA.
+
+### Concrete implementation changes — 2026-10-19
+- [ ] G01 Implement authoritative external Google busy periods, refresh/sync freshness and PostgreSQL concurrency checks for every booking/hold.
+- [ ] G02 Respond HTTP 409 `AVAILABILITY_CONFLICT` with recalculated slot choices and correlation ID on races; never override external events.
+- [ ] G03 Build Angular UI conflict snackbar/error, re-fetch fresh availability, require explicit reselection and test two concurrent customers plus imported Google event.
+- [ ] G04 Implement secure OAuth Google staff account connection, event sync, watch renewals, retry and revoked token handling.
+- [ ] U01 Verify Angular Material 22 + Tailwind 4 styles/theming in both apps and Storybook, document token precedence.
+- [x] S01 Add preliminary Spring/Strapi/PostgreSQL/Compose and Angular/Tailwind scaffolds. **Unverified, not production ready.** See IMPLEMENTATION-STATUS.md.
