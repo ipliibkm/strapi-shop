@@ -41,3 +41,11 @@ This is an **initial unverified scaffold**, NOT production-ready and NOT a worki
 
 ### Verification status
 Files committed to GitHub; no network-enabled build/test execution performed in this response. Added Actions YAML does not prove tests passed; consult workflow run results after invocation.
+
+## First-run business installer — 2026-10-19
+- [x] Commit `sh setup.sh` / `python3 scripts/setup.py` interactive first-run wizard; company name/slug/contact, timezone, locale, currency, optional address and phone; generated random credentials (private .env), confirmation and resumed start.
+- [x] Add Strapi `business-profile` single type and seed-once CMS bootstrap, mounted config file, Compose container health checks, supported Strapi interactive technical admin creation command.
+- [ ] Verify full image builds, `compose up`, HTTP health polling, CMS seed and admin CLI against a clean machine. Not tested in a running Docker engine during this turn.
+- [ ] Implement full custom Angular first-run business/admin onboarding with OIDC and initial operator roles; current admin step creates only the technical Strapi admin account.
+- [ ] Implement TLS/reverse proxy, offsite backups, restoration, role isolation and readiness/security tests before declaring business one-click deployment production-ready.
+See [FIRST-RUN-SETUP.md](FIRST-RUN-SETUP.md).
