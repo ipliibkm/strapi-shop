@@ -24,6 +24,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/platform
       SPRING_DATASOURCE_USERNAME: platform
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    healthcheck:
+      test: [CMD, curl, -fsS, 'http://127.0.0.1:8080/actuator/health']
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 45s
     ports: ['127.0.0.1:8080:8080']
     depends_on:
       postgres: {condition: service_healthy}
@@ -48,6 +54,12 @@ services:
       TRANSFER_TOKEN_SALT: ${STRAPI_TRANSFER_TOKEN_SALT:?Set STRAPI_TRANSFER_TOKEN_SALT}
       ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY:?Set STRAPI_ENCRYPTION_KEY}
       BUSINESS_SETUP_FILE: /opt/app/config/business.json
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:1337/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 75s
     ports: ['127.0.0.1:1337:1337']
     volumes:
       - cmsuploads:/opt/app/public/uploads
