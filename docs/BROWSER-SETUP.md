@@ -56,3 +56,11 @@ The backend allows one completed setup per database. It rejects a second setup w
 4. Connect the operator onboarding flow to the production OIDC service.
 5. Add provider connection screens and remote configuration checks.
 6. Remove or disable the setup API in production after successful onboarding.
+
+## Check the installation
+On the final page, select **Check system settings**.
+The app now reads `GET /setup/api/checks`. It shows the database and installation state. It also shows whether Google, Stripe, and identity settings exist.
+The result `configuration_present` does not prove that an external service works.
+Read [integration instructions](INTEGRATIONS-ONBOARDING.md) before you enable integrations.
+
+**Important:** The first administrator record is not a working identity account. The production OIDC enrollment step still needs implementation. The Strapi business profile is not yet synchronized from the saved setup record.
