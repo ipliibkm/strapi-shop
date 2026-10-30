@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-admin-ui-languages
+      author: platform
+      changes:
+        - createTable:
+            tableName: admin_ui_language
+            columns:
+              - column: {name: code, type: varchar(8), constraints: {primaryKey: true}}
+              - column: {name: name, type: varchar(50), constraints: {nullable: false}}
+              - column: {name: enabled, type: boolean, defaultValueBoolean: 'false', constraints: {nullable: false}}
+              - column: {name: sort_order, type: int, constraints: {nullable: false}}
+        - insert:
+            tableName: admin_ui_language
+            columns:
+              - column: {name: code, value: de}
+              - column: {name: name, value: Deutsch}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 1}
+        - insert:
+            tableName: admin_ui_language
+            columns:
+              - column: {name: code, value: en}
+              - column: {name: name, value: English}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 2}
+        - insert:
+            tableName: admin_ui_language
+            columns:
+              - column: {name: code, value: ru}
+              - column: {name: name, value: 'Русский'}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 3}
+        - insert:
+            tableName: admin_ui_language
+            columns:
+              - column: {name: code, value: tr}
+              - column: {name: name, value: 'Türkçe'}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 4}

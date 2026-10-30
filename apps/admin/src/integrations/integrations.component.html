@@ -1,0 +1,123 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('INTEGRATIONS') }}</p>
+    <h2>{{ t('Google Calendar') }}</h2>
+    <p>{{ t('Import busy times and send confirmed bookings to a mapped calendar.') }}</p>
+  </div>
+  @if (!google().connected && auth.googleCalendarEnabled()) {
+    <button mat-flat-button (click)="connectGoogle()">
+      {{ t('Connect Google services') }} <mat-icon iconPositionEnd>login</mat-icon>
+    </button>
+  }
+</div>
+<section class="panel connection-panel">
+  <span class="connection-logo"><mat-icon>calendar_month</mat-icon></span>
+  <div>
+    <span class="badge" [class.live]="google().connected">{{
+      google().connected ? t('CONNECTED') : t('NOT CONNECTED')
+    }}</span>
+    <h3>{{ t('Google Calendar account') }}</h3>
+    @if (google().connected) {
+      <p>{{ google().email }}</p>
+      <small>
+        {{
+          t('Automatic token refresh is {state}. Current token expires at {time}.', {
+            state: google().refreshable ? t('available') : t('not available'),
+            time: google().expiresAt || t('the provider-defined time'),
+          })
+        }}
+      </small>
+    } @else {
+      <p>{{ t('No Google services account is connected.') }}</p>
+      <small>{{ t('Connect Google only for Calendar and future Gmail services.') }}</small>
+    }
+  </div>
+  <div class="connection-actions">
+    @if (google().connected) {
+      <button mat-stroked-button [disabled]="googleBusy()" (click)="syncGoogle()">
+        {{ t('Sync now') }}</button
+      ><button mat-stroked-button [disabled]="googleBusy()" (click)="disconnectGoogle()">
+        {{ t('Disconnect') }}
+      </button>
+    } @else if (auth.googleCalendarEnabled()) {
+      <button mat-flat-button (click)="connectGoogle()">{{ t('Connect') }}</button>
+    }
+  </div>
+</section>
+@if (googleNotice()) {
+  <div class="notice" [class.warning]="!google().connected">
+    <mat-icon>info</mat-icon>
+    <div>
+      <strong>{{ t('Calendar status') }}</strong>
+      <p>{{ t(googleNotice()) }}</p>
+    </div>
+  </div>
+}
+@if (google().connected) {
+  <section class="panel mapping-panel">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">{{ t('RESOURCE MAPPING') }}</p>
+        <h2>{{ t('Connect a resource') }}</h2>
+      </div>
+    </div>
+    <div class="mapping-form">
+      <mat-form-field
+        ><mat-label>{{ t('Resource ID') }}</mat-label
+        ><input matInput #mappingResource placeholder="room-1"
+      /></mat-form-field>
+      <mat-form-field
+        ><mat-label>{{ t('Google calendar') }}</mat-label
+        ><mat-select #mappingCalendar
+          ><mat-option value="">{{ t('Select a calendar') }}</mat-option>
+          @for (item of calendars(); track item.id) {
+            <mat-option [value]="item.id"
+              >{{ item.name }}{{ item.primary ? ' (' + t('primary') + ')' : '' }}</mat-option
+            >
+          }
+        </mat-select></mat-form-field
+      >
+      <mat-checkbox #writeBookings [checked]="true">{{
+        t('Send bookings to Google')
+      }}</mat-checkbox>
+      <button
+        mat-flat-button
+        [disabled]="googleBusy()"
+        (click)="saveMapping(mappingResource.value, mappingCalendar.value, writeBookings.checked)"
+      >
+        {{ t('Save mapping') }}
+      </button>
+    </div>
+    <div class="mapping-list">
+      @for (item of google().mappings || []; track item.resourceId) {
+        <article>
+          <div>
+            <strong>{{ item.resourceId }}</strong>
+            <p>{{ item.displayName }}</p>
+            <small>
+              {{
+                t('Sync: {status} · Conflicts: {count}', {
+                  status: item.syncStatus,
+                  count: item.conflictCount,
+                })
+              }}
+              @if (item.lastSyncedAt) {
+                · {{ item.lastSyncedAt }}
+              }
+            </small>
+            @if (item.lastError) {
+              <small class="mapping-error">{{ t(item.lastError) }}</small>
+            }
+          </div>
+          <button mat-button [disabled]="googleBusy()" (click)="removeMapping(item.resourceId)">
+            {{ t('Remove') }}
+          </button>
+        </article>
+      } @empty {
+        <p class="muted">{{ t('No resource has a calendar mapping.') }}</p>
+      }
+    </div>
+  </section>
+}

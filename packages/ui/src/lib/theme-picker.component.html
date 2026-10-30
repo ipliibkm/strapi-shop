@@ -1,0 +1,65 @@
+<section role="radiogroup" [attr.aria-label]="labels().groupLabel">
+  @for (item of themes(); track item.key) {
+    <button
+      type="button"
+      class="theme-card"
+      [class.selected]="!usingCustom() && selectedKey() === item.key"
+      role="radio"
+      [attr.aria-checked]="!usingCustom() && selectedKey() === item.key ? 'true' : 'false'"
+      (click)="selectPreset.emit(item.key)"
+    >
+      <span class="swatches" aria-hidden="true">
+        @for (color of item.swatches; track color) {
+          <i [style.background]="color"></i>
+        }
+      </span>
+      <span class="meta">
+        <strong>{{ item.label }}</strong>
+        <small>{{ item.hint }}</small>
+      </span>
+    </button>
+  }
+
+  @if (showCustom()) {
+    <!-- Custom palette card -->
+    <div
+      class="theme-card custom-card"
+      [class.selected]="usingCustom()"
+      role="radio"
+      [attr.aria-checked]="usingCustom() ? 'true' : 'false'"
+    >
+      <button type="button" class="custom-toggle" (click)="openCustom.emit()">
+        <span class="swatches" aria-hidden="true">
+          @for (color of customSwatches(); track $index) {
+            <i [style.background]="color"></i>
+          }
+        </span>
+        <span class="meta">
+          <strong>{{ labels().customTitle }}</strong>
+          <small>{{ labels().customHint }}</small>
+        </span>
+      </button>
+      @if (draftPalette()) {
+        <div class="custom-editor" (click)="$event.stopPropagation()">
+          <div class="color-fields">
+            @for (field of paletteFields(); track field.key) {
+              <label class="color-field">
+                <span>{{ field.label }}</span>
+                <input
+                  type="color"
+                  [value]="draftPalette()?.[field.key] ?? '#000000'"
+                  (change)="updateColor.emit({ key: field.key, value: $any($event.target).value })"
+                />
+              </label>
+            }
+          </div>
+          <button mat-flat-button [disabled]="busy()" (click)="saveCustom.emit()">
+            {{ labels().saveLabel }}
+          </button>
+        </div>
+      } @else {
+        <p class="hint-text">{{ labels().idleHint }}</p>
+      }
+    </div>
+  }
+</section>

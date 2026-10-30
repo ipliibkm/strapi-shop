@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-articles-create
+      author: openshopfront-platform
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: article
+      changes:
+        - createTable:
+            tableName: article
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: slug
+                  type: varchar(200)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: content_html
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tags
+                  type: varchar(500) # Comma-separated list of page slugs (e.g., "shop,services")
+                  constraints:
+                    nullable: false
+                    defaultValue: ""
+              - column:
+                  name: published
+                  type: boolean
+                  constraints:
+                    nullable: false
+                    defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false

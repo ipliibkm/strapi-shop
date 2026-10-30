@@ -1,0 +1,26 @@
+name: production-config
+on:
+  push:
+    paths:
+      - compose.yaml
+      - config/development.env.example
+      - config/production.env.example
+      - infrastructure/traefik/dynamic/development.yaml
+      - infrastructure/traefik/dynamic/production.yaml
+      - scripts/verify-production-config.sh
+      - .github/workflows/production-config.yml
+  pull_request:
+    paths:
+      - compose.yaml
+      - config/development.env.example
+      - config/production.env.example
+      - infrastructure/traefik/dynamic/development.yaml
+      - infrastructure/traefik/dynamic/production.yaml
+      - scripts/verify-production-config.sh
+      - .github/workflows/production-config.yml
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/verify-production-config.sh

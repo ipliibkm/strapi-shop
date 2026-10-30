@@ -1,0 +1,89 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('PLATFORM') }}</p>
+    <h2>{{ t('Email settings') }}</h2>
+    <p>{{ t('Configure the subject lines and HTML templates for platform mail per language.') }}</p>
+  </div>
+</div>
+
+@if (error()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+}
+@if (notice()) {
+  <p class="form-notice" role="status">{{ notice() }}</p>
+}
+
+<div class="email-locale-bar">
+  <label class="field inline-field">
+    <span>{{ t('Language') }}</span>
+    <select [value]="locale()" (change)="onLocaleChange($event)">
+      <option value="default">{{ t('Default') }}</option>
+      @for (lang of languages(); track lang.code) {
+        <option [value]="lang.code">{{ lang.name }} ({{ lang.code }})</option>
+      }
+    </select>
+  </label>
+</div>
+
+<section class="panel">
+  <header class="email-channel-head">
+    <div>
+      <p class="label">{{ t('FORMS') }}</p>
+      <h3>{{ t('Form submission receipt') }}</h3>
+    </div>
+    <span class="badge live">{{ t('RECEIPT TO SUBMITTER') }}</span>
+  </header>
+  <p class="hint-text">
+    {{
+      t(
+        'The submitter receives this mail after a form submission. Leave the template empty to use the built-in text.'
+      )
+    }}
+  </p>
+  <label class="field wide">
+    <span>{{ t('Subject line') }}</span>
+    <input [value]="formSubject()" maxlength="254" (change)="setSubject('form', $event)" />
+  </label>
+  <p class="label">{{ t('Template (HTML)') }}</p>
+  <ip-template-editor
+    [template]="formTemplate()"
+    [variables]="formVariables"
+    (templateChange)="onFormTemplateChange($event)"
+  ></ip-template-editor>
+</section>
+
+<section class="panel">
+  <header class="email-channel-head">
+    <div>
+      <p class="label">{{ t('COMMERCE') }}</p>
+      <h3>{{ t('Order confirmation') }}</h3>
+    </div>
+    <span class="badge live">{{ t('TO CUSTOMER') }}</span>
+  </header>
+  <p class="hint-text">
+    {{
+      t(
+        'The customer receives this mail when the order payment is confirmed. Leave the template empty to use the built-in text.'
+      )
+    }}
+  </p>
+  <label class="field wide">
+    <span>{{ t('Subject line') }}</span>
+    <input [value]="orderSubject()" maxlength="254" (change)="setSubject('order', $event)" />
+  </label>
+  <p class="label">{{ t('Template (HTML)') }}</p>
+  <ip-template-editor
+    [template]="orderTemplate()"
+    [variables]="orderVariables"
+    (templateChange)="onOrderTemplateChange($event)"
+  ></ip-template-editor>
+</section>
+
+<div class="page-actions">
+  <button mat-flat-button [disabled]="saving() || loading()" (click)="save()">
+    {{ saving() ? t('Saving') : t('Save mail settings') }}
+  </button>
+</div>

@@ -1,0 +1,159 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('BOOKING SETUP') }}</p>
+    <h2>{{ t('Services and duration') }}</h2>
+    <p>
+      {{
+        t('Define the services that customers can book and set the duration of each appointment.')
+      }}
+    </p>
+  </div>
+  <span class="badge live">{{ t('CUSTOMER CATALOG') }}</span>
+</div>
+<article class="booking-settings">
+  <div class="settings-copy">
+    <span class="settings-icon"><mat-icon>event_available</mat-icon></span>
+    <div>
+      <p class="label">{{ t('CUSTOMER BOOKING') }}</p>
+      <h3>{{ t('Online appointments') }}</h3>
+      <p>
+        {{
+          t('Enable customer booking. The default duration applies when no active services exist.')
+        }}
+      </p>
+    </div>
+  </div>
+  <label class="toggle"
+    ><input
+      #customerToggle
+      type="checkbox"
+      [checked]="settings().customerBookingEnabled"
+    /><span></span
+    ><strong>{{ customerToggle.checked ? t('Enabled') : t('Disabled') }}</strong></label
+  >
+  <label class="default-duration"
+    ><span>{{ t('Default duration') }}</span>
+    <div class="duration-input">
+      <input
+        #defaultDuration
+        type="number"
+        [value]="settings().defaultDurationMinutes"
+        min="5"
+        max="480"
+        step="5"
+      /><span>{{ t('minutes') }}</span>
+    </div></label
+  >
+  <button
+    mat-flat-button
+    [disabled]="busy() || !enabled()"
+    (click)="saveSettings(customerToggle.checked, defaultDuration.value)"
+  >
+    {{ t('Save settings') }}
+  </button>
+</article>
+<section class="service-layout">
+  <article class="service-editor">
+    <p class="label">{{ t('NEW SERVICE') }}</p>
+    <h3>{{ t('Add a booking service') }}</h3>
+    <p class="intro">
+      {{
+        t('Set the appointment duration. Customers select the service before they select a time.')
+      }}
+    </p>
+    <label
+      ><span>{{ t('Service name') }}</span
+      ><input #name placeholder="Lashlifting" maxlength="120"
+    /></label>
+    <label
+      ><span>{{ t('Duration') }}</span>
+      <div class="duration-input">
+        <input #duration type="number" value="60" min="5" max="480" step="5" /><span>{{
+          t('minutes')
+        }}</span>
+      </div></label
+    >
+    <div class="duration-presets">
+      @for (value of [30, 45, 60, 90]; track value) {
+        <button (click)="duration.value = value.toString()">
+          {{ t('{count} min', { count: value }) }}
+        </button>
+      }
+    </div>
+    <button
+      mat-flat-button
+      class="save-button"
+      [disabled]="busy() || !enabled()"
+      (click)="create(name.value, duration.value); name.value = ''"
+    >
+      {{ t('Add service') }} <mat-icon iconPositionEnd>add</mat-icon>
+    </button>
+    @if (notice()) {
+      <p class="notice" [class.error]="failed()">{{ notice() }}</p>
+    }
+  </article>
+  <article class="service-list">
+    <header>
+      <div>
+        <p class="label">{{ t('SERVICE CATALOG') }}</p>
+        <h3>{{ t('Customer booking options') }}</h3>
+      </div>
+      <span>{{ t('{count} active', { count: activeCount() }) }}</span>
+    </header>
+    <div class="rows">
+      @for (item of offerings(); track item.id) {
+        <div class="service-row" [class.inactive]="!item.active">
+          <span class="service-symbol"
+            ><mat-icon>{{ item.active ? 'auto_awesome' : 'visibility_off' }}</mat-icon></span
+          >
+          <label
+            ><span>{{ t('Name') }}</span
+            ><input #editName [value]="item.name" maxlength="120"
+          /></label>
+          <label class="small"
+            ><span>{{ t('Duration') }}</span
+            ><input
+              #editDuration
+              type="number"
+              [value]="item.durationMinutes"
+              min="5"
+              max="480"
+              step="5"
+          /></label>
+          <span class="minutes">{{ t('min') }}</span>
+          <div class="row-actions">
+            <button
+              mat-button
+              [disabled]="busy()"
+              (click)="update(item, editName.value, editDuration.value)"
+            >
+              {{ t('Save') }}
+            </button>
+            @if (item.active) {
+              <button class="hide-action" mat-button [disabled]="busy()" (click)="deactivate(item)">
+                {{ t('Hide') }}
+              </button>
+            } @else {
+              <button
+                mat-button
+                [disabled]="busy()"
+                (click)="activate(item, editName.value, editDuration.value)"
+              >
+                {{ t('Activate') }}
+              </button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <div class="empty">
+          <mat-icon>calendar_add_on</mat-icon><strong>{{ t('No services exist') }}</strong>
+          <p>
+            {{ t('Customers use the default appointment duration while the catalog is empty.') }}
+          </p>
+        </div>
+      }
+    </div>
+  </article>
+</section>

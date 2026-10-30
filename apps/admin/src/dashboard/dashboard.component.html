@@ -1,0 +1,94 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<section class="welcome-panel">
+  <div>
+    <p class="eyebrow">{{ t('SETUP') }}</p>
+    <h2>{{ t('Service status.') }}</h2>
+    <p>{{ t('Check which services are configured and running on this installation.') }}</p>
+  </div>
+  <button mat-flat-button (click)="status.refreshStatus()">
+    {{ t('Run checks') }} <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+  </button>
+</section>
+<section class="metric-grid" [attr.aria-label]="t('System summary')">
+  <openshopfront-metric-card
+    icon="dns"
+    tone="blue"
+    [label]="t('System checks')"
+    [value]="status.readyChecks() + ' / ' + (status.checks().length || 5)"
+    [hint]="t('Configured services')"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="event_available"
+    tone="green"
+    [label]="t('Booking API')"
+    [value]="status.backendOnline() ? t('Available') : t('Unavailable')"
+    [hint]="t('Availability and confirmed bookings')"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="description"
+    tone="amber"
+    [label]="t('CMS content models')"
+    value="1"
+    [hint]="t('Business Profile is available')"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="extension"
+    tone="violet"
+    [label]="t('Active modules')"
+    value="2"
+    [hint]="t('Website and basic booking')"
+  ></openshopfront-metric-card>
+</section>
+<section class="two-column">
+  <article class="panel">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">{{ t('SERVICE STATUS') }}</p>
+        <h2>{{ t('Configuration checks') }}</h2>
+      </div>
+      <button mat-button (click)="status.refreshStatus()">{{ t('Refresh') }}</button>
+    </div>
+    <div class="check-list">
+      @for (check of status.checks(); track check.id) {
+        <div class="check-row">
+          <span class="status-dot" [class.online]="check.status === 'ready'"></span>
+          <div>
+            <strong>{{ check.id }}</strong>
+            <p>{{ t(check.message) }}</p>
+          </div>
+          <span class="badge">{{ check.status }}</span>
+        </div>
+      } @empty {
+        <p class="muted">{{ t('No status data is available.') }}</p>
+      }
+    </div>
+  </article>
+  <article class="panel">
+    <p class="eyebrow">{{ t('QUICK ACCESS') }}</p>
+    <h2>{{ t('Administration tools') }}</h2>
+    <div class="quick-links">
+      <button (click)="navigate.emit('bookings')">
+        <mat-icon>calendar_month</mat-icon
+        ><span
+          ><strong>{{ t('Booking operations') }}</strong
+          ><small>{{ t('Check and reserve a known resource') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <button (click)="navigate.emit('content')">
+        <mat-icon>edit_note</mat-icon
+        ><span
+          ><strong>{{ t('Content maintenance') }}</strong
+          ><small>{{ t('Open the current Strapi workspace') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <button (click)="navigate.emit('system')">
+        <mat-icon>monitor_heart</mat-icon
+        ><span
+          ><strong>{{ t('System status') }}</strong
+          ><small>{{ t('Review implemented capabilities') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </article>
+</section>

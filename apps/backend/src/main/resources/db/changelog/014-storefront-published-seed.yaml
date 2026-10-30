@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-storefront-published-seed
+      author: platform
+      changes:
+        - sql:
+            sql: update storefront_page set published_content=content where published_content is null

@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-google-calendar-consistency
+      author: platform
+      changes:
+        - addColumn:
+            tableName: google_calendar_mapping
+            columns:
+              - column: {name: version, type: bigint, defaultValueNumeric: 0, constraints: {nullable: false}}
+        - addColumn:
+            tableName: google_booking_event
+            columns:
+              - column: {name: generation, type: bigint, defaultValueNumeric: 0, constraints: {nullable: false}}
+        - sql:
+            sql: delete from external_busy_block e where not exists (select 1 from google_calendar_mapping m where m.resource_id=e.resource_id)
+        - addForeignKeyConstraint:
+            baseTableName: external_busy_block
+            baseColumnNames: resource_id
+            referencedTableName: google_calendar_mapping
+            referencedColumnNames: resource_id
+            constraintName: fk_external_busy_block_mapping
+            onDelete: CASCADE

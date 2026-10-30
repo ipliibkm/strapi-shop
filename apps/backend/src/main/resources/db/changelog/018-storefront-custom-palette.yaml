@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-storefront-custom-palette
+      author: platform
+      changes:
+        - addColumn:
+            tableName: storefront_appearance
+            columns:
+              - column: {name: custom_palette, type: jsonb}

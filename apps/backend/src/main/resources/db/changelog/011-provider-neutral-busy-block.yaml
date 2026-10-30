@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-provider-neutral-busy-block
+      author: platform
+      changes:
+        - addColumn:
+            tableName: external_busy_block
+            columns:
+              - column:
+                  name: provider
+                  type: varchar(64)
+                  defaultValue: google
+                  constraints: {nullable: false}
+        - renameColumn:
+            tableName: external_busy_block
+            oldColumnName: google_calendar_id
+            newColumnName: external_calendar_id
+            columnDataType: varchar(512)
+        - renameColumn:
+            tableName: external_busy_block
+            oldColumnName: google_event_id
+            newColumnName: external_event_id
+            columnDataType: varchar(512)
+        - dropUniqueConstraint:
+            tableName: external_busy_block
+            constraintName: uq_google_busy_event
+        - addUniqueConstraint:
+            tableName: external_busy_block
+            columnNames: provider,external_calendar_id,external_event_id
+            constraintName: uq_external_busy_event

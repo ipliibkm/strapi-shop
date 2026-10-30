@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-google-service-connection
+      author: platform
+      changes:
+        - createTable:
+            tableName: google_service_connection
+            columns:
+              - column: {name: id, type: integer, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: principal_name, type: varchar(200), constraints: {nullable: false}}
+              - column: {name: email, type: varchar(320), constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}

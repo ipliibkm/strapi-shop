@@ -1,0 +1,74 @@
+.empty-cart-icon {
+  width: 56px;
+  height: 56px;
+  font-size: 56px;
+  line-height: 56px;
+}
+
+.cart-line button[mat-icon-button] {
+  width: 44px;
+  height: 44px;
+}
+
+.empty-cart-action,
+.back-to-shop-row button {
+  min-height: 44px;
+}
+
+.back-to-shop-row {
+  margin-top: 32px;
+}
+
+.continue-shopping-btn {
+  min-height: 48px;
+  padding-inline: 20px !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  color: var(--openshopfront-fg);
+  margin-top: 12px;
+}
+
+.continue-shopping-btn:hover {
+  color: var(--openshopfront-accent);
+}
+
+.payment-actions {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.payment-button {
+  min-height: 48px;
+  padding-inline: 24px !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+}
+
+.payment-fallback,
+.payment-not-required {
+  max-width: 65ch;
+  margin: 0;
+  color: var(--on-surface-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.payment-fallback a {
+  color: var(--openshopfront-fg);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.payment-fallback a:hover {
+  color: var(--openshopfront-accent);
+}
+
+.payment-fallback a:focus-visible {
+  border-radius: 3px;
+  outline: 3px solid color-mix(in srgb, var(--openshopfront-accent) 35%, transparent);
+  outline-offset: 3px;
+}

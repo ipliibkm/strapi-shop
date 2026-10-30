@@ -1,0 +1,82 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('CONTENT') }}</p>
+    <h2>{{ t('Content workspace') }}</h2>
+    <p>{{ t('Strapi applies the permissions of your administrator role.') }}</p>
+  </div>
+</div>
+@if (loading()) {
+  <section class="content-state" role="status">{{ t('Load content.') }}</section>
+} @else if (forbidden()) {
+  <section class="content-state">
+    <mat-icon>lock</mat-icon>
+    <h3>{{ t('Your Strapi role cannot open this content.') }}</h3>
+    <p>{{ t('Ask a Strapi Super Admin to change your Content Manager permissions.') }}</p>
+  </section>
+} @else if (profile(); as item) {
+  <form
+    class="content-editor"
+    (submit)="
+      save(
+        $event,
+        item,
+        name.value,
+        slug.value,
+        email.value,
+        timezone.value,
+        locale.value,
+        currency.value,
+        address.value,
+        phone.value
+      )
+    "
+  >
+    <header>
+      <div>
+        <p class="eyebrow">{{ t('SINGLE TYPE') }}</p>
+        <h3>{{ t('Business Profile') }}</h3>
+        <p>{{ t('Strapi applies your role permissions to this content.') }}</p>
+      </div>
+      <button mat-flat-button [disabled]="saving()">{{ t('Save content') }}</button>
+    </header>
+    <div class="content-fields">
+      <label
+        ><span>{{ t('Name') }}</span
+        ><input #name [value]="item.name" required
+      /></label>
+      <label
+        ><span>{{ t('Slug') }}</span
+        ><input #slug [value]="item.slug" required
+      /></label>
+      <label
+        ><span>{{ t('Contact email') }}</span
+        ><input #email type="email" [value]="item.contactEmail" required
+      /></label>
+      <label
+        ><span>{{ t('Time zone') }}</span
+        ><input #timezone [value]="item.timezone" required
+      /></label>
+      <label
+        ><span>{{ t('Locale') }}</span
+        ><input #locale [value]="item.localeCode" required
+      /></label>
+      <label
+        ><span>{{ t('Currency') }}</span
+        ><input #currency [value]="item.currency" required
+      /></label>
+      <label
+        ><span>{{ t('Phone') }}</span
+        ><input #phone [value]="item.phone || ''"
+      /></label>
+      <label class="wide"
+        ><span>{{ t('Address') }}</span
+        ><textarea #address rows="4">{{ item.address || '' }}</textarea>
+      </label>
+    </div>
+    @if (notice()) {
+      <p class="content-notice" [class.error]="failed()">{{ notice() }}</p>
+    }
+  </form>
+}

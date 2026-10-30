@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-google-calendar-sync
+      author: platform
+      changes:
+        - createTable:
+            tableName: google_calendar_mapping
+            columns:
+              - column: {name: resource_id, type: varchar(128), constraints: {primaryKey: true, nullable: false}}
+              - column: {name: client_registration_id, type: varchar(100), defaultValue: google, constraints: {nullable: false}}
+              - column: {name: principal_name, type: varchar(200), constraints: {nullable: false}}
+              - column: {name: google_calendar_id, type: varchar(512), constraints: {nullable: false}}
+              - column: {name: display_name, type: varchar(512), constraints: {nullable: false}}
+              - column: {name: write_bookings, type: boolean, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: sync_token, type: text}
+              - column: {name: sync_status, type: varchar(24), defaultValue: PENDING, constraints: {nullable: false}}
+              - column: {name: last_synced_at, type: timestamp with time zone}
+              - column: {name: conflict_count, type: integer, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: last_error, type: varchar(2000)}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: google_calendar_mapping
+            columnNames: google_calendar_id
+            constraintName: uq_google_calendar_mapping_calendar
+        - addForeignKeyConstraint:
+            baseTableName: google_calendar_mapping
+            baseColumnNames: client_registration_id,principal_name
+            referencedTableName: oauth2_authorized_client
+            referencedColumnNames: client_registration_id,principal_name
+            constraintName: fk_google_calendar_mapping_client
+            onDelete: CASCADE
+        - createTable:
+            tableName: google_booking_event
+            columns:
+              - column: {name: booking_id, type: uuid, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: principal_name, type: varchar(200), constraints: {nullable: false}}
+              - column: {name: google_calendar_id, type: varchar(512), constraints: {nullable: false}}
+              - column: {name: google_event_id, type: varchar(512)}
+              - column: {name: operation, type: varchar(16), constraints: {nullable: false}}
+              - column: {name: delivery_status, type: varchar(16), defaultValue: PENDING, constraints: {nullable: false}}
+              - column: {name: attempt_count, type: integer, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: next_attempt_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+              - column: {name: last_error, type: varchar(2000)}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        - addForeignKeyConstraint:
+            baseTableName: google_booking_event
+            baseColumnNames: booking_id
+            referencedTableName: booking
+            referencedColumnNames: id
+            constraintName: fk_google_booking_event_booking
+            onDelete: CASCADE
+        - createIndex:
+            tableName: google_booking_event
+            indexName: ix_google_booking_event_delivery
+            columns:
+              - column: {name: delivery_status}
+              - column: {name: next_attempt_at}

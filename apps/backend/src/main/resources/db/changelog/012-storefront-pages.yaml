@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-storefront-pages
+      author: platform
+      changes:
+        - createTable:
+            tableName: storefront_page
+            columns:
+              - column: {name: slug, type: varchar(64), constraints: {primaryKey: true}}
+              - column: {name: title, type: varchar(200), constraints: {nullable: false}}
+              - column: {name: content, type: text, constraints: {nullable: false}}
+              - column: {name: published_content, type: text}
+              - column: {name: updated_at, type: timestamptz, defaultValueComputed: now(), constraints: {nullable: false}}
+        - insert:
+            tableName: storefront_page
+            columns:
+              - column: {name: slug, value: home}
+              - column: {name: title, value: Home}
+              - column:
+                  name: content
+                  value: '[{"type":"heading","eyebrow":"YOUR BUSINESS. YOUR STORY.","title":"Good things start here."},{"type":"text","html":"<p>Welcome to a space built for your customers. Edit this page in the operations admin and publish the changes.</p>"},{"type":"cta","label":"Book a visit","target":"booking"}]'
+              - column: {name: updated_at, valueComputed: now()}
+        - insert:
+            tableName: storefront_page
+            columns:
+              - column: {name: slug, value: services}
+              - column: {name: title, value: Services}
+              - column:
+                  name: content
+                  value: '[{"type":"heading","eyebrow":"OUR SERVICES","title":"What we offer."},{"type":"text","html":"<p>Explore our services. Contact us for details and available times.</p>"},{"type":"cta","label":"Book a visit","target":"booking"}]'
+              - column: {name: updated_at, valueComputed: now()}
+        - insert:
+            tableName: storefront_page
+            columns:
+              - column: {name: slug, value: about}
+              - column: {name: title, value: About}
+              - column:
+                  name: content
+                  value: '[{"type":"heading","eyebrow":"OUR STORY","title":"People come first."},{"type":"text","html":"<p>This website is ready for your company''s story. Edit the text in the operations admin.</p>"}]'
+              - column: {name: updated_at, valueComputed: now()}
+        - insert:
+            tableName: storefront_page
+            columns:
+              - column: {name: slug, value: contact}
+              - column: {name: title, value: Contact}
+              - column:
+                  name: content
+                  value: '[{"type":"heading","eyebrow":"CONTACT","title":"Say hello."},{"type":"text","html":"<p>We would like to hear from you. Add your contact details on this page.</p>"}]'
+              - column: {name: updated_at, valueComputed: now()}

@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-booking-service-catalog
+      author: platform
+      changes:
+        - createTable:
+            tableName: booking_service_definition
+            columns:
+              - column: {name: id, type: uuid, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: name, type: varchar(120), constraints: {nullable: false}}
+              - column: {name: duration_minutes, type: integer, constraints: {nullable: false}}
+              - column: {name: active, type: boolean, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: created_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: booking_service_definition
+            columnNames: name
+            constraintName: uq_booking_service_definition_name
+        - addColumn:
+            tableName: booking
+            columns:
+              - column: {name: service_id, type: uuid}
+              - column: {name: service_name, type: varchar(120)}
+              - column: {name: duration_minutes, type: integer}
+        - addForeignKeyConstraint:
+            baseTableName: booking
+            baseColumnNames: service_id
+            referencedTableName: booking_service_definition
+            referencedColumnNames: id
+            constraintName: fk_booking_service_definition
+            onDelete: SET NULL

@@ -1,0 +1,101 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+@if (!product()) {
+  <section class="inner-hero">
+    <h1 class="section-title mt-5">{{ t('product.notFound') }}</h1>
+    <button mat-flat-button class="!mt-8" (click)="backToShop.emit()">
+      {{ t('product.backToShop') }}
+    </button>
+  </section>
+} @else if (product(); as item) {
+  <section class="product-page max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-10 items-start">
+    @if (galleryItems().length) {
+      <openshopfront-gallery [items]="galleryItems()" />
+    } @else {
+      <div class="product-hero">
+        <span>{{ initialOf(item.name) }}</span>
+      </div>
+    }
+    <div>
+      <p class="eyebrow">{{ item.slug.toUpperCase() }}</p>
+      <h1 class="section-title mt-3">{{ item.name }}</h1>
+      <p class="mt-4 text-slate-600 leading-7 whitespace-pre-line">{{ item.description }}</p>
+
+      @if (item.variants.length) {
+        <div class="variant-picker">
+          @for (option of item.variants; track option.id) {
+            <button
+              [class.selected]="selectedVariantId() === option.id"
+              [disabled]="option.availableQuantity <= 0"
+              (click)="selectVariant(option)"
+            >
+              <span
+                ><strong>{{ option.label || t('product.optionDefault') }}</strong
+                ><small
+                  >{{ money(option.priceCents, option.currency) }} ·
+                  {{
+                    option.availableQuantity > 0
+                      ? t('product.inStock', { count: option.availableQuantity })
+                      : t('product.soldOut')
+                  }}</small
+                ></span
+              >
+              @if (selectedVariantId() === option.id) {
+                <mat-icon>check_circle</mat-icon>
+              }
+            </button>
+          }
+        </div>
+      }
+
+      <label class="qty-row"
+        ><span>{{ t('product.quantity') }}</span
+        ><input
+          type="number"
+          min="1"
+          [max]="selectedVariant()?.availableQuantity ?? 99"
+          [value]="quantity()"
+          (change)="onQuantityChange($event)"
+      /></label>
+
+      @if (quantityWarning()) {
+        <p class="notice-line error" role="alert">{{ quantityWarning() }}</p>
+      }
+
+      <button
+        mat-flat-button
+        class="!rounded-full add-to-cart-btn"
+        [disabled]="
+          addingToCart() ||
+          !selectedVariantId() ||
+          (selectedVariant()?.availableQuantity ?? -1) <= 0
+        "
+        (click)="addToCart()"
+      >
+        {{
+          addingToCart()
+            ? t('product.adding')
+            : t(quantityInCart() ? 'product.updateCart' : 'product.addToCart')
+        }}
+        <mat-icon iconPositionEnd>add_shopping_cart</mat-icon>
+      </button>
+
+      @if (notice()) {
+        <div class="add-result">
+          <p class="notice-line ok">{{ notice() }}</p>
+          <button mat-stroked-button class="!rounded-full view-cart-btn" (click)="goToCart.emit()">
+            {{ t('cart.viewCart') }} <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <button
+          mat-stroked-button
+          class="!rounded-full continue-shop-btn"
+          (click)="backToShop.emit()"
+        >
+          {{ t('cart.browseShop') }}
+        </button>
+      }
+    </div>
+  </section>
+}

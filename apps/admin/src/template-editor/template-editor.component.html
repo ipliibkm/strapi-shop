@@ -1,0 +1,74 @@
+<div class="te-toolbar" role="toolbar" aria-label="Template editor">
+  <button type="button" (click)="exec('bold')" title="Bold"><b>B</b></button>
+  <button type="button" (click)="exec('italic')" title="Italic"><i>I</i></button>
+  <button type="button" (click)="exec('underline')" title="Underline"><u>U</u></button>
+  <button
+    type="button"
+    class="te-btn te-sep"
+    (click)="exec('insertUnorderedList')"
+    title="Bulleted list"
+  >
+    •
+  </button>
+  <span class="te-spacer"></span>
+  @for (variable of variables; track variable.name) {
+    <button
+      type="button"
+      class="te-chip"
+      [title]="'Insert ' + '{' + variable.name + '}'"
+      (click)="insertVariable(variable.name)"
+    >
+      {{ '{' }}{{ variable.name }}{{ '}' }}
+    </button>
+  }
+</div>
+
+<div class="te-tabs" role="tablist">
+  <button
+    type="button"
+    role="tab"
+    [class.active]="mode() === 'editor'"
+    (click)="switchMode('editor')"
+  >
+    {{ t('Editor') }}
+  </button>
+  <button type="button" role="tab" [class.active]="mode() === 'html'" (click)="switchMode('html')">
+    HTML
+  </button>
+  <button
+    type="button"
+    role="tab"
+    [class.active]="mode() === 'preview'"
+    (click)="switchMode('preview')"
+  >
+    {{ t('Preview') }}
+  </button>
+</div>
+
+<div class="te-panes">
+  <div
+    #editable
+    [class.te-hidden]="mode() !== 'editor'"
+    class="richtext-editor te-pane"
+    contenteditable="true"
+    spellcheck="false"
+    aria-label="Template editor"
+    (input)="syncFromEditable()"
+  ></div>
+  <textarea
+    #source
+    [class.te-hidden]="mode() !== 'html'"
+    rows="10"
+    spellcheck="false"
+    placeholder="&lt;h2&gt;Thank you&lt;/h2&gt;&#10;&lt;p&gt;Dear {customerName}, ...&lt;/p&gt;"
+    aria-label="Template HTML source"
+    (input)="onSourceInput($event)"
+  ></textarea>
+  <iframe
+    [class.te-hidden]="mode() !== 'preview'"
+    [srcdoc]="previewHtml()"
+    sandbox=""
+    title="Template preview"
+    class="te-preview-frame"
+  ></iframe>
+</div>

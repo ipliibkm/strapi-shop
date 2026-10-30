@@ -2,45 +2,47 @@
 
 The proposal table below is historical. Approved choices and remaining questions are documented in the superseding section at the end.
 
-| ID | Question | Proposed starting default | Why it matters |
-| --- | --- | --- | --- |
-| D01 | Primary goal: CMS-first sites, store-first, booking-first, or all enabled? | Modular platform, website enabled; commerce/booking feature flags | Avoid overbuilding |
-| D02 | Single business/site or multitenant SaaS hosting several clients? | Single-tenant, multi-site-ready contracts | Security, schema, domain design |
-| D03 | Repositories public or private? Naming prefix? Existing empty `strapi-shop` usage? | Private new repos with `platform-` prefix; existing repo as architecture staging | Repository creation and governance |
-| D04 | Business geography, currencies, languages, sales tax regime? | Germany/EU, EUR, de/en; confirm | Checkout, compliance |
-| D05 | Product type: physical/digital/services/subscriptions/B2B? | Physical products + appointments MVP | Data model and fulfillment |
-| D06 | Payment provider(s), countries, wallets, deposit/refunds? | Stripe abstraction (not commitment) | API, webhook, legal |
-| D07 | Shipping carriers/rules, pickup, digital delivery? | Carrier-neutral + flat-rate start | Logistics |
-| D08 | Identity: OIDC service (Keycloak/Auth0/etc.), social login, guest checkout? | OIDC for customer/staff, guest checkout optional | Identity boundary |
-| D09 | Booking model: staff/resource, classes, multi-capacity, recurrence, integration? | Single-resource appointments, optional calendar sync | Race conditions & complexity |
-| D10 | Search: PostgreSQL FTS, Meilisearch, Typesense, OpenSearch? | PostgreSQL FTS initially, pluggable | Search relevance, ops |
-| D11 | UI base: Angular Material, PrimeNG, custom CDK? | Angular CDK + custom themed design system + Storybook | UI quality, license, maintainability |
-| D12 | Hosting: one VPS/self-hosted Compose, cloud, managed PostgreSQL/storage? | Single VPS Compose + managed offsite backup | SLA, budget |
-| D13 | API service runtime for commerce/booking/worker: Java Spring Boot or Node/TypeScript? | Java Spring Boot + Liquibase preferred if enterprise transaction semantics; confirm | Repo scaffolds and ORM |
-| D14 | Message transport: PostgreSQL outbox polling, RabbitMQ, Kafka? | Outbox + polling MVP; RabbitMQ on demand | Delivery & operations |
-| D15 | Caching/session/queues: Redis needed? | Optional, only after load needs verified | Data invalidation/complexity |
-| D16 | Marketing: analytics, cookie consent, email, CRM providers? | Provider-neutral, minimal consent analytics | Privacy, events |
-| D17 | CMS media storage: local dev / S3 production and image CDN? | S3-compatible object store + CDN | Durability and scale |
-| D18 | Functional role boundaries: editor, operator, manager, super admin, customer? | RBAC split across systems | Access controls |
-| D19 | Target SLA, latency, throughput, RPO/RTO, storage, estimated transactions? | Define before hosting design | Production readiness |
-| D20 | Licensing/distribution: private business internal, open-source framework, commercial starter? | Private until clarified | Dependency licensing |
-| D21 | CI/CD: GitHub Actions + registry, branch policy, secrets manager? | GitHub Actions, GHCR, staged releases | Deployment & audit |
-| D22 | Admin: rely on Strapi for content AND separate Angular for operations? | Both, distinct authorization | UX & security |
-| D23 | Tenant domains/branding/white-label and themes? | Tokens/theme per brand, not tenant dynamic initially | Platform productization |
-| D24 | Localization/timezones/currency conversion and region residency? | EU region + IANA timezones | Correct business rules |
-| D25 | Must platform be offline/edge deployable or single VPS with internet? | Online single-region | OAuth/PSP dependencies |
-| D26 | SEO: editorial prerender/SSR, catalog SSR and storefront index requirements? | Hybrid SSR and selective prerender | Angular hosting |
-| D27 | Data ownership/reporting: internal dashboard vs external BI? | Operational dashboard plus export | Reporting architecture |
-| D28 | Purchase flows: invoice generation, VAT, gift cards, loyalty, POS? | Invoice via provider, defer loyalty/POS | Legal integrations |
-| D29 | Feature packages optional commercial modules and extensibility API? | Install profiles + explicit adapter contracts | Generic reuse |
-| D30 | Desired delivery phases, MVP vs full version and expected budget? | 3-stage MVP-to-production rollout | Priorities |
-| D31 | Website functionality: forms, newsletter, events, maps, multilingual blog, membership? | Content/forms/blog/SEO baseline | Model scope |
-| D32 | Accessibility/compliance target and age-sensitive content? | WCAG 2.2 AA / GDPR, legal counsel for sales | Acceptance gates |
+| ID  | Question                                                                                      | Proposed starting default                                                           | Why it matters                       |
+| --- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------ |
+| D01 | Primary goal: CMS-first sites, store-first, booking-first, or all enabled?                    | Modular platform, website enabled; commerce/booking feature flags                   | Avoid overbuilding                   |
+| D02 | Single business/site or multitenant SaaS hosting several clients?                             | Single-tenant, multi-site-ready contracts                                           | Security, schema, domain design      |
+| D03 | Repositories public or private? Naming prefix? Existing empty `strapi-shop` usage?            | Private new repos with `platform-` prefix; existing repo as architecture staging    | Repository creation and governance   |
+| D04 | Business geography, currencies, languages, sales tax regime?                                  | Germany/EU, EUR, de/en; confirm                                                     | Checkout, compliance                 |
+| D05 | Product type: physical/digital/services/subscriptions/B2B?                                    | Physical products + appointments MVP                                                | Data model and fulfillment           |
+| D06 | Payment provider(s), countries, wallets, deposit/refunds?                                     | Stripe abstraction (not commitment)                                                 | API, webhook, legal                  |
+| D07 | Shipping carriers/rules, pickup, digital delivery?                                            | Carrier-neutral + flat-rate start                                                   | Logistics                            |
+| D08 | Identity: OIDC service (Keycloak/Auth0/etc.), social login, guest checkout?                   | OIDC for customer/staff, guest checkout optional                                    | Identity boundary                    |
+| D09 | Booking model: staff/resource, classes, multi-capacity, recurrence, integration?              | Single-resource appointments, optional calendar sync                                | Race conditions & complexity         |
+| D10 | Search: PostgreSQL FTS, Meilisearch, Typesense, OpenSearch?                                   | PostgreSQL FTS initially, pluggable                                                 | Search relevance, ops                |
+| D11 | UI base: Angular Material, PrimeNG, custom CDK?                                               | Angular CDK + custom themed design system + Storybook                               | UI quality, license, maintainability |
+| D12 | Hosting: one VPS/self-hosted Compose, cloud, managed PostgreSQL/storage?                      | Single VPS Compose + managed offsite backup                                         | SLA, budget                          |
+| D13 | API service runtime for commerce/booking/worker: Java Spring Boot or Node/TypeScript?         | Java Spring Boot + Liquibase preferred if enterprise transaction semantics; confirm | Repo scaffolds and ORM               |
+| D14 | Message transport: PostgreSQL outbox polling, RabbitMQ, Kafka?                                | Outbox + polling MVP; RabbitMQ on demand                                            | Delivery & operations                |
+| D15 | Caching/session/queues: Redis needed?                                                         | Optional, only after load needs verified                                            | Data invalidation/complexity         |
+| D16 | Marketing: analytics, cookie consent, email, CRM providers?                                   | Provider-neutral, minimal consent analytics                                         | Privacy, events                      |
+| D17 | CMS media storage: local dev / S3 production and image CDN?                                   | S3-compatible object store + CDN                                                    | Durability and scale                 |
+| D18 | Functional role boundaries: editor, operator, manager, super admin, customer?                 | RBAC split across systems                                                           | Access controls                      |
+| D19 | Target SLA, latency, throughput, RPO/RTO, storage, estimated transactions?                    | Define before hosting design                                                        | Production readiness                 |
+| D20 | Licensing/distribution: private business internal, open-source framework, commercial starter? | Private until clarified                                                             | Dependency licensing                 |
+| D21 | CI/CD: GitHub Actions + registry, branch policy, secrets manager?                             | GitHub Actions, GHCR, staged releases                                               | Deployment & audit                   |
+| D22 | Admin: rely on Strapi for content AND separate Angular for operations?                        | Both, distinct authorization                                                        | UX & security                        |
+| D23 | Tenant domains/branding/white-label and themes?                                               | Tokens/theme per brand, not tenant dynamic initially                                | Platform productization              |
+| D24 | Localization/timezones/currency conversion and region residency?                              | EU region + IANA timezones                                                          | Correct business rules               |
+| D25 | Must platform be offline/edge deployable or single VPS with internet?                         | Online single-region                                                                | OAuth/PSP dependencies               |
+| D26 | SEO: editorial prerender/SSR, catalog SSR and storefront index requirements?                  | Hybrid SSR and selective prerender                                                  | Angular hosting                      |
+| D27 | Data ownership/reporting: internal dashboard vs external BI?                                  | Operational dashboard plus export                                                   | Reporting architecture               |
+| D28 | Purchase flows: invoice generation, VAT, gift cards, loyalty, POS?                            | Invoice via provider, defer loyalty/POS                                             | Legal integrations                   |
+| D29 | Feature packages optional commercial modules and extensibility API?                           | Install profiles + explicit adapter contracts                                       | Generic reuse                        |
+| D30 | Desired delivery phases, MVP vs full version and expected budget?                             | 3-stage MVP-to-production rollout                                                   | Priorities                           |
+| D31 | Website functionality: forms, newsletter, events, maps, multilingual blog, membership?        | Content/forms/blog/SEO baseline                                                     | Model scope                          |
+| D32 | Accessibility/compliance target and age-sensitive content?                                    | WCAG 2.2 AA / GDPR, legal counsel for sales                                         | Acceptance gates                     |
 
 ## Decision procedure
+
 For each ID record: chosen option, owner, date, rationale, consequences, ADR link. Block technology-dependent build issues until relevant decisions closed. In particular D02, D05, D06, D09, D11, D12, D13 are architecture-significant.
 
 ## Critical open questions for the user
+
 1. **Service runtime:** Java 21+/Spring Boot or TypeScript/NestJS for commerce and booking?
 2. **Tenancy:** one business at a time, or one installation serving many companies?
 3. **Payment & geography:** Stripe/PayPal/Mollie/other, and EU only vs global?
@@ -52,19 +54,20 @@ For each ID record: chosen option, owner, date, rationale, consequences, ADR lin
 
 Return decision choices before anyone generates scaffolds. Defaults can be used to continue planning, but must never be misrepresented as approved requirements.
 
-
 ## Approved choices — 2026-10-19 (supersedes proposed defaults above)
+
 **Approved:** D01 full modular platform, phased delivery; D02 single business per deployment; D03 private proposed 11 GitHub repositories (creation still pending); D06 Stripe first, extensible payment adapters; D09 appointments + resource rental + group events (specific business rules still open); D11 Angular Material + Storybook; D12 single VPS with Docker Compose; D13 Java/Spring Boot for transactional core. In addition: admin frontend must be custom Angular using shared UI library, with full booking management; runtime-selectable themes administrated in the dashboard. Google account connection for Calendar and optional Gmail email sending requested. **Google Calendar API** and **Gmail API** are different products/scopes; never parse Gmail messages to run calendar availability.
 
 **Architecture adjustment:** 11 GitHub repositories were previously **proposed**, and their names and private visibility were approved, but logical separation does not imply 11 independently deployed microservices. Recommended **modular Spring Boot monolith** containing separate commerce, booking, calendar integration and worker modules; separate Strapi process, Angular storefront SSR, Angular admin and optional worker execution, PostgreSQL with CMS/application isolation. The user is now questioning whether even the GitHub repositories need separating. Treat the 11-repo choice as **provisional pending clarification on repository boundaries**, without undoing the approved privacy choice. A single monorepo with the same 11 logical projects is the lower-overhead alternative; no need to create either set without reconfirming this tradeoff.
 
 ### Remaining architecture-critical decisions (prioritized)
+
 - R01 (BLOCKING): Does 'separated' mean GitHub repositories, backend services, databases, or all? Recommend **single monorepo** and modular-monolith Spring backend on one VPS; retain separate DB/schema ownership for Strapi vs Liquibase.
 - R02 (BLOCKING): Google integration authorization: which Google accounts connect (business owner only, multiple staff, every customer)? One-way export vs two-way sync vs availability imports; allow syncing private event details or only busy windows? OAuth consent, offline tokens, revocation, refresh rotation, verification and webhook/polling recovery required.
 - R03 (BLOCKING): Gmail function: use Gmail API **to send booking confirmations/reminders** or also read/parse incoming messages? Recommend send-only gmail.send scope, and choose production transactional email provider if sending quotas/deliverability require it.
 - R04 (BLOCKING): Booking requirements: individual staff appointments, pooled resources, group classes, ticketed events, max group capacity, waitlists, recurring patterns, deposits, cancellation cutoffs and conflict priority; whether Google busy times block new bookings.
 - R05 (BLOCKING): Themes: admin-only or admin + public storefront? Built-in themes + custom branding, editable design tokens and preview, per-user preference versus global site setting, publishing approval and accessibility contrast. Recommend theme catalog curated by developers; admin can select/preview/assign themes, with persisted per-user preference and optional global default. Arbitrary admin-supplied CSS/code not allowed.
-- R06 (BLOCKING): Should Angular custom admin replace *all* Strapi editing UI or coexist with protected Strapi editorial admin? Recommend coexist; use Angular for operations including bookings and commerce, Strapi native admin restricted to CMS editors, with optional editorial screens later.
+- R06 (BLOCKING): Should Angular custom admin replace _all_ Strapi editing UI or coexist with protected Strapi editorial admin? Recommend coexist; use Angular for operations including bookings and commerce, Strapi native admin restricted to CMS editors, with optional editorial screens later.
 - R07: Business operations region, tax country, currencies, locales, physical/digital products, delivery and invoicing.
 - R08: Staff/customer auth provider, guest checkout, MFA, roles and scopes.
 - R09: Stripe payments details: Checkout vs Elements, wallets, recurring payments, deposits, capture/refund policies.
@@ -73,26 +76,28 @@ Return decision choices before anyone generates scaffolds. Defaults can be used 
 - R12: Technical versions and package/tool compatibility must be checked and pinned immediately before coding; no unverified version pin.
 
 ## FINAL APPROVED DECISIONS — 2026-10-19 — AUTHORITATIVE
+
 This section **supersedes** all earlier proposal/default/provisional language in this document.
 
-| ID | Status | Decision |
-| --- | --- | --- |
-| D01 | APPROVED | Full modular platform, phased rollout |
-| D02 | APPROVED | Single business per deployment |
-| D03 | APPROVED | **One private GitHub monorepo** at `ipliibkm/strapi-shop`, logically separated modules/packages. Do not create 11 repositories. Verify/enforce private visibility, which is a separate account operation. |
-| D06 | APPROVED | Stripe first; provider adapter contract allows others later |
-| D09 | APPROVED | Individual appointments, resources and group events |
-| D11 | APPROVED | Angular Material-based shared Angular UI library, Storybook |
-| D12 | APPROVED | Single VPS production Docker Compose deployment, no HA assumption |
-| D13 | APPROVED | Java / Spring Boot modular monolith for transactional backend |
-| R01 | APPROVED | Monorepo + modular-monolith deployment, not microservice-per-module |
-| R02 | APPROVED IN PRINCIPLE | Google Calendar **two-way sync** (platform to Google and Google to platform); rules governing deletes/conflicts/authority still blocking |
-| R03 | APPROVED | Gmail API **send only**, booking confirmations/reminders (cancellations subject to notification rules); no Gmail inbox reading |
-| R05 | APPROVED | Independent theme selection/branding for custom Angular admin and public Angular storefront |
-| R06 | APPROVED | **All editorial content authoring/editing via custom Angular admin**, backed by secured Strapi API/BFF; native Strapi admin must not be exposed as editor workflow |
-| ADM01 | APPROVED | Custom admin uses shared Angular Material UI library for content, commerce, bookings, calendars, dashboards and themes |
+| ID    | Status                | Decision                                                                                                                                                                                                  |
+| ----- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D01   | APPROVED              | Full modular platform, phased rollout                                                                                                                                                                     |
+| D02   | APPROVED              | Single business per deployment                                                                                                                                                                            |
+| D03   | APPROVED              | **One private GitHub monorepo** at `OpenShopfront/OpenShopfront`, logically separated modules/packages. Do not create 11 repositories. Verify/enforce private visibility, which is a separate account operation. |
+| D06   | APPROVED              | Stripe first; provider adapter contract allows others later                                                                                                                                               |
+| D09   | APPROVED              | Individual appointments, resources and group events                                                                                                                                                       |
+| D11   | APPROVED              | Angular Material-based shared Angular UI library, Storybook                                                                                                                                               |
+| D12   | APPROVED              | Single VPS production Docker Compose deployment, no HA assumption                                                                                                                                         |
+| D13   | APPROVED              | Java / Spring Boot modular monolith for transactional backend                                                                                                                                             |
+| R01   | APPROVED              | Monorepo + modular-monolith deployment, not microservice-per-module                                                                                                                                       |
+| R02   | APPROVED IN PRINCIPLE | Google Calendar **two-way sync** (platform to Google and Google to platform); rules governing deletes/conflicts/authority still blocking                                                                  |
+| R03   | APPROVED              | Gmail API **send only**, booking confirmations/reminders (cancellations subject to notification rules); no Gmail inbox reading                                                                            |
+| R05   | APPROVED              | Independent theme selection/branding for custom Angular admin and public Angular storefront                                                                                                               |
+| R06   | APPROVED              | **All editorial content authoring/editing via custom Angular admin**, backed by secured Strapi API/BFF; native Strapi admin must not be exposed as editor workflow                                        |
+| ADM01 | APPROVED              | Custom admin uses shared Angular Material UI library for content, commerce, bookings, calendars, dashboards and themes                                                                                    |
 
 ### Remaining BLOCKING decisions, in priority order
+
 - **B01 Google two-way sync conflict & authority policy:** Google-created events imported as (a) authoritative bookings, (b) external busy blocks, or (c) proposals requiring approval? Recommend external events as **busy blocks** and platform confirmed bookings as only customer-booking records; when Google moves/deletes platform-managed events, flag conflicts rather than silently cancel customer bookings. Define precedence, cancellation, webhook retries, per-resource mapping, private event visibility, ownership, quotas and repair UI.
 - **B02 Strapi editing integration:** Which content types are exposed in custom Angular editor, especially dynamic zones, draft/publish, media, localization, workflows, version history, preview? Recommend **BFF/server-side integration** with service credentials (never browser admin/API token), schema-driven forms mapped per content type, restricted roles and audit trails. Decide if custom admin must attain 100% feature parity with Strapi's Content Manager; this has significant cost.
 - **B03 Google OAuth and calendar accounts:** Business-owned Workspace vs personal Gmail accounts; one owner/multiple staff calendars; scopes, token hosting, Google verification and OAuth app mode, import volume and background synchronization limits.
@@ -104,7 +109,22 @@ This section **supersedes** all earlier proposal/default/provisional language in
 - **B09 Supported version matrix:** validate latest compatible Strapi v5 release, Angular 22 minor/Node, Angular Material, Storybook, Java LTS/Spring Boot/Liquibase, PostgreSQL, drivers and security fixes before generating apps.
 - **B10 Feature flags/integrations:** desired core vs optional modules, operational analytics/search provider, webhook/queue strategy, CRM/newsletter, media, shipping and support.
 
+## Approved frontend structure rules — 2026-10-23 (owner preference, mandatory)
+
+- **Feature folders:** one folder per page or section component under `apps/*/src/`; `shared/` only for files used by two or more features or the shell; no loose files in `src/`.
+- **Pure shell entry point:** `main.ts` contains only header, navigation, routing switch, and footer. Every page is its own component that receives CMS content as inputs and emits events as outputs.
+- **No markup or styles in `.ts`:** always `templateUrl` + sibling `.html`, and `styleUrls` + sibling `.css`. Exception: Storybook story wrapper strings in `*.stories.ts`.
+- **UI library stays presentational:** `packages/ui` components take translated text via inputs and emit events via outputs; they contain no i18n logic.
+- The rules are enforced for agents through the Code structure section of `AGENTS.md`.
+
 ## Approved implementation updates — 2026-10-19
+
 - **B01 RESOLVED:** Google Calendar external events are authoritative **busy-time blockers**. On a last-moment conflict the server rejects the attempted reservation with **HTTP 409**, a structured `AVAILABILITY_CONFLICT` error and a fresh availability version/slot list. The UI displays an error, refreshes available slots and asks the user to select again. It must NEVER override external Google events. Full two-way synchronization still requires mapping/deletion/ACL rules but does not change this conflict policy.
 - **UI APPROVED:** Angular Material **and Tailwind CSS 4** used together, and shared UI consumed in admin and storefront. Semantic tokens govern both to prevent diverging themes.
-- **Remain recommended defaults:** central OIDC with MFA, Stripe Checkout first, staff Google OAuth, user-level admin theme and global published storefront theme, transactional email deliverability fallback, validated versions, offsite backups. Further business-specific details not approved by these defaults.
+- **Remain recommended defaults:** Strapi sessions with MFA for staff, a separately selected customer identity system if customer accounts are added, Stripe Checkout first, staff Google OAuth, a user-level admin theme, a global published storefront theme, transactional email fallback, validated versions, and offsite backups. Further business-specific details are not approved by these defaults.
+
+## Approved authentication update — 2026-10-26
+
+- **Staff authentication:** Local Strapi administrator accounts and server-side Strapi sessions are the only supported administrator mode.
+- **External OIDC experiment:** Removed because the Angular administrator did not implement a compatible complete flow.
+- **Customer identity:** Not implemented. Select it independently before customer accounts are added.

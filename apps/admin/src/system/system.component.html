@@ -1,0 +1,43 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('SYSTEM') }}</p>
+    <h2>{{ t('Implementation status') }}</h2>
+    <p>{{ t('This list separates working functions from planned functions.') }}</p>
+  </div>
+  <button mat-stroked-button (click)="status.refreshStatus()">{{ t('Run checks') }}</button>
+</div>
+
+<section class="mock-data-panel" aria-label="{{ t('Mock test data') }}">
+  <h3>{{ t('Mock test data') }}</h3>
+  <p class="muted">
+    {{
+      t(
+        'Fill the application with realistic content for one of these stores. Existing products, services and page content are replaced.'
+      )
+    }}
+  </p>
+  <div class="mock-data-buttons">
+    @for (store of mockStores(); track store.key) {
+      <button
+        mat-stroked-button
+        [disabled]="mockApplying() !== null"
+        (click)="confirmMock(store.key)"
+      >
+        {{ mockApplying() === store.key ? t('Applying…') : store.label }}
+        @if (mockApplying() === store.key) {
+          <mat-icon iconPositionEnd>refresh</mat-icon>
+        }
+      </button>
+    }
+  </div>
+  @if (mockNotice(); as notice) {
+    <p class="form-status" [class.error]="notice.error" role="status">{{ notice.message }}</p>
+  }
+</section>
+
+<openshopfront-capability-table
+  [rows]="capabilityRows()"
+  [labels]="tableLabels()"
+></openshopfront-capability-table>

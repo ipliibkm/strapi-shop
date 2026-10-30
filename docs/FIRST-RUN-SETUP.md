@@ -5,6 +5,7 @@ This setup is for development and testing. **Do not use it for a public producti
 ## 1. Check the required tools
 
 Install these tools:
+
 - Docker Engine.
 - Docker Compose version 2.
 - Python version 3.10 or later.
@@ -23,6 +24,7 @@ sh setup.sh
 ```
 
 The setup asks for these company details:
+
 1. Company name and ID.
 2. Email address.
 3. Time zone.
@@ -31,19 +33,14 @@ The setup asks for these company details:
 
 Check the details. Enter `yes` to save them.
 
-## 3. Let the setup start the services
+## 3. Start the services
 
 The script creates two local files:
+
 - `.env` contains generated secrets.
 - `config/business.json` contains the company details.
 
-The script starts PostgreSQL, Spring Boot, and Strapi.
-
-The script then checks these health addresses:
-- `http://127.0.0.1:8080/actuator/health`
-- `http://127.0.0.1:1337/_health`
-
-If a service does not become healthy, the script stops with an error. Read the logs to find the cause.
+The script starts the complete development stack with Docker Compose. It waits for container health, then checks the Storefront, Admin, and CMS routes through Traefik. Setup stops if a container or route does not become healthy before the timeout.
 
 ## 4. Create the first technical administrator
 
@@ -53,7 +50,7 @@ Enter the administrator name, email address, and password in the Strapi tool.
 
 This administrator manages Strapi. It is **not** the user account for the custom Angular admin.
 
-Open Strapi at `http://127.0.0.1:1337/admin` after setup.
+Open Strapi at `http://cms.localhost/admin` after setup.
 
 ## 5. Start or stop the services later
 
@@ -97,10 +94,10 @@ Back up the database, media, and secrets. Store an encrypted backup outside the 
 
 Do not expose this test setup directly to the internet.
 
-The script does not configure HTTPS, off-site backups, or production authentication.
+The script does not configure trusted production HTTPS, off-site backups, or production authentication.
 
-It does not start the Angular apps. It does not connect Google Calendar, Gmail, or Stripe.
+It does not connect Google Calendar, Gmail, or Stripe.
 
-**Test status:** The setup files exist in GitHub. A complete Docker installation test has not passed yet.
+**Test status:** The `--start-only` flow passes against the current Traefik Compose stack. A clean-machine first installation and administrator creation still require a separate test.
 
 For writing rules, read [WRITING-STYLE.md](WRITING-STYLE.md).

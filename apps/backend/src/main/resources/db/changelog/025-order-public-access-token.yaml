@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-order-public-access-token
+      author: platform
+      changes:
+        - addColumn:
+            tableName: shop_order
+            columns:
+              - column:
+                  name: public_access_token_hash
+                  type: char(64)
+        - createIndex:
+            tableName: shop_order
+            indexName: ux_shop_order_public_access_token_hash
+            unique: true
+            columns:
+              - column:
+                  name: public_access_token_hash

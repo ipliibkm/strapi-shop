@@ -1,0 +1,17 @@
+:host {
+  display: block;
+}
+
+.product-media {
+  background: linear-gradient(135deg, var(--surface-2, #eef2f7), var(--surface, #ffffff));
+  color: var(--text-muted, #64748b);
+}
+
+.badge-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgb(15 23 42 / 0.8);
+}

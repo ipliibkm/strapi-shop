@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Operator manual for the example commerce and booking platform development preview."
+    />
+    <title>Example Platform | Operator Manual</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17211c;
+        --muted: #637068;
+        --paper: #f1ecdf;
+        --surface: #fffdf7;
+        --line: #d7d0c2;
+        --forest: #274233;
+        --forest-soft: #405e4a;
+        --lime: #d9ef9f;
+        --coral: #d85d46;
+        --blue: #315f83;
+        --code: #1c2821;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        line-height: 1.58;
+      }
+      a {
+        color: var(--blue);
+      }
+      code,
+      pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      :focus-visible {
+        outline: 3px solid var(--coral);
+        outline-offset: 3px;
+      }
+
+      .masthead {
+        padding: 16px clamp(18px, 4vw, 56px);
+        color: #fff;
+        background: var(--forest);
+        border-bottom: 4px solid var(--lime);
+      }
+      .masthead-inner {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        justify-content: space-between;
+        width: min(1320px, 100%);
+        margin: auto;
+      }
+      .brand {
+        color: #fff;
+        font-weight: 850;
+        letter-spacing: 0.09em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+      .masthead nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .masthead nav a {
+        padding: 7px 11px;
+        color: #fff;
+        border: 1px solid rgb(255 255 255 / 25%);
+        border-radius: 999px;
+        font-size: 0.85rem;
+        text-decoration: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+        width: min(1320px, calc(100% - 32px));
+        margin: 28px auto 64px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: 0 20px 55px rgb(35 48 40 / 10%);
+      }
+      aside {
+        padding: 28px 18px;
+        background: #e7e0d2;
+        border-right: 1px solid var(--line);
+      }
+      aside nav {
+        position: sticky;
+        top: 20px;
+      }
+      aside p {
+        margin: 0 10px 10px;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 850;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      aside a {
+        display: block;
+        padding: 9px 10px;
+        color: #334038;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-decoration: none;
+      }
+      aside a:hover {
+        color: #fff;
+        background: var(--forest-soft);
+      }
+      main {
+        min-width: 0;
+      }
+      section {
+        padding: 48px clamp(22px, 5vw, 68px);
+        border-bottom: 1px solid var(--line);
+        scroll-margin-top: 16px;
+      }
+      section:last-child {
+        border-bottom: 0;
+      }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding-block: 72px;
+        background: #fffef9;
+      }
+      .hero::after {
+        position: absolute;
+        top: -100px;
+        right: -85px;
+        width: 300px;
+        height: 300px;
+        border: 48px solid var(--lime);
+        border-radius: 50%;
+        content: '';
+      }
+      .eyebrow {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.73rem;
+        font-weight: 850;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+        font-family: Georgia, 'Times New Roman', serif;
+        line-height: 1.12;
+      }
+      h1 {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        margin-bottom: 18px;
+        font-size: clamp(3rem, 7vw, 6rem);
+        font-weight: 500;
+        letter-spacing: -0.05em;
+      }
+      h2 {
+        margin-bottom: 12px;
+        font-size: clamp(2rem, 4vw, 3.1rem);
+        font-weight: 500;
+        letter-spacing: -0.035em;
+      }
+      h3 {
+        margin-bottom: 8px;
+        font-size: 1.3rem;
+      }
+      .lead {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 1.12rem;
+      }
+      .meta {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 24px;
+      }
+      .pill {
+        padding: 6px 10px;
+        background: #edf2df;
+        border: 1px solid #cbd5ad;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 750;
+      }
+      .section-head {
+        display: flex;
+        gap: 24px;
+        align-items: end;
+        justify-content: space-between;
+        margin-bottom: 26px;
+      }
+      .section-head > p {
+        max-width: 540px;
+        margin: 0;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        gap: 15px;
+      }
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .card {
+        min-width: 0;
+        padding: 20px;
+        background: #fffef9;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+      .card .label {
+        color: var(--forest-soft);
+        font-size: 0.74rem;
+        font-weight: 850;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 850;
+      }
+      .status.live {
+        color: #234325;
+        background: #dff0c3;
+      }
+      .status.limit {
+        color: #792f22;
+        background: #ffe0d8;
+      }
+      .note,
+      .warning {
+        margin: 18px 0;
+        padding: 14px 16px;
+        background: #edf4f8;
+        border-left: 4px solid var(--blue);
+      }
+      .warning {
+        background: #fff0ec;
+        border-color: var(--coral);
+      }
+      .steps {
+        margin: 0;
+        padding-left: 22px;
+      }
+      .steps li {
+        margin: 0 0 10px;
+        padding-left: 4px;
+      }
+      .command {
+        margin: 12px 0;
+        padding: 14px 16px;
+        overflow-x: auto;
+        color: #eef8eb;
+        background: var(--code);
+        border-radius: 9px;
+        white-space: pre-wrap;
+      }
+      table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        background: #fffef9;
+      }
+      th,
+      td {
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+      }
+      th {
+        color: #fff;
+        background: var(--forest-soft);
+      }
+      details {
+        margin-top: 10px;
+        background: #fffef9;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+      }
+      summary {
+        padding: 13px 15px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+      details > div {
+        padding: 0 15px 15px;
+      }
+      footer {
+        padding: 24px;
+        color: #e5ede2;
+        background: var(--forest);
+        text-align: center;
+      }
+
+      @media (max-width: 900px) {
+        .layout {
+          display: block;
+          width: 100%;
+          margin: 0;
+          border-inline: 0;
+        }
+        aside {
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          padding: 8px;
+          overflow-x: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        aside nav {
+          display: flex;
+          position: static;
+          width: max-content;
+        }
+        aside p {
+          display: none;
+        }
+        aside a {
+          white-space: nowrap;
+        }
+        .grid.three {
+          grid-template-columns: 1fr 1fr;
+        }
+        .hero::after {
+          right: -190px;
+        }
+      }
+      @media (max-width: 620px) {
+        .masthead-inner,
+        .section-head {
+          display: block;
+        }
+        .masthead nav {
+          margin-top: 12px;
+        }
+        section {
+          padding: 38px 18px;
+        }
+        .grid.two,
+        .grid.three {
+          grid-template-columns: 1fr;
+        }
+        h1 {
+          font-size: 3.2rem;
+        }
+        table {
+          font-size: 0.83rem;
+        }
+      }
+      @media print {
+        body {
+          background: #fff;
+          font-size: 10pt;
+        }
+        .masthead,
+        aside {
+          display: none;
+        }
+        .layout {
+          display: block;
+          width: 100%;
+          margin: 0;
+          border: 0;
+          box-shadow: none;
+        }
+        section {
+          padding: 24px 0;
+          break-inside: avoid;
+        }
+        .hero::after {
+          display: none;
+        }
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead-inner">
+        <a class="brand" href="README.html">Example Platform</a>
+        <nav aria-label="Manual links">
+          <a href="README.html">Project guide</a>
+          <a href="http://admin.localhost">Open admin</a>
+          <a href="http://storefront.localhost">Open storefront</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <nav aria-label="Manual sections">
+          <p>Operator manual</p>
+          <a href="#scope">Scope and access</a>
+          <a href="#start">Start and stop</a>
+          <a href="#signin">Sign in and roles</a>
+          <a href="#admin">Admin sections</a>
+          <a href="#services">Booking services</a>
+          <a href="#bookings">Booking operations</a>
+          <a href="#public">Customer booking</a>
+          <a href="#pages">Storefront pages</a>
+          <a href="#appearance">Languages and palette</a>
+          <a href="#commerce">Shop and orders</a>
+          <a href="#reports">Reports and monitoring</a>
+          <a href="#google">Google Calendar</a>
+          <a href="#content">Business Profile</a>
+          <a href="#operations">System operations</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+          <a href="#limits">Current limits</a>
+        </nav>
+      </aside>
+
+      <main>
+        <section class="hero" id="scope">
+          <p class="eyebrow">Development preview</p>
+          <h1>Platform operator manual</h1>
+          <p class="lead">
+            Use this manual to operate the local storefront, custom admin, booking system, Strapi
+            content, and Google Calendar connection.
+          </p>
+          <div class="meta">
+            <span class="pill">Updated 22 October 2026</span>
+            <span class="pill">Local Docker Compose</span>
+            <span class="pill">Not production-ready</span>
+          </div>
+          <div class="warning">
+            <strong>Do not expose this installation to the public internet.</strong> It does not
+            include production TLS, backups, monitoring, or public API abuse controls.
+          </div>
+        </section>
+
+        <section id="start">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Lifecycle</p>
+              <h2>Start and stop the platform</h2>
+            </div>
+            <p>
+              Run all commands from the repository root. Docker publishes application ports only on
+              the local machine.
+            </p>
+          </div>
+          <h3>First start</h3>
+          <ol class="steps">
+            <li>Install Docker Compose version 2 and Python 3.10 or later.</li>
+            <li>Run the setup script.</li>
+          </ol>
+          <pre class="command">sh setup.sh</pre>
+          <ol class="steps" start="3">
+            <li>Enter the requested business information.</li>
+            <li>Enter <code>yes</code> after you check the information.</li>
+            <li>Create the first Strapi administrator when the script asks.</li>
+            <li>Wait for the service health checks to finish.</li>
+          </ol>
+          <div class="note">
+            The setup creates <code>.env</code> and <code>config/business.json</code>. Do not commit
+            these files.
+          </div>
+          <div class="grid two">
+            <article class="card">
+              <p class="label">Start existing data</p>
+              <pre class="command">sh setup.sh --start-only</pre>
+            </article>
+            <article class="card">
+              <p class="label">Check containers</p>
+              <pre class="command">docker compose ps</pre>
+            </article>
+            <article class="card">
+              <p class="label">Read service logs</p>
+              <pre class="command">docker compose logs -f cms backend</pre>
+            </article>
+            <article class="card">
+              <p class="label">Stop services</p>
+              <pre class="command">docker compose down</pre>
+              <p>This command keeps the database and upload volumes.</p>
+            </article>
+          </div>
+          <div class="warning">
+            <strong>Data removal:</strong> Do not run <code>docker compose down -v</code> unless you
+            intend to remove persistent local data.
+          </div>
+          <h3>Local addresses</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Address</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Storefront</td>
+                <td><a href="http://storefront.localhost">storefront.localhost</a></td>
+                <td>Customer pages and booking form</td>
+              </tr>
+              <tr>
+                <td>Operations admin</td>
+                <td><a href="http://admin.localhost">admin.localhost</a></td>
+                <td>Bookings, content, resources, and connections</td>
+              </tr>
+              <tr>
+                <td>Storybook</td>
+                <td><a href="http://storybook.localhost">storybook.localhost</a></td>
+                <td>Shared component examples</td>
+              </tr>
+              <tr>
+                <td>Strapi admin</td>
+                <td><a href="http://cms.localhost/admin">cms.localhost/admin</a></td>
+                <td>Strapi role and content administration</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="signin">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Identity</p>
+              <h2>Sign in and permissions</h2>
+            </div>
+            <p>
+              The operations admin uses local Strapi administrator accounts. Google does not
+              authenticate administrators.
+            </p>
+          </div>
+          <ol class="steps">
+            <li>Open <a href="http://admin.localhost">the operations admin</a>.</li>
+            <li>Enter the email and password for a Strapi administrator.</li>
+            <li>Select <strong>Sign in</strong>.</li>
+          </ol>
+          <div class="grid two">
+            <article class="card">
+              <span class="status live">STRAPI ADMIN</span>
+              <h3>Content access</h3>
+              <p>
+                All Strapi administrators can open <strong>Content</strong>. Strapi Content Manager
+                permissions control read and update access.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status live">SUPER ADMIN</span>
+              <h3>Platform administration</h3>
+              <p>
+                Only a Strapi Super Admin can use bookings, resources, connections, appearance,
+                system checks, and other platform sections.
+              </p>
+            </article>
+          </div>
+          <p>
+            The backend checks the current Strapi account and roles before each protected request. A
+            role change takes effect without a new platform deployment.
+          </p>
+          <p>
+            Five failed sign-in attempts for the same email and client address cause a five-minute
+            lockout. A successful sign-in clears the failures.
+          </p>
+          <div class="note">
+            Administrator sessions are stored in PostgreSQL. The default timeout is eight hours.
+            Signing out also revokes the related Strapi device session.
+          </div>
+        </section>
+
+        <section id="admin">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Navigation</p>
+              <h2>Use the operations admin</h2>
+            </div>
+            <p>
+              A Super Admin sees all current sections. Other Strapi administrators see only the
+              Content section.
+            </p>
+          </div>
+          <div class="grid three">
+            <article class="card">
+              <h3>Overview</h3>
+              <p>Review backend availability, setup checks, and quick links.</p>
+            </article>
+            <article class="card">
+              <h3>Bookings</h3>
+              <p>Review the weekly calendar and cancel confirmed bookings.</p>
+            </article>
+            <article class="card">
+              <h3>Content</h3>
+              <p>Edit the Strapi Business Profile with your Strapi permissions.</p>
+            </article>
+            <article class="card">
+              <h3>Resources</h3>
+              <p>Configure online booking, fallback duration, and customer services.</p>
+            </article>
+            <article class="card">
+              <span class="status live">LIVE</span>
+              <h3>Pages</h3>
+              <p>Edit storefront pages with sections. Save a draft or publish the page.</p>
+            </article>
+            <article class="card">
+              <h3>Connections</h3>
+              <p>Connect Google Calendar and map platform resources.</p>
+            </article>
+            <article class="card">
+              <span class="status live">LIVE</span>
+              <h3>Appearance</h3>
+              <p>
+                Publish a storefront color palette, enable website languages, and set your personal
+                admin theme.
+              </p>
+            </article>
+            <article class="card">
+              <h3>System</h3>
+              <p>Review available and planned capabilities. Run configuration checks.</p>
+            </article>
+            <article class="card">
+              <span class="status live">LIVE</span>
+              <h3>Commerce</h3>
+              <p>Products, orders, payments, refunds, fulfillment, and shop settings.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="services">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Resources</p>
+              <h2>Configure booking services</h2>
+            </div>
+            <p>
+              Services define the choices and durations that customers see in the storefront booking
+              form.
+            </p>
+          </div>
+          <h3>Set customer booking</h3>
+          <ol class="steps">
+            <li>Open <strong>Resources</strong>.</li>
+            <li>Enable or disable <strong>Online appointments</strong>.</li>
+            <li>Set the default duration from 5 through 480 minutes.</li>
+            <li>Select <strong>Save settings</strong>.</li>
+          </ol>
+          <h3>Add a service</h3>
+          <ol class="steps">
+            <li>Enter a service name with no more than 120 characters.</li>
+            <li>Set a duration from 5 through 480 minutes in five-minute steps.</li>
+            <li>Select <strong>Add service</strong>.</li>
+          </ol>
+          <p>
+            Use <strong>Save</strong> to change a service. Use <strong>Hide</strong> to remove it
+            from new customer bookings. Use <strong>Activate</strong> to show it again.
+          </p>
+          <div class="note">
+            A booking stores the service name and duration at creation time. Later service changes
+            do not change historical bookings.
+          </div>
+        </section>
+
+        <section id="bookings">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Calendar</p>
+              <h2>Review booking operations</h2>
+            </div>
+            <p>The weekly calendar shows confirmed and cancelled bookings across all resources.</p>
+          </div>
+          <ol class="steps">
+            <li>Open <strong>Bookings</strong>.</li>
+            <li>Use the arrow controls to change the week.</li>
+            <li>Select <strong>Today</strong> to return to the current week.</li>
+            <li>Select a booking to open its details.</li>
+            <li>Review the customer, service, resource, time, and calendar delivery state.</li>
+            <li>Select <strong>Cancel booking</strong> when cancellation is required.</li>
+            <li>Confirm the cancellation.</li>
+          </ol>
+          <p>
+            The customer email link opens the default email application. The platform does not send
+            booking email.
+          </p>
+          <div class="note">
+            The backend supports administrator creation and rescheduling APIs. The current admin UI
+            does not expose these actions.
+          </div>
+          <h3>Calendar delivery states</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>State</th>
+                <th>Meaning</th>
+                <th>Operator action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>SYNCED</code></td>
+                <td>The provider accepted the latest booking change.</td>
+                <td>No action is required.</td>
+              </tr>
+              <tr>
+                <td><code>PENDING</code></td>
+                <td>The worker has not completed the delivery.</td>
+                <td>Wait for the worker or select <strong>Sync now</strong>.</td>
+              </tr>
+              <tr>
+                <td><code>FAILED</code></td>
+                <td>The delivery stopped after its retry limit.</td>
+                <td>Check the connection, then select <strong>Sync now</strong>.</td>
+              </tr>
+              <tr>
+                <td><code>NOT_CONFIGURED</code></td>
+                <td>No writable calendar mapping applies to the booking resource.</td>
+                <td>Add or update a resource mapping if delivery is required.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="public">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Storefront</p>
+              <h2>Customer booking flow</h2>
+            </div>
+            <p>Customers can create a confirmed booking without an account.</p>
+          </div>
+          <ol class="steps">
+            <li>Open the storefront and select <strong>Book</strong>.</li>
+            <li>Select a service when active services exist.</li>
+            <li>Select a date and one of the displayed start times.</li>
+            <li>Enter a customer name and valid email address.</li>
+            <li>Submit the booking.</li>
+          </ol>
+          <p>
+            The backend calculates the end time from the service duration. If no active service
+            exists, it uses the default duration.
+          </p>
+          <p>
+            A database lock prevents two customers from booking the same resource and time. If a
+            conflict occurs, the customer must select another time.
+          </p>
+          <h3>Conditions for public booking</h3>
+          <ul>
+            <li>The administrator enabled customer booking.</li>
+            <li>At least one calendar provider has a writable mapping for the public resource.</li>
+            <li>Each mapped provider has a recent successful synchronization.</li>
+            <li>Provider authorization is valid.</li>
+            <li>No unresolved imported-calendar conflict exists.</li>
+          </ul>
+          <div class="warning">
+            <strong>Time-zone limit:</strong> The current storefront uses the customer browser time
+            zone and fixed daily start times. It does not use business opening hours.
+          </div>
+        </section>
+
+        <section id="pages">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Storefront</p>
+              <h2>Edit storefront pages</h2>
+            </div>
+            <p>
+              Home, Services, About, and Contact are editable in the admin. The storefront renders
+              each page as an ordered list of sections.
+            </p>
+          </div>
+          <h3>Add or arrange sections</h3>
+          <ol class="steps">
+            <li>Open <strong>Pages</strong> and select a page from the list.</li>
+            <li>Select a section type to add it at the end of the list.</li>
+            <li>Use the arrows to change the order. Select the delete icon to remove a section.</li>
+          </ol>
+          <div class="grid two">
+            <article class="card">
+              <h3>Heading</h3>
+              <p>Show an eyebrow line and a title at the start of the page or after content.</p>
+            </article>
+            <article class="card">
+              <h3>Rich text</h3>
+              <p>Write paragraphs, lists, and links with the formatting toolbar.</p>
+            </article>
+            <article class="card">
+              <h3>Image</h3>
+              <p>Show an image from an address. Add a short caption below it.</p>
+            </article>
+            <article class="card">
+              <h3>Button and products</h3>
+              <p>Point a button to another storefront page, or show shop products in the grid.</p>
+            </article>
+          </div>
+          <h3>Edit rich text</h3>
+          <p>
+            Write in a Rich text section. Use Bold, Italic, Underline, List, and Link from the
+            toolbar. When you save, the server removes markup that is not on the approved list.
+          </p>
+          <h3>Save a draft or publish</h3>
+          <ol class="steps">
+            <li>
+              Select <strong>Save draft</strong>. The change is stored and customers do not see it.
+            </li>
+            <li>
+              Select <strong>Publish page</strong>. The storefront shows the new version at once.
+            </li>
+          </ol>
+          <div class="note">
+            The Live preview renders your current draft. Publishing makes that content visible on
+            the matching storefront page. A page without published content keeps its built-in
+            layout.
+          </div>
+        </section>
+
+        <section id="appearance">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Storefront</p>
+              <h2>Languages and color palette</h2>
+            </div>
+            <p>
+              The Appearance section controls the customer website. Saved changes apply to every
+              visitor after you save them.
+            </p>
+          </div>
+          <h3>Enable or disable a language</h3>
+          <ol class="steps">
+            <li>Open <strong>Appearance</strong>.</li>
+            <li>Select the checkbox for a language to enable it, or clear it to disable it.</li>
+            <li>The change saves at once. The storefront language switcher updates immediately.</li>
+          </ol>
+          <p>
+            The platform supports German, English, Russian, and Turkish. A visitor sees the saved
+            choice first, then a matching browser language, then the first enabled language. Keep at
+            least one language enabled; the admin blocks the last switch-off.
+          </p>
+          <h3>Publish a color palette</h3>
+          <ol class="steps">
+            <li>Open <strong>Appearance</strong>.</li>
+            <li>Select a palette card: Maison, Noir, Lagoon, or Blush.</li>
+            <li>The selection publishes at once and applies to every storefront visitor.</li>
+          </ol>
+          <div class="note">
+            Translations cover the storefront interface: navigation, buttons, booking, shop, cart,
+            checkout, and footer. Page content that you write in the page editor stays in its
+            authored language. The personal admin theme at the bottom of the section applies to this
+            browser only.
+          </div>
+        </section>
+
+        <section id="commerce">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Commerce</p>
+              <h2>Run the shop</h2>
+            </div>
+            <p>
+              Open Commerce in the admin. The status bar shows whether a payment provider is
+              connected and whether the shop accepts orders.
+            </p>
+          </div>
+          <h3>Create a product</h3>
+          <ol class="steps">
+            <li>Open the <strong>Products</strong> tab.</li>
+            <li>Enter a slug, a name, and an optional description.</li>
+            <li>
+              Add at least one option with a SKU, a label, a price in euros, and a stock count.
+            </li>
+            <li>Select <strong>Create product</strong>. The shop shows the product immediately.</li>
+          </ol>
+          <p>
+            Select an existing product to edit its name, description, and options. Saving replaces
+            the full option set. Deleting a product removes it from the shop. Completed orders keep
+            their stored product details.
+          </p>
+          <h3>Set sales rules</h3>
+          <ol class="steps">
+            <li>Open the <strong>Settings</strong> tab.</li>
+            <li>Turn the shop on or off for customers.</li>
+            <li>
+              Set the tax rate, the flat shipping cost, and an optional free-shipping threshold.
+            </li>
+          </ol>
+          <div class="note">
+            The server calculates subtotal, tax, shipping, and total at checkout. Amounts sent by a
+            browser do not apply. Prices are stored as euro minor units.
+          </div>
+          <h3>Customer cart and stock limits</h3>
+          <ul class="bullets">
+            <li>The browser stores the anonymous cart in local storage.</li>
+            <li>A product page shows the quantity that is already in the cart.</li>
+            <li>Product and cart quantity controls do not accept more than the displayed stock.</li>
+            <li>
+              If stock decreases, the storefront reduces an old cart quantity and shows a warning.
+            </li>
+            <li>Adding an item to the browser cart does not reserve stock.</li>
+            <li>The server checks and reserves stock when it creates the pending order.</li>
+          </ul>
+          <p>
+            A successful checkout clears the cart display and old warnings. The confirmation page
+            shows the order number and the payment action when payment is required.
+          </p>
+          <div class="note">
+            Each new order has a private access token. Stripe returns the customer to a link that
+            keeps this token in the browser URL fragment. The storefront sends it only in the
+            <code>X-Order-Access-Token</code> request header. Do not share the order link.
+          </div>
+          <h3>Order lifecycle</h3>
+          <ol class="steps">
+            <li><strong>PENDING_PAYMENT</strong> — the server holds stock for the order.</li>
+            <li>
+              <strong>PAID</strong> — payment confirmed, by Stripe webhook or manual action. The
+              stock remains reserved until fulfillment or refund.
+            </li>
+            <li>
+              <strong>FULFILLED</strong> — you ship with a carrier and tracking number. Physical
+              stock decreases.
+            </li>
+            <li>
+              <strong>CANCELLED</strong> — an unpaid order closes, or a paid order receives a
+              refund. Shipped items return to stock.
+            </li>
+          </ol>
+          <h3>Work an order</h3>
+          <p>Select an order in the list, then use the actions available for its status:</p>
+          <ul class="bullets">
+            <li><strong>Mark paid</strong> — confirm a manual payment without Stripe.</li>
+            <li>
+              <strong>Cancel order</strong> — close an unpaid order and release its stock hold.
+            </li>
+            <li>
+              <strong>Fulfill order</strong> — record the carrier and tracking number, then deduct
+              stock.
+            </li>
+            <li>
+              <strong>Refund order</strong> — refund a paid or shipped order once. Shipped items
+              return to stock.
+            </li>
+          </ul>
+          <h3>Connect Stripe</h3>
+          <p class="lead">
+            The platform needs two values from your Stripe account: a secret API key and the webhook
+            signing secret for one endpoint. Both come from the dashboard at
+            <code>dashboard.stripe.com</code>. Select either the test or the live environment in the
+            top bar before you copy a value; the keys are different for each. Use the test
+            environment until production is verified.
+          </p>
+          <h4>Get the secret key (STRIPE_SECRET_KEY)</h4>
+          <ol class="steps">
+            <li>
+              In the Stripe dashboard, select <strong>Developers</strong> in the left navigation,
+              then select <strong>API keys</strong>. If you do not see it yet, create your first
+              test key.
+            </li>
+            <li>
+              Select <strong>Standard secrets</strong>. Copy the secret key that starts with
+              <code>sk_test_</code>, or <code>sk_live_</code> for production.
+            </li>
+            <li>
+              Paste it into <code>.env</code> as <code>STRIPE_SECRET_KEY=sk_...</code>. Do not
+              commit the key to version control.
+            </li>
+          </ol>
+          <h4>Get the webhook secret (STRIPE_WEBHOOK_SECRET)</h4>
+          <ol class="steps">
+            <li>
+              In the dashboard, select <strong>Developers</strong>, then <strong>Webhooks</strong>.
+            </li>
+            <li>Select <strong>Add endpoint</strong>.</li>
+            <li>
+              Set the callback URL to your public backend address plus the path
+              <code>/webhooks/stripe</code>. For a local run use the Stripe CLI forwarder described
+              below, and keep this endpoint for production.
+            </li>
+            <li>Select <strong>Add another event</strong> and add these events:</li>
+          </ol>
+          <ul>
+            <li><code>checkout.session.completed</code></li>
+            <li><code>checkout.session.async_payment_failed</code></li>
+          </ul>
+          <ol class="steps" start="5">
+            <li>Select <strong>Add endpoint</strong> to save it.</li>
+            <li>
+              Open the new endpoint and select <strong>Show</strong> next to the signing secret.
+            </li>
+            <li>
+              Copy the value that starts with <code>whsec_</code>. Paste it into
+              <code>.env</code> as <code>STRIPE_WEBHOOK_SECRET=whsec_...</code>. The platform
+              verifies each event against this secret and rejects events without a valid signature.
+            </li>
+          </ol>
+          <h4>Apply the configuration</h4>
+          <ol class="steps">
+            <li>Restart with <code>docker compose up -d --build backend</code>.</li>
+            <li>
+              Confirm the platform reports Stripe as configured:
+              <code>GET /api/v1/admin/commerce/status</code> must return
+              <code>{"stripeConfigured": true}</code>.
+            </li>
+          </ol>
+
+          <h4>Local testing with the Stripe CLI (step by step)</h4>
+          <p class="lead">
+            A webhook is a message that Stripe sends to your app. On a home or office network your
+            computer has no public address, so Stripe cannot reach it directly. The Stripe CLI
+            solves this: you run one small program on your computer, and it opens a private tunnel
+            that forwards every test event from Stripe into your running platform. Everything below
+            uses test mode, so no real money moves.
+          </p>
+
+          <h4>Step 1 — Install the Stripe CLI</h4>
+          <p class="lead">Install it once with the command that matches your computer.</p>
+          <ul class="bullets">
+            <li><strong>macOS (Apple chip or Intel)</strong></li>
+          </ul>
+          <pre class="command">
+brew install stripe-cli   # if "brew" is missing, run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</pre>
+          <ul class="bullets">
+            <li><strong>Ubuntu or Debian (Linux)</strong></li>
+          </ul>
+          <pre class="command">sudo curl -sSfL https://stripe.install.sh | sudo bash</pre>
+          <ul class="bullets">
+            <li><strong>Windows 10 or 11 (PowerShell)</strong></li>
+          </ul>
+          <pre class="command">
+winget install --id Stripe.stripe-cli   # if "winget" is missing, use: irm https://stripe.dev/install.ps1 | iex</pre>
+          <p class="lead">If none of those fit your system, open the download page in a browser:</p>
+          <ul class="bullets">
+            <li>
+              <a
+                href="https://docs.stripe.com/stripe-cli#installation"
+                target="_blank"
+                rel="noopener"
+                >https://docs.stripe.com/stripe-cli#installation</a
+              >
+            </li>
+          </ul>
+
+          <h4>Step 2 — Check the install worked</h4>
+          <pre class="command">stripe --version</pre>
+          <p class="lead">
+            You must see a version number (for example, <code>stripe-cli version 1.23.0</code>). If
+            you see "not found" or "nicht erkannt", close the terminal window and open a new one; if
+            that still fails, install it again from Step 1.
+          </p>
+
+          <h4>Step 3 — Log in to your Stripe account</h4>
+          <pre class="command">stripe login</pre>
+          <p class="lead">
+            This opens a page in your browser where you allow the CLI to connect to your Stripe test
+            account. After it finishes, run this and read the result:
+          </p>
+          <pre class="command">stripe config --list</pre>
+          <ul class="bullets">
+            <li>
+              A line that starts with <code>api_key</code> is shown (for example, a value beginning
+              with <code>sk_test_...567890</code>).
+            </li>
+          </ul>
+
+          <h4>Step 4 — Start the local listener</h4>
+          <p class="lead">
+            Keep this command running in its own terminal window while you test. It must stay open:
+            when it closes, forwarding stops.
+          </p>
+          <pre class="command">
+stripe listen --forward-to http://storefront.localhost/webhooks/stripe \
+  --events checkout.session.completed,checkout.session.async_payment_failed</pre>
+          <div class="note">
+            Newer CLI versions refuse to start without an event list and print "must specify events
+            to forward using --events, --all-snapshot, or --all-thin". The command above lists
+            exactly the two events this platform processes. Use
+            <code>--all-snapshot</code> only when you want every test event forwarded. Older CLI
+            versions also accept the shorter form without <code>--events</code>.
+          </div>
+          <div class="note">
+            The platform backend, Storefront, and Traefik must be running before you use the
+            checkout link. The Storefront proxy sends the webhook to the private Backend service.
+          </div>
+
+          <h4>Step 5 — Read the signing secret from the listener</h4>
+          <p class="lead">Right after it starts, the listener prints text like this:</p>
+          <pre class="command">
+Listens to localhost:3000 and forwards to http://storefront.localhost/webhooks/stripe
+
+    Listening... (press CTRL+C to quit)
+
+    Add webhook endpoint with secret:  whsec_1a2b3c4d5e6f7g8h9i0j
+    Endpoint ID:                      whpay_00000000000000</pre>
+          <p class="lead">
+            Copy the value that starts with <code>whsec_</code>. This is your local
+            <code>STRIPE_WEBHOOK_SECRET</code>. Put it in <code>.env</code>, then restart the
+            backend so it reads the new value:
+          </p>
+          <pre class="command">
+# .env  (replace with YOUR whsec_... from the listener)
+STRIPE_WEBHOOK_SECRET=whsec_YOUR_VALUE_FROM_THE_LISTENER
+docker compose up -d --build backend</pre>
+
+          <h4>Step 6 — Make a test purchase</h4>
+          <ol class="steps">
+            <li>In the storefront, add a product to the basket and start checkout.</li>
+            <li>Open the Stripe payment page in the browser it gives you.</li>
+            <li>Use this test card (it always succeeds):</li>
+          </ol>
+          <ul class="bullets">
+            <li><strong>Card number:</strong> 4242 4242 4242 4242</li>
+            <li><strong>Expiry date:</strong> any future month, for example 12/30</li>
+            <li><strong>CVC:</strong> any 3 digits, for example 123</li>
+          </ul>
+          <ol class="steps" start="4">
+            <li>Complete the payment.</li>
+            <li>
+              Watch your listener window. You must see a green line like:
+              <code>POST /webhooks/stripe ... 200 OK</code>. This proves Stripe reached your app and
+              it accepted the event.
+            </li>
+          </ol>
+
+          <h4>Step 7 — Confirm the order is paid</h4>
+          <p class="lead">
+            Open <a href="http://admin.localhost">the operations admin</a>, then open the same order
+            in Commerce. Its status must have changed from PENDING_PAYMENT to PAID by itself,
+            without you selecting Mark paid. That change is made automatically by the verified
+            webhook.
+          </p>
+
+          <h4>Step 8 — Stop when finished</h4>
+          <pre class="command">CTRL+C</pre>
+          <p class="lead">Press this inside the listener window to stop forwarding.</p>
+
+          <div class="warning">
+            Keep test and live separate. The <code>whsec_...</code> from a local listener is for
+            test events only, and it changes each time you run <code>stripe listen</code>. When you
+            move to production, create the real webhook endpoint in the dashboard (see Get the
+            webhook secret) and use that permanent signing secret instead.
+          </div>
+
+          <h4>If something goes wrong</h4>
+          <ul class="bullets">
+            <li>
+              <strong>"not found" when you type stripe:</strong> open a new terminal window; if it
+              still fails, redo Step 1.
+            </li>
+            <li>
+              <strong>The listener refuses to start:</strong> make sure Traefik, Storefront,
+              Backend, and PostgreSQL are running with <code>docker compose up -d</code>, then run
+              the listener again.
+            </li>
+            <li>
+              <strong>"forwarding failed" or "connection refused":</strong> run
+              <code>docker compose ps</code>. The required containers must be healthy. If the
+              Backend is not healthy, restart it with
+              <code>docker compose up -d --build backend</code>.
+            </li>
+            <li>
+              <strong>The order stays PENDING_PAYMENT:</strong> re-read the signing secret (Step 5),
+              put it in .env, and restart the backend. Then repeat Step 6.
+            </li>
+          </ul>
+
+          <div class="note">
+            Without STRIPE_SECRET_KEY the platform runs in manual mode. Orders stay in
+            PENDING_PAYMENT until you select Mark paid. The Stripe CLI is only needed so that test
+            webhooks can reach a local computer; it is not required for production, where the
+            dashboard endpoint sends events directly.
+          </div>
+        </section>
+
+        <section id="reports">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Operations analytics</p>
+              <h2>Reports and monitoring</h2>
+            </div>
+            <p>
+              Use the Reports section to review sales, revenue, orders by status, low stock, and
+              booking volume. All amounts are EUR. All dates follow UTC.
+            </p>
+          </div>
+
+          <h3>View operational reports</h3>
+          <ol class="steps">
+            <li>In the admin panel, select <strong>Reports</strong> in the side navigation.</li>
+            <li>Select a date range or choose Last 7 days, Last 30 days, or Last 90 days.</li>
+            <li>
+              Review the KPI cards: paid orders, gross revenue, cancelled orders, units sold,
+              bookings, and refunded amount.
+            </li>
+            <li>
+              Use the daily trend table to compare activity over time. The sales funnel shows order
+              counts by status.
+            </li>
+            <li>Check inventory alerts for variants with the lowest available stock.</li>
+          </ol>
+
+          <h3>Export data</h3>
+          <p>
+            Select a CSV button to download trend rows, inventory alerts, or the order ledger. The
+            order ledger includes customer name and email address. Store exports securely and delete
+            them when you no longer need them. Follow your organization's data retention policy.
+          </p>
+
+          <h3>Scrape metrics with Prometheus</h3>
+          <div class="note">
+            The backend exposes metrics at <code>/actuator/prometheus</code> on the private Compose
+            network. Point a Prometheus or Grafana sidecar at this address: <br /><code
+              >http://backend:8080/actuator/prometheus</code
+            >
+            <br />
+            Business counters include order creation, payment confirmation, fulfilment, refunds, and
+            out-of-stock checkout failures. JVM, HTTP, and system meters are available as well. The
+            endpoint requires no sign-in because it contains no customer data.
+          </div>
+
+          <h3>Interpret the figures</h3>
+          <p>
+            Reports read the same tables that store orders and bookings, so they match the order
+            ledger. Use them to understand activity. Before you use a report for a financial
+            decision, reconcile it with your accounting records. Time ranges are half-open intervals
+            in UTC: a range starts at 00:00 on the first day and ends before midnight on the last
+            day.
+          </p>
+        </section>
+
+        <section id="google">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Connections</p>
+              <h2>Operate Google Calendar</h2>
+            </div>
+            <p>
+              Google OAuth grants Calendar and Gmail send access. It is separate from the Strapi
+              administrator session and does not grant mailbox read access.
+            </p>
+          </div>
+          <h3>Connect the account</h3>
+          <ol class="steps">
+            <li>
+              Configure the Google OAuth client as described in
+              <a href="docs/GOOGLE-OAUTH.md">Google OAuth setup</a>.
+            </li>
+            <li>Sign in to the operations admin as a Strapi Super Admin.</li>
+            <li>Open <strong>Connections</strong>.</li>
+            <li>Select <strong>Connect Google services</strong>.</li>
+            <li>Approve the requested Calendar permissions at Google.</li>
+          </ol>
+          <h3>Map a resource</h3>
+          <ol class="steps">
+            <li>Enter the exact platform resource ID.</li>
+            <li>Select a writable Google calendar.</li>
+            <li>
+              Select <strong>Send bookings to Google</strong> when the platform must publish booking
+              events.
+            </li>
+            <li>Select <strong>Save mapping</strong>.</li>
+          </ol>
+          <p>
+            Saving a mapping starts synchronization. The default worker interval is 60 seconds. The
+            first import looks back 31 days.
+          </p>
+          <p>
+            Imported busy events block new bookings. Cancelled, transparent, invalid, and
+            platform-managed events do not create busy blocks.
+          </p>
+          <div class="warning">
+            <strong>Calendar conflict:</strong> An imported event can overlap an existing confirmed
+            booking. The mapping changes to <code>CONFLICT</code>, and public booking stops until an
+            operator resolves the conflict.
+          </div>
+          <h3>Run or remove the connection</h3>
+          <ul>
+            <li>
+              Select <strong>Sync now</strong> to import changes, deliver due booking changes, and
+              requeue failed deliveries.
+            </li>
+            <li>
+              Select <strong>Remove</strong> to delete one resource mapping and its provider data.
+            </li>
+            <li>
+              Select <strong>Disconnect</strong> to revoke the grant and remove local Google
+              connection data.
+            </li>
+          </ul>
+          <div class="note">
+            Signing out does not disconnect Google. Disconnecting Google does not sign out the
+            administrator.
+          </div>
+        </section>
+
+        <section id="content">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Strapi</p>
+              <h2>Edit the Business Profile</h2>
+            </div>
+            <p>
+              The custom admin uses your Strapi permissions to read and update the Business Profile
+              single type.
+            </p>
+          </div>
+          <ol class="steps">
+            <li>Open <strong>Content</strong>.</li>
+            <li>Edit the name, slug, email, time zone, locale, currency, phone, or address.</li>
+            <li>Select <strong>Save content</strong>.</li>
+          </ol>
+          <p>
+            If the page reports a permission error, update the administrator role in Strapi. Grant
+            the required Business Profile read and update actions.
+          </p>
+          <div class="note">
+            The storefront does not currently read the Business Profile. The profile has no
+            draft-and-publish workflow.
+          </div>
+        </section>
+
+        <section id="operations">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Maintenance</p>
+              <h2>Check and protect the system</h2>
+            </div>
+            <p>
+              Configuration checks show whether required values exist. They do not prove that each
+              external service works.
+            </p>
+          </div>
+          <div class="grid two">
+            <article class="card">
+              <h3>Backend health</h3>
+              <pre class="command">
+docker compose exec backend curl -fsS http://127.0.0.1:8080/actuator/health</pre>
+              <p>The response must contain <code>"status":"UP"</code>.</p>
+            </article>
+            <article class="card">
+              <h3>Container health</h3>
+              <pre class="command">docker compose ps backend admin cms postgres</pre>
+              <p>Each required service must report <code>healthy</code>.</p>
+            </article>
+            <article class="card">
+              <h3>Rebuild application services</h3>
+              <pre class="command">docker compose up -d --build --force-recreate backend admin</pre>
+              <p>Use this command after an authentication or integration configuration change.</p>
+            </article>
+            <article class="card">
+              <h3>Validate Compose</h3>
+              <pre class="command">docker compose config --quiet</pre>
+              <p>No output means that Compose accepted the configuration.</p>
+            </article>
+            <article class="card">
+              <h3>Wipe all data and start clean</h3>
+              <pre class="command">
+docker compose down -v
+rm -f .env config/business.json .setup-state.json
+sh setup.sh</pre>
+              <p>
+                This removes the databases, uploads, company details, and generated secrets. Your
+                Google Cloud client ID and secret stay valid.
+              </p>
+            </article>
+            <article class="card">
+              <h3>Data reset only</h3>
+              <pre class="command">
+docker compose down -v
+rm -f .setup-state.json
+sh setup.sh</pre>
+              <p>This keeps the company details and existing secrets.</p>
+            </article>
+          </div>
+          <h3>Protect these items</h3>
+          <ul>
+            <li>The PostgreSQL <code>pgdata</code> volume.</li>
+            <li>The Strapi <code>cmsuploads</code> volume.</li>
+            <li>The private <code>.env</code> file.</li>
+            <li>The <code>config/business.json</code> file.</li>
+            <li>The Strapi and OAuth token encryption keys.</li>
+          </ul>
+          <div class="warning">
+            <strong>Backup gap:</strong> The repository does not provide an automated backup or
+            restore process. Do not claim production readiness until restore tests pass.
+          </div>
+        </section>
+
+        <section id="troubleshooting">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Recovery</p>
+              <h2>Troubleshoot common problems</h2>
+            </div>
+            <p>Check the reported condition before you change code or delete data.</p>
+          </div>
+          <details>
+            <summary>The operations admin rejects my credentials</summary>
+            <div>
+              <p>
+                Confirm that the account exists in Strapi. Use the Strapi administrator email and
+                password. Wait five minutes after repeated failures.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>I can open Content but no other section</summary>
+            <div>
+              <p>
+                The account is not a Strapi Super Admin. Assign the
+                <code>strapi-super-admin</code> role when full platform access is required.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>Content reports a permission error</summary>
+            <div>
+              <p>
+                Open Strapi role settings. Grant the required Business Profile read or update
+                action.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>Google reports redirect_uri_mismatch</summary>
+            <div>
+              <p>
+                Register exactly
+                <code>http://localhost/login/oauth2/code/google</code>. Do not add a trailing slash.
+                The backend must send the same URI: set
+                <code>PLATFORM_ADMIN_BASE_URL=http://localhost</code> in the local environment file.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>The Google connection reports an error</summary>
+            <div>
+              <p>
+                Check the Calendar API, OAuth consent, and stored encryption key. Reconnect the
+                account if authorization is no longer valid.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>Public booking is unavailable</summary>
+            <div>
+              <p>
+                Enable customer booking. Add a writable mapping for the public resource. Run
+                synchronization and resolve each mapping conflict.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>A booking shows NOT_CONFIGURED</summary>
+            <div>
+              <p>
+                Add a writable calendar mapping for that booking resource. A mapping for a different
+                resource does not apply.
+              </p>
+            </div>
+          </details>
+          <details>
+            <summary>The backend cannot decrypt saved tokens</summary>
+            <div>
+              <p>
+                Restore the original encryption key. If the key is lost, remove the unusable
+                connection data and complete authorization again.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <section id="limits">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Release status</p>
+              <h2>Current implementation limits</h2>
+            </div>
+            <p>These limits are part of the current development preview.</p>
+          </div>
+          <div class="grid two">
+            <article class="card">
+              <span class="status limit">SECURITY</span>
+              <h3>No public deployment controls</h3>
+              <p>
+                TLS ingress, secure production defaults, rate limits, bot protection, and security
+                verification are incomplete.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status limit">OPERATIONS</span>
+              <h3>Limited recovery automation</h3>
+              <p>
+                Operational reports and Prometheus metrics are available. Automated backups, restore
+                tests, alerting rules, and high availability are not implemented.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status limit">BOOKING</span>
+              <h3>Limited schedule model</h3>
+              <p>
+                The storefront uses fixed times. Customer cancellation, customer rescheduling, and
+                business opening hours are not implemented.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status limit">COMMERCE</span>
+              <h3>Limited commerce operations</h3>
+              <p>
+                Refunds close a whole order at once. Product image upload, customer order email,
+                order reports, and CSV export are available. Partial refunds and returns are not
+                implemented.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status limit">MAIL</span>
+              <h3>Limited email delivery</h3>
+              <p>
+                Gmail and SMTP delivery are available for form receipts and order confirmations.
+                Booking mail, a durable notification outbox, bounce handling, and Microsoft Graph
+                Mail are not implemented.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status limit">CONTENT</span>
+              <h3>Limited storefront content</h3>
+              <p>
+                Storefront pages render editor sections only after you publish them. Pages without
+                published content fall back to the built-in layout. Product images come from
+                addresses entered in the page editor or product options, not from a media library.
+              </p>
+            </article>
+          </div>
+          <p>
+            Read <a href="docs/IMPLEMENTATION-STATUS.md">implementation status</a>,
+            <a href="docs/IMPLEMENTATION-BACKLOG.md">implementation backlog</a>, and
+            <a href="docs/EXTENSION-ARCHITECTURE.md">extension architecture</a> before release
+            planning.
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <footer>Example Platform &middot; Operator manual &middot; Development preview</footer>
+  </body>
+</html>

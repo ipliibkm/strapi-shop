@@ -6,7 +6,7 @@ RUN mvn -B -DskipTests package
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
-RUN useradd -r -u 10001 platform
+RUN useradd -r -u 10001 platform && mkdir -p /app/uploads/products && chown -R platform:platform /app/uploads
 COPY --from=build /src/target/backend-0.1.0-SNAPSHOT.jar /app/app.jar
 USER platform
 EXPOSE 8080

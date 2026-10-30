@@ -1,0 +1,163 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('OPERATIONS') }}</p>
+    <h2>{{ t('Booking calendar') }}</h2>
+    <p>{{ t('Review customer bookings, Calendar delivery, and weekly capacity.') }}</p>
+  </div>
+  <span class="badge live">{{ t('LIVE SCHEDULE') }}</span>
+</div>
+<section class="calendar-shell">
+  <header class="calendar-toolbar">
+    <div class="period-control">
+      <button class="icon-button" (click)="moveWeek(-1)" [attr.aria-label]="t('Previous week')">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <div>
+        <p>{{ t('WEEK {number}', { number: weekNumber() }) }}</p>
+        <h3>{{ weekLabel() }}</h3>
+      </div>
+      <button class="icon-button" (click)="moveWeek(1)" [attr.aria-label]="t('Next week')">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-stroked-button (click)="goToday()">{{ t('Today') }}</button>
+      <label class="date-jump"
+        ><span>{{ t('Go to date') }}</span
+        ><input type="date" [value]="dateValue()" (change)="jumpTo($any($event.target).value)"
+      /></label>
+    </div>
+    <div class="calendar-summary">
+      <span
+        ><i class="confirmed-dot"></i
+        >{{ t('{count} confirmed', { count: confirmedCount() }) }}</span
+      ><span
+        ><i class="cancelled-dot"></i
+        >{{ t('{count} cancelled', { count: cancelledCount() }) }}</span
+      ><button class="refresh-button" (click)="load()" [disabled]="loading()">
+        <mat-icon>refresh</mat-icon>{{ t('Refresh') }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="calendar-error">
+      <mat-icon>error</mat-icon><span>{{ error() }}</span>
+    </div>
+  }
+
+  <div class="week-scroll">
+    <div class="week-grid">
+      @for (day of days(); track day.key) {
+        <section class="day-column" [class.today]="day.today">
+          <header>
+            <span>{{ day.weekday }}</span
+            ><strong>{{ day.day }}</strong
+            ><small>{{ day.month }}</small>
+          </header>
+          <div class="day-events">
+            @for (item of eventsFor(day.date); track item.id) {
+              <button
+                class="calendar-event"
+                [class.cancelled]="item.status !== 'CONFIRMED'"
+                [class.selected]="selected()?.id === item.id"
+                (click)="selected.set(item)"
+              >
+                <span class="event-time">{{ time(item.startsAt) }} – {{ time(item.endsAt) }}</span>
+                <strong>{{ item.serviceName || t('General booking') }}</strong>
+                <small>{{ item.customerName || t('Customer not recorded') }}</small>
+                <span class="sync-mark" [class.synced]="item.calendarSyncStatus === 'SYNCED'"
+                  ><mat-icon>{{
+                    item.calendarSyncStatus === 'SYNCED' ? 'cloud_done' : 'cloud_queue'
+                  }}</mat-icon></span
+                >
+              </button>
+            } @empty {
+              <div class="empty-day">
+                <span></span>
+                <p>{{ t('No bookings') }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="calendar-lower">
+  <article class="detail-panel">
+    @if (selected(); as item) {
+      <div class="detail-heading">
+        <span class="customer-avatar">{{ initials(item) }}</span>
+        <div>
+          <p>{{ t('BOOKING DETAILS') }}</p>
+          <h3>{{ item.customerName || t('Customer not recorded') }}</h3>
+          <a [href]="item.customerEmail ? 'mailto:' + item.customerEmail : null">{{
+            item.customerEmail || t('No email address')
+          }}</a>
+        </div>
+        <span class="state-badge" [class.cancelled]="item.status !== 'CONFIRMED'">{{
+          t(item.status)
+        }}</span>
+      </div>
+      <dl>
+        <div>
+          <dt>{{ t('Service') }}</dt>
+          <dd>
+            {{ item.serviceName || t('Not recorded') }}
+            @if (item.durationMinutes) {
+              · {{ t('{count} min', { count: item.durationMinutes }) }}
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>{{ t('Date') }}</dt>
+          <dd>{{ fullDate(item.startsAt) }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('Time') }}</dt>
+          <dd>{{ time(item.startsAt) }} – {{ time(item.endsAt) }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('Resource') }}</dt>
+          <dd>{{ item.resourceId }}</dd>
+        </div>
+        <div>
+          <dt>{{ calendarLabel(item) }}</dt>
+          <dd>{{ syncLabel(item) }}</dd>
+        </div>
+      </dl>
+      @if (item.calendarSyncError) {
+        <p class="sync-error">{{ t(item.calendarSyncError) }}</p>
+      }
+      @if (item.status === 'CONFIRMED') {
+        <div class="detail-actions">
+          <a mat-stroked-button [href]="item.customerEmail ? 'mailto:' + item.customerEmail : null"
+            ><mat-icon>mail</mat-icon>{{ t('Email customer') }}</a
+          ><button mat-button class="cancel-action" (click)="cancel(item)" [disabled]="loading()">
+            {{ t('Cancel booking') }}
+          </button>
+        </div>
+      }
+    } @else {
+      <div class="detail-empty">
+        <span><mat-icon>touch_app</mat-icon></span>
+        <h3>{{ t('Select a booking') }}</h3>
+        <p>
+          {{
+            t('Select an entry in the calendar to see the customer and synchronization details.')
+          }}
+        </p>
+      </div>
+    }
+  </article>
+  <aside class="week-insight">
+    <p>{{ t('WEEK AT A GLANCE') }}</p>
+    <strong>{{ confirmedCount() }}</strong
+    ><span>{{ t('confirmed bookings') }}</span>
+    <div class="insight-rule"></div>
+    <small>{{ t('{count} with customer details', { count: customerCount() }) }}</small
+    ><small>{{ t('{count} synchronized with a calendar', { count: syncedCount() }) }}</small>
+  </aside>
+</section>

@@ -1,0 +1,23 @@
+http:
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        permanent: true
+        scheme: https
+    security-headers:
+      headers:
+        # Replace the localhost origins with your production admin and storefront hosts before deploying.
+        contentSecurityPolicy: >-
+          default-src 'self'; base-uri 'self'; connect-src 'self';
+          font-src 'self' data: https://fonts.gstatic.com;
+          form-action 'self';
+          frame-ancestors 'self' http://admin.localhost http://localhost;
+          frame-src 'self' http://storefront.localhost http://cms.localhost;
+          img-src 'self' data: blob: https://picsum.photos https://fastly.picsum.photos;
+          object-src 'none'; script-src 'self';
+          style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
+        contentTypeNosniff: true
+        permissionsPolicy: geolocation=(),camera=(),microphone=(),usb=(),payment=(self)
+        referrerPolicy: strict-origin-when-cross-origin
+        stsIncludeSubdomains: true
+        stsSeconds: 31536000

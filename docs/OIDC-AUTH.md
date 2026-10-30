@@ -1,44 +1,43 @@
-# Connect administrator sign-in
+# Administrator authentication
 
-This feature uses OpenID Connect (OIDC). OIDC verifies the identity of a user.
-The current code supports an external OIDC provider. It does not create user accounts in that provider.
+The admin UI uses local Strapi administrator accounts. This is the only supported administrator authentication mode.
 
-## 1. Configure the identity provider
-1. Create an OIDC client for the Angular admin.
-2. Use the **Authorization Code flow with PKCE**.
-3. Use a public client. Do not put a client secret in Angular.
-4. Register `https://ADMIN_DOMAIN/auth/callback` as the redirect address.
-5. Register `https://ADMIN_DOMAIN/` as the logout redirect address.
-6. Issue an access token with a `roles` claim that contains `OPERATOR` for approved staff.
-7. Configure the API audience. Check that the identity provider includes this audience in its access tokens.
+The backend has no OIDC administrator switch. Google OAuth connects external services only.
 
-## 2. Configure Spring Boot
-Set these values in the environment:
-- `PLATFORM_AUTH_ENABLED=true`
-- `PLATFORM_OIDC_ISSUER=https://IDP_REALM`
-- `PLATFORM_OIDC_AUDIENCE=YOUR_API_AUDIENCE`
-- `PLATFORM_OIDC_CLIENT_ID=YOUR_PUBLIC_CLIENT_ID`
+## Access rules
 
-Do not enable OIDC before the issuer and audience values are correct.
-Use HTTPS in production.
+- Every active Strapi administrator can sign in.
+- Strapi applies each administrator's Content Manager permissions.
+- Only users with the `strapi-super-admin` role can access platform administration.
+- Platform administration includes bookings, services, connections, commerce, appearance, and system functions.
+- Google OAuth connects Google services only. It does not authenticate administrators.
 
-## 3. Create the first administrator
-Enroll the administrator in the OIDC provider. Assign the `OPERATOR` role.
-The setup wizard's initial password hash **does not** create the account in the provider.
-The enrollment process needs a separate, verified provider integration.
-Do not sign in with the setup password.
+## Sign in
 
-## 4. Test the connection
 1. Open the Angular admin.
-2. Select **Sign in**.
-3. Sign in through the OIDC provider.
-4. Confirm that the API accepts the access token.
-5. Confirm that an unapproved user cannot access administrator APIs.
-6. Sign out. Confirm that the app removes its local session.
+2. Enter the email address and password of a local Strapi administrator.
+3. Select **Sign in**.
 
-## Security limits
-- The current frontend stores the OIDC session in browser session storage. A BFF with secure, HttpOnly session cookies is a stronger production option and remains planned.
-- Token refresh, MFA enforcement, identity enrollment, account recovery and account disablement need tests with the selected provider.
-- Role claims are validated through a server-side JWT. The frontend does not grant privileges.
-- Keep setup and identity provider management endpoints on restricted networks.
-- This code has not passed a production security review or end-to-end tests.
+Spring sends the credentials to Strapi through the internal network. Spring does not store the password.
+
+Strapi returns short-lived access data and a refresh session. Spring encrypts these values and stores them in the server-side JDBC session. The browser receives only the HttpOnly platform session cookie and the CSRF cookie.
+
+## Content authorization
+
+The Angular admin sends content operations to the Spring backend. Spring forwards them to Strapi with the signed-in user's encrypted Strapi session. Strapi remains the authorization source for content.
+
+A user without permission for a content type receives `403 Forbidden`. A platform role cannot override this Strapi decision.
+
+## Session configuration
+
+Set these values in `.env`:
+
+```text
+PLATFORM_STRAPI_TOKEN_ENCRYPTION_KEY=your-base64-encoded-32-byte-key
+PLATFORM_ADMIN_SESSION_TIMEOUT=8h
+SERVER_SERVLET_SESSION_COOKIE_SECURE=false
+```
+
+The platform uses `PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY` as a fallback when the dedicated Strapi key is not set.
+
+Use HTTPS and secure cookies in production. Configure MFA in Strapi when the deployment requires it.

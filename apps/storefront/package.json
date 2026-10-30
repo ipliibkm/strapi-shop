@@ -1,1 +1,5 @@
-{"name":"@ipli/storefront","version":"0.1.0","private":true}
+{
+  "name": "@openshopfront/storefront",
+  "version": "0.1.0",
+  "private": true
+}

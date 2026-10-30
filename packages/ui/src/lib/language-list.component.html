@@ -1,0 +1,15 @@
+<div class="language-rows" role="group" [attr.aria-label]="label()">
+  @for (item of languages(); track item.code) {
+    <label class="language-row">
+      <span class="language-name">
+        <strong>{{ item.name }}</strong>
+        <small>{{ item.code.toUpperCase() }}</small>
+      </span>
+      <input
+        type="checkbox"
+        [checked]="item.enabled"
+        (change)="toggle.emit({ code: item.code, enabled: $any($event.target).checked })"
+      />
+    </label>
+  }
+</div>

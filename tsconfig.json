@@ -1,1 +1,23 @@
-{"compileOnSave":false,"compilerOptions":{"outDir":"./dist/out-tsc","strict":true,"noImplicitOverride":true,"noPropertyAccessFromIndexSignature":true,"noImplicitReturns":true,"noFallthroughCasesInSwitch":true,"skipLibCheck":true,"experimentalDecorators":true,"moduleResolution":"bundler","module":"preserve","target":"ES2022","lib":["ES2022","dom"],"paths":{"@ipli/ui":["./packages/ui/src/index.ts"]}},"angularCompilerOptions":{"strictTemplates":true,"strictInjectionParameters":true,"strictInputAccessModifiers":true}}
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "bundler",
+    "module": "preserve",
+    "target": "ES2022",
+    "lib": ["ES2022", "dom"],
+    "paths": { "@openshopfront/ui": ["./packages/ui/src/index.ts"] }
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  }
+}

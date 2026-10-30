@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-booking-customer-contact
+      author: platform
+      changes:
+        - addColumn:
+            tableName: booking
+            columns:
+              - column: {name: customer_name, type: varchar(200)}
+              - column: {name: customer_email, type: varchar(254)}

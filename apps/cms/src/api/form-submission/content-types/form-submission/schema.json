@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "storefront_form_submissions",
+  "info": {
+    "singularName": "form-submission",
+    "pluralName": "form-submissions",
+    "displayName": "Form Submission",
+    "description": "A customer submission of a storefront form, stored as content linked to its form"
+  },
+  "options": {},
+  "pluginOptions": {},
+  "attributes": {
+    "form": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::storefront-form.storefront-form",
+      "useJoinTable": false,
+      "required": false
+    },
+    "formDocumentId": {
+      "type": "string",
+      "maxLength": 64,
+      "searchable": true
+    },
+    "payload": {
+      "type": "json",
+      "required": true
+    },
+    "submittedAt": {
+      "type": "datetime"
+    }
+  }
+}

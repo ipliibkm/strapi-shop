@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-storefront-settings
+      author: platform
+      changes:
+        - createTable:
+            tableName: storefront_language
+            columns:
+              - column: {name: code, type: varchar(8), constraints: {primaryKey: true}}
+              - column: {name: name, type: varchar(50), constraints: {nullable: false}}
+              - column: {name: enabled, type: boolean, defaultValueBoolean: 'false', constraints: {nullable: false}}
+              - column: {name: sort_order, type: int, constraints: {nullable: false}}
+        - insert:
+            tableName: storefront_language
+            columns:
+              - column: {name: code, value: de}
+              - column: {name: name, value: Deutsch}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 1}
+        - insert:
+            tableName: storefront_language
+            columns:
+              - column: {name: code, value: en}
+              - column: {name: name, value: English}
+              - column: {name: enabled, valueBoolean: true}
+              - column: {name: sort_order, valueNumeric: 2}
+        - insert:
+            tableName: storefront_language
+            columns:
+              - column: {name: code, value: ru}
+              - column: {name: name, value: 'Русский'}
+              - column: {name: enabled, valueBoolean: false}
+              - column: {name: sort_order, valueNumeric: 3}
+        - insert:
+            tableName: storefront_language
+            columns:
+              - column: {name: code, value: tr}
+              - column: {name: name, value: 'Türkçe'}
+              - column: {name: enabled, valueBoolean: false}
+              - column: {name: sort_order, valueNumeric: 4}
+        - createTable:
+            tableName: storefront_appearance
+            columns:
+              - column: {name: id, type: int, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: theme_key, type: varchar(32), constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamptz, defaultValueComputed: now(), constraints: {nullable: false}}
+        - insert:
+            tableName: storefront_appearance
+            columns:
+              - column: {name: id, valueNumeric: 1}
+              - column: {name: theme_key, value: light}
+              - column: {name: updated_at, valueComputed: now()}

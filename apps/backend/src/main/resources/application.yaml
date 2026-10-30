@@ -1,24 +1,86 @@
 spring:
   application:
-    name: ipli-platform
+    name: openshopfront-platform
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/platform}
     username: ${SPRING_DATASOURCE_USERNAME:platform}
     password: ${SPRING_DATASOURCE_PASSWORD:}
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  session:
+    jdbc:
+      initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 9MB
+      max-request-size: 10MB
+  mail:
+    # Optional SMTP provider. Leave the host empty to send through the connected Google account.
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
 server:
   port: 8080
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: ${PLATFORM_ADMIN_SESSION_TIMEOUT:8h}
+      cookie:
+        http-only: true
+        name: SESSION
+        path: /
+        secure: ${SERVER_SERVLET_SESSION_COOKIE_SECURE:false}
+        same-site: lax
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
+  health:
+    # Mail delivery is verified per send; the SMTP probe must not fail overall health.
+    mail:
+      enabled: false
+  endpoint:
+    prometheus:
+      access: unrestricted
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 platform:
-  auth:
-    enabled: ${PLATFORM_AUTH_ENABLED:false}
-    authority: ${PLATFORM_OIDC_ISSUER:}
-    client-id: ${PLATFORM_OIDC_CLIENT_ID:}
-    audience: ${PLATFORM_OIDC_AUDIENCE:}
-spring.security.oauth2.resourceserver.jwt.issuer-uri: ${PLATFORM_OIDC_ISSUER:}
+  setup:
+    enabled: ${PLATFORM_SETUP_ENABLED:true}
+  booking:
+    public-resource-id: ${PLATFORM_BOOKING_PUBLIC_RESOURCE_ID:default}
+    maximum-calendar-sync-age-seconds: ${PLATFORM_BOOKING_MAXIMUM_CALENDAR_SYNC_AGE_SECONDS:${PLATFORM_BOOKING_MAXIMUM_GOOGLE_SYNC_AGE_SECONDS:300}}
+  storefront-base-url: ${PLATFORM_STOREFRONT_BASE_URL:http://storefront.localhost}
+  commerce:
+    stripe-secret-key: ${STRIPE_SECRET_KEY:}
+    stripe-webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    stripe-api-base-url: ${STRIPE_API_BASE_URL:https://api.stripe.com}
+    upload-directory: ${PLATFORM_PRODUCT_UPLOAD_DIRECTORY:/app/uploads/products}
+    expiry-interval-ms: ${PLATFORM_COMMERCE_EXPIRY_INTERVAL_MS:60000}
+  mail:
+    smtp-host: ${MAIL_HOST:}
+    from-address: ${PLATFORM_MAIL_FROM_ADDRESS:}
+    gmail-api-base-url: ${PLATFORM_GOOGLE_GMAIL_API_BASE_URL:https://www.googleapis.com/gmail/v1}
+  admin:
+    base-url: ${PLATFORM_ADMIN_BASE_URL:http://admin.localhost}
+  strapi:
+    base-url: ${PLATFORM_STRAPI_BASE_URL:http://localhost:1337}
+    token-encryption-key: ${PLATFORM_STRAPI_TOKEN_ENCRYPTION_KEY:${PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY:}}
+    # Optional read/write API token used by anonymous storefront form submissions.
+    service-token: ${STRAPI_SERVICE_TOKEN:}
+  google:
+    enabled: ${PLATFORM_GOOGLE_ENABLED:false}
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    token-encryption-key: ${PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY:}
+    api-base-url: ${PLATFORM_GOOGLE_API_BASE_URL:https://www.googleapis.com}
+    calendar-api-base-url: ${PLATFORM_GOOGLE_CALENDAR_API_BASE_URL:https://www.googleapis.com/calendar/v3}
+    sync-interval-ms: ${PLATFORM_GOOGLE_SYNC_INTERVAL_MS:60000}
+    sync-initial-delay-ms: ${PLATFORM_GOOGLE_SYNC_INITIAL_DELAY_MS:15000}
+    sync-initial-lookback-days: ${PLATFORM_GOOGLE_SYNC_INITIAL_LOOKBACK_DAYS:31}
+    delivery-interval-ms: ${PLATFORM_GOOGLE_DELIVERY_INTERVAL_MS:15000}
+    delivery-initial-delay-ms: ${PLATFORM_GOOGLE_DELIVERY_INITIAL_DELAY_MS:20000}

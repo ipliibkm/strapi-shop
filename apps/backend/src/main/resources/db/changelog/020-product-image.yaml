@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-product-image
+      author: platform
+      changes:
+        - addColumn:
+            tableName: product
+            columns:
+              - column: {name: image_url, type: varchar(500), defaultValue: '', constraints: {nullable: false}}

@@ -1,0 +1,225 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('OPERATIONS ANALYTICS') }}</p>
+    <h2>{{ t('Reports and monitoring') }}</h2>
+    <p>
+      {{
+        t(
+          'Sales, revenue, funnel, inventory and booking figures for a date range. All amounts are EUR; dates follow UTC. Export CSV where required.'
+        )
+      }}
+    </p>
+  </div>
+</div>
+<section class="reports-shell">
+  <article class="panel control-bar">
+    <div class="range-field">
+      <p>{{ t('FROM') }}</p>
+      <input type="date" (change)="applyRange()" [value]="fromValue" />
+    </div>
+    <div class="range-field">
+      <p>{{ t('TO') }}</p>
+      <input type="date" (change)="applyRange()" [value]="toValue" />
+    </div>
+    @for (preset of presets; track preset.label) {
+      <button mat-stroked-button (click)="usePreset(preset.days)">{{ t(preset.label) }}</button>
+    }
+    <span class="spacer"></span>
+    <button mat-flat-button [disabled]="busy()" (click)="refresh()">
+      <mat-icon>refresh</mat-icon>{{ busy() ? t('Loading') : t('Refresh') }}
+    </button>
+  </article>
+
+  @if (error()) {
+    <p class="reports-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (summary(); as s) {
+    <div class="kpi-grid">
+      <article class="kpi-card">
+        <p>{{ t('PAID ORDERS') }}</p>
+        <strong>{{ s.paidOrders }}</strong>
+      </article>
+      <article class="kpi-card accent">
+        <p>{{ t('REVENUE (GROSS)') }}</p>
+        <strong>{{ money(s.revenueCents) }}</strong>
+      </article>
+      <article class="kpi-card warn">
+        <p>{{ t('CANCELLED') }}</p>
+        <strong>{{ s.cancelledOrders }}</strong>
+      </article>
+      <article class="kpi-card">
+        <p>{{ t('UNITS SOLD') }}</p>
+        <strong>{{ s.unitsSold }}</strong>
+      </article>
+      <article class="kpi-card">
+        <p>{{ t('BOOKINGS') }}</p>
+        <strong>{{ s.bookings }}</strong>
+      </article>
+      <article class="kpi-card danger">
+        <p>{{ t('REFUNDED') }}</p>
+        <strong>{{ money(s.refundedCents) }}</strong>
+      </article>
+    </div>
+  }
+
+  <div class="reports-grid">
+    <article class="panel table-panel">
+      <header>
+        <div>
+          <p class="label">{{ t('DAILY TREND') }}</p>
+          <h3>{{ t('Orders and revenue per day (UTC)') }}</h3>
+        </div>
+        <button mat-stroked-button [disabled]="busy()" (click)="downloadCsv('trend')">
+          <mat-icon>download</mat-icon>CSV
+        </button>
+      </header>
+      @if (trend().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t('Date') }}</th>
+              <th class="num">{{ t('Orders') }}</th>
+              <th class="num">{{ t('Revenue') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of trend(); track row.day) {
+              <tr>
+                <td>{{ row.day }}</td>
+                <td class="num">{{ row.orders }}</td>
+                <td class="num">{{ money(row.revenueCents) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty">{{ t('No orders in this range.') }}</p>
+      }
+    </article>
+
+    <article class="panel table-panel">
+      <header>
+        <div>
+          <p class="label">{{ t('SALES FUNNEL') }}</p>
+          <h3>{{ t('Orders by status') }}</h3>
+        </div>
+      </header>
+      @if (funnel().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t('Status') }}</th>
+              <th class="num">{{ t('Orders') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of funnel(); track row.status) {
+              <tr [class]="funnelClass(row.status)">
+                <td>{{ statusLabel(row.status) }}</td>
+                <td class="num">{{ row.orders }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty">{{ t('No orders in this range.') }}</p>
+      }
+    </article>
+
+    <article class="panel table-panel">
+      <header>
+        <div>
+          <p class="label">{{ t('TOP PRODUCTS') }}</p>
+          <h3>{{ t('By units sold') }}</h3>
+        </div>
+      </header>
+      @if (top().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t('Product') }}</th>
+              <th class="num">{{ t('Units') }}</th>
+              <th class="num">{{ t('Revenue') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of top(); track row.name) {
+              <tr>
+                <td>{{ row.name }}</td>
+                <td class="num">{{ row.units }}</td>
+                <td class="num">{{ money(row.revenueCents) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty">{{ t('No units sold in this range.') }}</p>
+      }
+    </article>
+
+    <article class="panel table-panel">
+      <header>
+        <div>
+          <p class="label">{{ t('INVENTORY ALERTS') }}</p>
+          <h3>{{ t('Lowest available stock first') }}</h3>
+        </div>
+        <button mat-stroked-button [disabled]="busy()" (click)="downloadCsv('inventory')">
+          <mat-icon>download</mat-icon>CSV
+        </button>
+      </header>
+      @if (alerts().length) {
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>{{ t('Sku') }}</th>
+              <th>{{ t('Product / variant') }}</th>
+              <th class="num">{{ t('Available') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of alerts(); track row.sku) {
+              <tr [class.low]="row.available <= 3" [class.out]="row.available <= 0">
+                <td>{{ row.sku }}</td>
+                <td>
+                  {{ row.product }}
+                  @if (row.label && row.label !== row.sku) {
+                    · {{ row.label }}
+                  }
+                </td>
+                <td class="num">{{ row.available }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty">{{ t('No active products.') }}</p>
+      }
+    </article>
+  </div>
+
+  <article class="panel export-panel">
+    <header>
+      <div>
+        <p class="label">{{ t('DATA EXPORT') }}</p>
+        <h3>{{ t('Order ledger CSV') }}</h3>
+        <p class="hint">
+          {{
+            t(
+              'Exports order numbers, statuses, PII and amounts. Use only where required and keep it secure per your data retention policy.'
+            )
+          }}
+        </p>
+      </div>
+      <button mat-flat-button [disabled]="busy()" (click)="downloadCsv('orders')">
+        <mat-icon>download</mat-icon>{{ t('Download order CSV') }}
+      </button>
+    </header>
+  </article>
+
+  @if (notice()) {
+    <p class="reports-notice" role="status">{{ notice() }}</p>
+  }
+</section>

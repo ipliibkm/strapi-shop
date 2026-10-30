@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-booking-customer-settings
+      author: platform
+      changes:
+        - createTable:
+            tableName: booking_customer_settings
+            columns:
+              - column: {name: id, type: integer, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: customer_booking_enabled, type: boolean, defaultValueBoolean: true, constraints: {nullable: false}}
+              - column: {name: default_duration_minutes, type: integer, defaultValueNumeric: 60, constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        - insert:
+            tableName: booking_customer_settings
+            columns:
+              - column: {name: id, valueNumeric: 1}
+              - column: {name: customer_booking_enabled, valueBoolean: true}
+              - column: {name: default_duration_minutes, valueNumeric: 60}

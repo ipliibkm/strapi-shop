@@ -16,9 +16,16 @@
             "index": "apps/admin/src/index.html",
             "browser": "apps/admin/src/main.ts",
             "tsConfig": "apps/admin/tsconfig.app.json",
-            "styles": [
-              "apps/admin/src/styles.css"
-            ]
+            "outputHashing": "all",
+            "optimization": {
+              "scripts": true,
+              "fonts": true,
+              "styles": {
+                "minify": true,
+                "inlineCritical": false
+              }
+            },
+            "styles": ["apps/admin/src/styles.css"]
           }
         },
         "serve": {
@@ -26,6 +33,26 @@
           "options": {
             "buildTarget": "admin:build",
             "proxyConfig": "apps/admin/proxy.conf.json"
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "admin:build",
+            "compodoc": false,
+            "styles": [".storybook/preview.css"],
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "admin:build",
+            "compodoc": false,
+            "styles": [".storybook/preview.css"],
+            "outputDir": "storybook-static"
           }
         }
       }
@@ -43,9 +70,16 @@
             "index": "apps/storefront/src/index.html",
             "browser": "apps/storefront/src/main.ts",
             "tsConfig": "apps/storefront/tsconfig.app.json",
-            "styles": [
-              "apps/storefront/src/styles.css"
-            ]
+            "outputHashing": "all",
+            "optimization": {
+              "scripts": true,
+              "fonts": true,
+              "styles": {
+                "minify": true,
+                "inlineCritical": false
+              }
+            },
+            "styles": ["apps/storefront/src/styles.css"]
           }
         },
         "serve": {
@@ -69,9 +103,7 @@
             "index": "apps/setup/src/index.html",
             "browser": "apps/setup/src/main.ts",
             "tsConfig": "apps/setup/tsconfig.app.json",
-            "styles": [
-              "apps/setup/src/styles.css"
-            ]
+            "styles": ["apps/setup/src/styles.css"]
           }
         },
         "serve": {

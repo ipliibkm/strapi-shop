@@ -1,0 +1,1525 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Interactive setup and operations guide for the example commerce and booking platform."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23d9ef9f'/%3E%3Cpath d='M28 17h8v30h-8z' fill='%23273b2c'/%3E%3C/svg%3E"
+    />
+    <title>Example Platform | Project Guide</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #18211d;
+        --muted: #667069;
+        --paper: #f5f0e5;
+        --panel: #fffdf7;
+        --line: #d7d0c2;
+        --olive: #405b45;
+        --olive-dark: #273b2c;
+        --lime: #d9ef9f;
+        --coral: #ed684f;
+        --blue: #3b658a;
+        --shadow: 0 16px 40px rgb(37 50 42 / 10%);
+        --radius: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          linear-gradient(rgb(64 91 69 / 4%) 1px, transparent 1px),
+          linear-gradient(90deg, rgb(64 91 69 / 4%) 1px, transparent 1px), var(--paper);
+        background-size: 28px 28px;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        line-height: 1.55;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--coral);
+        outline-offset: 3px;
+      }
+
+      .shell {
+        width: min(1380px, calc(100% - 32px));
+        margin: 16px auto;
+        border: 1px solid var(--line);
+        background: rgb(255 253 247 / 94%);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 58px;
+        padding: 0 20px;
+        color: #f8f4e9;
+        background: var(--olive-dark);
+        border-bottom: 1px solid #17261b;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        color: var(--olive-dark);
+        background: var(--lime);
+        border-radius: 50%;
+        font-family: Georgia, serif;
+      }
+
+      .top-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .top-actions a,
+      .top-actions button {
+        padding: 7px 11px;
+        color: #f8f4e9;
+        background: transparent;
+        border: 1px solid rgb(255 255 255 / 24%);
+        border-radius: 999px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        min-height: calc(100vh - 92px);
+      }
+
+      aside {
+        padding: 24px 16px;
+        background: #ebe5d8;
+        border-right: 1px solid var(--line);
+      }
+
+      .nav-title,
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      nav {
+        position: sticky;
+        top: 20px;
+      }
+
+      nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 9px;
+        color: #334038;
+        font-size: 0.92rem;
+        text-decoration: none;
+      }
+
+      nav a:hover,
+      nav a.active {
+        color: #fff;
+        background: var(--olive);
+      }
+
+      main {
+        min-width: 0;
+      }
+
+      section {
+        padding: 56px clamp(22px, 5vw, 72px);
+        border-bottom: 1px solid var(--line);
+        scroll-margin-top: 16px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding-block: 80px;
+        background: var(--panel);
+      }
+
+      .hero::after {
+        position: absolute;
+        top: -90px;
+        right: -70px;
+        width: 330px;
+        height: 330px;
+        border: 55px solid var(--lime);
+        border-radius: 50%;
+        content: '';
+        opacity: 0.8;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+        font-family: Georgia, 'Times New Roman', serif;
+        line-height: 1.05;
+      }
+
+      h1 {
+        position: relative;
+        z-index: 1;
+        max-width: 780px;
+        margin-bottom: 20px;
+        font-size: clamp(3rem, 7vw, 6.6rem);
+        font-weight: 500;
+        letter-spacing: -0.055em;
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        font-weight: 500;
+        letter-spacing: -0.035em;
+      }
+
+      h3 {
+        font-size: 1.35rem;
+      }
+
+      .lead {
+        position: relative;
+        z-index: 1;
+        max-width: 710px;
+        color: var(--muted);
+        font-size: 1.15rem;
+      }
+
+      .badges,
+      .actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 28px;
+      }
+
+      .badge {
+        padding: 7px 11px;
+        background: #eef2df;
+        border: 1px solid #ccd7aa;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 43px;
+        padding: 0 16px;
+        color: #fff;
+        background: var(--olive);
+        border: 1px solid var(--olive);
+        border-radius: 9px;
+        cursor: pointer;
+        font-weight: 750;
+        text-decoration: none;
+      }
+
+      .button.secondary {
+        color: var(--olive-dark);
+        background: transparent;
+      }
+
+      .section-heading {
+        display: flex;
+        gap: 24px;
+        align-items: end;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+
+      .section-heading p {
+        max-width: 540px;
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid.three {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .grid.two {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card {
+        min-width: 0;
+        padding: 22px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+
+      .service {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: start;
+      }
+
+      .service-number {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        color: var(--olive-dark);
+        background: var(--lime);
+        border-radius: 9px;
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .service h3 {
+        margin-bottom: 6px;
+      }
+      .service p {
+        margin: 0 0 8px;
+        color: var(--muted);
+      }
+      .service a {
+        color: var(--blue);
+        font-weight: 700;
+      }
+
+      .command {
+        position: relative;
+        margin: 14px 0;
+        padding: 16px 54px 16px 17px;
+        overflow-x: auto;
+        color: #ecf7e9;
+        background: #1e2923;
+        border: 1px solid #32483a;
+        border-radius: 11px;
+        font:
+          0.88rem/1.55 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .copy {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        padding: 6px 9px;
+        color: #e9f5e5;
+        background: #33473a;
+        border: 1px solid #597060;
+        border-radius: 7px;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 750;
+      }
+
+      .checklist {
+        display: grid;
+        gap: 10px;
+      }
+
+      .check-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        cursor: pointer;
+      }
+
+      .check-item:has(input:checked) {
+        background: #f1f7df;
+        border-color: #b9ca89;
+      }
+      .check-item input {
+        width: 19px;
+        height: 19px;
+        accent-color: var(--olive);
+      }
+      .check-item strong,
+      .check-item small {
+        display: block;
+      }
+      .check-item small {
+        margin-top: 3px;
+        color: var(--muted);
+      }
+
+      .progress-track {
+        height: 9px;
+        margin: 14px 0 24px;
+        overflow: hidden;
+        background: #ddd7ca;
+        border-radius: 999px;
+      }
+
+      .progress-bar {
+        width: 0;
+        height: 100%;
+        background: var(--coral);
+        transition: width 0.25s ease;
+      }
+
+      .stepper {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 20px;
+      }
+
+      .step-tabs {
+        display: grid;
+        align-content: start;
+        gap: 8px;
+      }
+
+      .step-tab {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 11px;
+        color: var(--ink);
+        text-align: left;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+
+      .step-tab span:first-child {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        background: #ded8ca;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: 900;
+      }
+
+      .step-tab.active {
+        background: var(--olive-dark);
+        color: #fff;
+      }
+      .step-tab.active span:first-child {
+        color: var(--olive-dark);
+        background: var(--lime);
+      }
+
+      .step-panel {
+        display: none;
+        min-height: 390px;
+        padding: clamp(22px, 4vw, 38px);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .step-panel.active {
+        display: block;
+        animation: reveal 0.18s ease-out;
+      }
+
+      @keyframes reveal {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .step-panel li {
+        margin-bottom: 9px;
+      }
+
+      .note,
+      .warning {
+        margin: 18px 0;
+        padding: 14px 16px;
+        border-left: 4px solid var(--blue);
+        background: #edf4f8;
+      }
+
+      .warning {
+        border-color: var(--coral);
+        background: #fff0ec;
+      }
+
+      .builder {
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+        gap: 20px;
+      }
+
+      .builder > *,
+      .stepper > * {
+        min-width: 0;
+      }
+
+      .field {
+        margin-bottom: 15px;
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .field input {
+        width: 100%;
+        min-height: 43px;
+        padding: 8px 11px;
+        color: var(--ink);
+        background: #fff;
+        border: 1px solid #bdb6a9;
+        border-radius: 8px;
+      }
+
+      .builder-output .command {
+        min-height: 238px;
+        margin-top: 0;
+      }
+
+      details {
+        margin-top: 10px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+
+      summary {
+        padding: 14px 16px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+      details p {
+        padding: 0 16px 14px;
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .docs-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .docs-list a {
+        display: block;
+        padding: 13px 15px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        color: var(--blue);
+        font-weight: 750;
+        text-decoration: none;
+      }
+
+      footer {
+        padding: 24px;
+        color: #dfe7dc;
+        background: var(--olive-dark);
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 10;
+        padding: 11px 15px;
+        color: #fff;
+        background: #18211d;
+        border-radius: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (max-width: 900px) {
+        .shell {
+          width: 100%;
+          margin: 0;
+          border: 0;
+        }
+        .layout {
+          display: block;
+        }
+        aside {
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          padding: 8px;
+          border: 0;
+          border-bottom: 1px solid var(--line);
+          overflow-x: auto;
+        }
+        nav {
+          display: flex;
+          position: static;
+          width: max-content;
+        }
+        .nav-title {
+          display: none;
+        }
+        nav a {
+          white-space: nowrap;
+        }
+        .grid.three {
+          grid-template-columns: 1fr 1fr;
+        }
+        .stepper,
+        .builder {
+          grid-template-columns: 1fr;
+        }
+        .step-tabs {
+          grid-template-columns: repeat(4, minmax(125px, 1fr));
+          overflow-x: auto;
+        }
+        .hero::after {
+          right: -180px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .top-actions a {
+          display: none;
+        }
+        section {
+          padding: 42px 18px;
+        }
+        .grid.three,
+        .grid.two,
+        .docs-list {
+          grid-template-columns: 1fr;
+        }
+        .section-heading {
+          display: block;
+        }
+        h1 {
+          font-size: 3.25rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">E</span> Example Platform</div>
+        <div class="top-actions">
+          <a href="MANUAL.html">Operator manual</a>
+          <a href="http://storefront.localhost">Storefront</a>
+          <a href="http://admin.localhost">Admin</a>
+          <button type="button" id="reset-progress">Reset progress</button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside>
+          <nav aria-label="README sections">
+            <p class="nav-title">Project guide</p>
+            <a href="#overview" class="active">Overview <span>01</span></a>
+            <a href="#services">Services <span>02</span></a>
+            <a href="#quick-start">Quick start <span>03</span></a>
+            <a href="#google">Google OAuth <span>04</span></a>
+            <a href="#environment">Environment <span>05</span></a>
+            <a href="#verify">Verify <span>06</span></a>
+            <a href="#architecture">Architecture <span>07</span></a>
+            <a href="#documents">Documents <span>08</span></a>
+          </nav>
+        </aside>
+
+        <main>
+          <section class="hero" id="overview">
+            <p class="eyebrow">Commerce + content + bookings</p>
+            <h1>One platform.<br />Clear boundaries.</h1>
+            <p class="lead">
+              A private monorepo for an Angular storefront, an operations admin, Strapi content, and
+              a Spring Boot transactional backend.
+            </p>
+            <div class="badges">
+              <span class="badge">Angular 22</span>
+              <span class="badge">Spring Boot</span>
+              <span class="badge">Strapi 5</span>
+              <span class="badge">PostgreSQL 17</span>
+              <span class="badge">Docker Compose</span>
+            </div>
+            <div class="actions">
+              <a class="button" href="#quick-start">Start locally</a>
+              <a class="button secondary" href="#google">Connect Google</a>
+            </div>
+          </section>
+
+          <section id="services">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Local workspace</p>
+                <h2>Service map</h2>
+              </div>
+              <p>
+                Docker Compose starts the application services on localhost. PostgreSQL remains on
+                the internal Docker network.
+              </p>
+            </div>
+            <div class="grid three">
+              <article class="card service">
+                <span class="service-number">01</span>
+                <div>
+                  <h3>Storefront</h3>
+                  <p>Customer website and product experience.</p>
+                  <a href="http://storefront.localhost">storefront.localhost</a>
+                </div>
+              </article>
+              <article class="card service">
+                <span class="service-number">02</span>
+                <div>
+                  <h3>Operations admin</h3>
+                  <p>Bookings, pages, shop, connections, and status.</p>
+                  <a href="http://admin.localhost">admin.localhost</a>
+                </div>
+              </article>
+              <article class="card service">
+                <span class="service-number">03</span>
+                <div>
+                  <h3>Storybook</h3>
+                  <p>Shared component examples.</p>
+                  <a href="http://storybook.localhost">storybook.localhost</a>
+                </div>
+              </article>
+              <article class="card service">
+                <span class="service-number">04</span>
+                <div>
+                  <h3>Strapi</h3>
+                  <p>CMS and technical content administration.</p>
+                  <a href="http://cms.localhost/admin">cms.localhost</a>
+                </div>
+              </article>
+              <article class="card service">
+                <span class="service-number">05</span>
+                <div>
+                  <h3>PostgreSQL</h3>
+                  <p>Separate CMS and application ownership.</p>
+                  <strong>Internal only</strong>
+                </div>
+              </article>
+              <article class="card service">
+                <span class="service-number">06</span>
+                <div>
+                  <h3>Shared UI</h3>
+                  <p>Angular components, tokens, and themes.</p>
+                  <strong>packages/ui</strong>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section id="quick-start">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Development setup</p>
+                <h2>Quick start</h2>
+              </div>
+              <p>
+                Your progress is stored in this browser. This page does not store secret values.
+              </p>
+            </div>
+            <p><strong id="progress-label">0 of 5 steps complete</strong></p>
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="checklist">
+              <label class="check-item"
+                ><input type="checkbox" data-check="prerequisites" /><span
+                  ><strong>Install prerequisites</strong
+                  ><small>Install Docker Compose v2 and Python 3.10 or later.</small></span
+                ></label
+              >
+              <label class="check-item"
+                ><input type="checkbox" data-check="clone" /><span
+                  ><strong>Open the repository</strong
+                  ><small>Run all commands from the repository root.</small></span
+                ></label
+              >
+              <label class="check-item"
+                ><input type="checkbox" data-check="setup" /><span
+                  ><strong>Run the setup wizard</strong
+                  ><small>The wizard creates local secrets and starts the services.</small></span
+                ></label
+              >
+              <label class="check-item"
+                ><input type="checkbox" data-check="strapi" /><span
+                  ><strong>Create the Strapi administrator</strong
+                  ><small
+                    >Enter the administrator details in the Strapi command-line step.</small
+                  ></span
+                ></label
+              >
+              <label class="check-item"
+                ><input type="checkbox" data-check="health" /><span
+                  ><strong>Check service health</strong
+                  ><small>Confirm that the required containers report healthy.</small></span
+                ></label
+              >
+            </div>
+            <div class="command"><button class="copy" type="button">Copy</button>sh setup.sh</div>
+            <div class="command">
+              <button class="copy" type="button">Copy</button>docker compose ps
+            </div>
+            <div class="warning">
+              <strong>Development status:</strong> The current platform is not ready for production
+              deployment.
+            </div>
+          </section>
+
+          <section id="google">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Calendar connection</p>
+                <h2>Create a Google client ID</h2>
+              </div>
+              <p>
+                Complete each Google Cloud step in order. Google grants Calendar and Gmail send
+                access. It does not sign administrators into the platform.
+              </p>
+            </div>
+
+            <div class="stepper">
+              <div class="step-tabs" role="tablist" aria-label="Google OAuth setup steps">
+                <button
+                  type="button"
+                  class="step-tab active"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="google-step-1"
+                  id="google-tab-1"
+                >
+                  <span>1</span><span>Project</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-2"
+                  id="google-tab-2"
+                >
+                  <span>2</span><span>Calendar API</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-3"
+                  id="google-tab-3"
+                >
+                  <span>3</span><span>Consent</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-4"
+                  id="google-tab-4"
+                >
+                  <span>4</span><span>Client</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-5"
+                  id="google-tab-5"
+                >
+                  <span>5</span><span>Credentials</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-6"
+                  id="google-tab-6"
+                >
+                  <span>6</span><span>Start</span>
+                </button>
+                <button
+                  type="button"
+                  class="step-tab"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="google-step-7"
+                  id="google-tab-7"
+                >
+                  <span>7</span><span>Authorize</span>
+                </button>
+              </div>
+
+              <div>
+                <article
+                  class="step-panel active"
+                  role="tabpanel"
+                  id="google-step-1"
+                  aria-labelledby="google-tab-1"
+                >
+                  <p class="eyebrow">Step 1</p>
+                  <h3>Create or select a Google Cloud project</h3>
+                  <ol>
+                    <li>Open Google Cloud Console.</li>
+                    <li>Select an existing test project or create a new project.</li>
+                    <li>
+                      Use separate Google Cloud projects for test and production environments.
+                    </li>
+                  </ol>
+                  <a
+                    class="button"
+                    href="https://console.cloud.google.com/projectcreate"
+                    target="_blank"
+                    rel="noreferrer"
+                    >Open project creation</a
+                  >
+                  <div class="note">
+                    Google recommends separate OAuth clients and projects for test and production
+                    use.
+                  </div>
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-2"
+                  aria-labelledby="google-tab-2"
+                  hidden
+                >
+                  <p class="eyebrow">Step 2</p>
+                  <h3>Enable Google Calendar API</h3>
+                  <ol>
+                    <li>Select your Google Cloud project.</li>
+                    <li>Open <strong>APIs &amp; Services</strong>.</li>
+                    <li>Find <strong>Google Calendar API</strong>.</li>
+                    <li>Select <strong>Enable</strong>.</li>
+                  </ol>
+                  <a
+                    class="button"
+                    href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    >Open Calendar API</a
+                  >
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-3"
+                  aria-labelledby="google-tab-3"
+                  hidden
+                >
+                  <p class="eyebrow">Step 3</p>
+                  <h3>Configure Google Auth Platform</h3>
+                  <ol>
+                    <li>Open <strong>Google Auth Platform</strong>.</li>
+                    <li>
+                      Set the application name and support email under <strong>Branding</strong>.
+                    </li>
+                    <li>
+                      Select <strong>External</strong> under <strong>Audience</strong> for normal
+                      Google accounts.
+                    </li>
+                    <li>Add each administrator under <strong>Test users</strong>.</li>
+                    <li>
+                      Add the Calendar event, calendar-list, and Gmail send scopes under
+                      <strong>Data Access</strong>.
+                    </li>
+                  </ol>
+                  <div class="command">
+                    <button class="copy" type="button">Copy</button
+                    >https://www.googleapis.com/auth/calendar.events<br />https://www.googleapis.com/auth/calendar.calendarlist.readonly<br />https://www.googleapis.com/auth/gmail.send
+                  </div>
+                  <a
+                    class="button"
+                    href="https://console.cloud.google.com/auth/overview"
+                    target="_blank"
+                    rel="noreferrer"
+                    >Open Google Auth Platform</a
+                  >
+                  <div class="note">
+                    If you use Google Workspace, your administrator can select an internal audience
+                    when the organization permits it.
+                  </div>
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-4"
+                  aria-labelledby="google-tab-4"
+                  hidden
+                >
+                  <p class="eyebrow">Step 4</p>
+                  <h3>Create the OAuth client</h3>
+                  <ol>
+                    <li>Open <strong>Google Auth Platform &gt; Clients</strong>.</li>
+                    <li>Select <strong>Create client</strong>.</li>
+                    <li>Select <strong>Web application</strong>.</li>
+                    <li>Enter a clear name, such as <strong>Example local admin</strong>.</li>
+                    <li>Add the exact authorized redirect URI below.</li>
+                    <li>Select <strong>Create</strong>.</li>
+                  </ol>
+                  <div class="command">
+                    <button class="copy" type="button">Copy</button
+                    >http://localhost/login/oauth2/code/google
+                  </div>
+                  <a
+                    class="button"
+                    href="https://console.cloud.google.com/auth/clients"
+                    target="_blank"
+                    rel="noreferrer"
+                    >Open OAuth clients</a
+                  >
+                  <div class="warning">
+                    <strong>Exact match required:</strong> A different host, port, path, or trailing
+                    slash causes <code>redirect_uri_mismatch</code>.
+                  </div>
+                  <div class="note">
+                    <strong>Why localhost:</strong> Google Cloud rejects
+                    <code>admin.localhost</code> with a top-level-domain error, so the local URI
+                    uses plain <code>localhost</code>. Set
+                    <code>PLATFORM_ADMIN_BASE_URL=http://localhost</code> in the local environment
+                    file so the backend sends exactly that URI. Traefik routes both hostnames to the
+                    admin UI.
+                  </div>
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-5"
+                  aria-labelledby="google-tab-5"
+                  hidden
+                >
+                  <p class="eyebrow">Step 5</p>
+                  <h3>Store credentials in the local environment</h3>
+                  <ol>
+                    <li>Copy the client ID from Google Cloud.</li>
+                    <li>Copy the client secret.</li>
+                    <li>Generate separate 32-byte keys for Google and Strapi tokens.</li>
+                    <li>Open the repository <code>.env</code> file.</li>
+                    <li>Add the generated configuration block.</li>
+                  </ol>
+                  <div class="warning">
+                    <strong>Keep the secret private:</strong> Do not commit <code>.env</code>. Do
+                    not put the client secret in Angular code or browser storage.
+                  </div>
+                  <a class="button secondary" href="#environment">Build the configuration</a>
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-6"
+                  aria-labelledby="google-tab-6"
+                  hidden
+                >
+                  <p class="eyebrow">Step 6</p>
+                  <h3>Recreate the application containers</h3>
+                  <p>
+                    Docker Compose reads <code>.env</code> when it creates each container. Recreate
+                    the backend and admin after each authentication configuration change.
+                  </p>
+                  <div class="command">
+                    <button class="copy" type="button">Copy</button>docker compose up -d --build
+                    --force-recreate backend admin
+                  </div>
+                  <p>Wait until both services report <code>healthy</code>.</p>
+                  <div class="command">
+                    <button class="copy" type="button">Copy</button>docker compose ps backend admin
+                  </div>
+                </article>
+
+                <article
+                  class="step-panel"
+                  role="tabpanel"
+                  id="google-step-7"
+                  aria-labelledby="google-tab-7"
+                  hidden
+                >
+                  <p class="eyebrow">Step 7</p>
+                  <h3>Connect a Google account</h3>
+                  <ol>
+                    <li>Open the operations admin.</li>
+                    <li>Sign in with a local Strapi Super Admin account.</li>
+                    <li>Open <strong>Connections</strong>.</li>
+                    <li>Select <strong>Connect Google services</strong>.</li>
+                    <li>Approve Google Calendar event management and calendar-list access.</li>
+                    <li>Map each platform resource ID to a writable calendar.</li>
+                  </ol>
+                  <a class="button" href="http://admin.localhost">Open operations admin</a>
+                  <div class="note">
+                    The backend encrypts OAuth and Strapi session tokens in PostgreSQL.
+                    Administrator sign-out and Google disconnect are independent operations.
+                  </div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section id="environment">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Local configuration</p>
+                <h2>Build the Google environment block</h2>
+              </div>
+              <p>
+                This builder does not save input. Clear this page before screen sharing if it
+                contains a client secret.
+              </p>
+            </div>
+            <div class="builder">
+              <div class="card">
+                <div class="field">
+                  <label for="client-id">Google client ID</label
+                  ><input
+                    id="client-id"
+                    type="text"
+                    autocomplete="off"
+                    placeholder="000000.apps.googleusercontent.com"
+                  />
+                </div>
+                <div class="field">
+                  <label for="client-secret">Google client secret</label
+                  ><input
+                    id="client-secret"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Enter the secret locally"
+                  />
+                </div>
+                <div class="field">
+                  <label for="token-key">Google token encryption key</label
+                  ><input
+                    id="token-key"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Base64-encoded 32-byte key"
+                  />
+                </div>
+                <div class="field">
+                  <label for="strapi-token-key">Strapi token encryption key</label
+                  ><input
+                    id="strapi-token-key"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Base64-encoded 32-byte key"
+                  />
+                </div>
+                <button class="button secondary" id="toggle-secret" type="button">
+                  Show secret
+                </button>
+                <button class="button secondary" id="generate-key" type="button">
+                  Generate encryption key
+                </button>
+              </div>
+              <div class="builder-output">
+                <div class="command" id="env-output">
+                  <button class="copy" type="button">Copy</button><span></span>
+                </div>
+                <p>Put this block in <code>.env</code> at the repository root.</p>
+                <div class="warning">
+                  <strong>Security:</strong> The generated block contains a secret. Store it only in
+                  the local environment or an approved secret manager.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="verify">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Troubleshooting</p>
+                <h2>Verify the connection</h2>
+              </div>
+              <p>Use these checks before you change application code.</p>
+            </div>
+            <div class="grid two">
+              <div class="card">
+                <h3>Authentication mode</h3>
+                <p>
+                  The response must contain <code>"mode":"strapi"</code> and
+                  <code>"enabled":true</code>. <code>googleCalendarEnabled</code> reports Calendar
+                  configuration.
+                </p>
+                <div class="command">
+                  <button class="copy" type="button">Copy</button>curl -sS
+                  http://admin.localhost/api/v1/auth/config
+                </div>
+              </div>
+              <div class="card">
+                <h3>Container values</h3>
+                <p>Check non-secret values inside the backend container.</p>
+                <div class="command">
+                  <button class="copy" type="button">Copy</button>docker compose exec backend
+                  printenv PLATFORM_GOOGLE_ENABLED PLATFORM_ADMIN_BASE_URL
+                </div>
+              </div>
+            </div>
+            <details>
+              <summary>The operations admin rejects my credentials</summary>
+              <p>
+                Use a local Strapi administrator account. Wait five minutes after repeated failures.
+                Google credentials cannot sign in to the operations admin.
+              </p>
+            </details>
+            <details>
+              <summary>I can open Content but no other section</summary>
+              <p>
+                Assign the Strapi <code>strapi-super-admin</code> role when the account requires
+                full platform administration.
+              </p>
+            </details>
+            <details>
+              <summary>Google reports redirect_uri_mismatch</summary>
+              <p>
+                Register exactly
+                <code>http://localhost/login/oauth2/code/google</code>. Do not add a trailing slash.
+                The backend must send the same URI: set
+                <code>PLATFORM_ADMIN_BASE_URL=http://localhost</code> in the local environment file.
+              </p>
+            </details>
+            <details>
+              <summary>Google reports that the app is being tested</summary>
+              <p>Add the selected Google account to the OAuth consent screen test-user list.</p>
+            </details>
+            <details>
+              <summary>The backend cannot decrypt the saved connection</summary>
+              <p>
+                Restore the original <code>PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY</code>. If the key is
+                lost, disconnect the database record and complete Google consent again.
+              </p>
+            </details>
+            <details>
+              <summary>I want to wipe all data and start clean</summary>
+              <p>
+                Stop the stack, delete its volumes, then re-run setup. To reset the company details
+                and secrets as well, remove them first:
+              </p>
+              <div class="command">
+                <button class="copy" type="button">Copy</button>docker compose down -v rm -f .env
+                config/business.json .setup-state.json sh setup.sh
+              </div>
+              <p>Keep the company details and existing secrets? Remove only the state flag:</p>
+              <div class="command">
+                <button class="copy" type="button">Copy</button>docker compose down -v rm -f
+                .setup-state.json sh setup.sh
+              </div>
+            </details>
+          </section>
+
+          <section id="architecture">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">System boundaries</p>
+                <h2>Architecture rules</h2>
+              </div>
+              <p>
+                The monorepo contains logical modules. Each component has one primary
+                responsibility.
+              </p>
+            </div>
+            <div class="grid two">
+              <article class="card">
+                <h3>Content</h3>
+                <p>
+                  Strapi owns editorial content and CMS-managed tables. It does not own orders,
+                  inventory, payments, or booking allocation.
+                </p>
+              </article>
+              <article class="card">
+                <h3>Transactions</h3>
+                <p>
+                  Spring Boot owns booking and commerce transactions. Liquibase changes
+                  application-owned tables only.
+                </p>
+              </article>
+              <article class="card">
+                <h3>Identity</h3>
+                <p>
+                  Local Strapi accounts authenticate administrators. Strapi roles control access.
+                  Google OAuth grants Calendar and Gmail send access. It does not grant mailbox read
+                  access. The backend keeps all provider tokens out of Angular browser storage.
+                </p>
+              </article>
+              <article class="card">
+                <h3>Calendar providers</h3>
+                <p>
+                  The booking domain uses provider-neutral ports. Google is the current adapter.
+                  Microsoft Calendar can be added without Google branches in booking services.
+                </p>
+              </article>
+              <article class="card">
+                <h3>Payments</h3>
+                <p>
+                  The payment provider settles payments. The backend verifies signed webhooks and
+                  does not trust browser totals or redirects.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section id="documents">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Reference library</p>
+                <h2>Project documents</h2>
+              </div>
+              <p>Use the detailed documents for contracts, decisions, and operational limits.</p>
+            </div>
+            <ul class="docs-list">
+              <li><a href="MANUAL.html">Operator manual</a></li>
+              <li><a href="docs/GOOGLE-OAUTH.md">Google OAuth setup</a></li>
+              <li><a href="docs/BOOKING-API.md">Booking API</a></li>
+              <li><a href="docs/EXTENSION-ARCHITECTURE.md">Extension architecture</a></li>
+              <li><a href="docs/FIRST-RUN-SETUP.md">First-run setup</a></li>
+              <li><a href="docs/ARCHITECTURE.md">Architecture</a></li>
+              <li><a href="docs/DOMAIN-AND-API.md">Domain and API contracts</a></li>
+              <li><a href="docs/IMPLEMENTATION-STATUS.md">Implementation status</a></li>
+              <li><a href="docs/IMPLEMENTATION-BACKLOG.md">Implementation backlog</a></li>
+              <li><a href="docs/DECISIONS.md">Decision register</a></li>
+              <li><a href="docs/WRITING-STYLE.md">Writing style</a></li>
+            </ul>
+          </section>
+        </main>
+      </div>
+      <footer>Example Platform &middot; Development guide &middot; Not production-ready</footer>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite">Copied</div>
+
+    <script>
+      const checklist = [...document.querySelectorAll('[data-check]')];
+      const progressBar = document.querySelector('#progress-bar');
+      const progressLabel = document.querySelector('#progress-label');
+      const toast = document.querySelector('#toast');
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        window.clearTimeout(showToast.timeout);
+        showToast.timeout = window.setTimeout(() => toast.classList.remove('show'), 1500);
+      }
+
+      function updateProgress() {
+        const completed = checklist.filter((item) => item.checked).length;
+        progressBar.style.width = `${(completed / checklist.length) * 100}%`;
+        progressLabel.textContent = `${completed} of ${checklist.length} steps complete`;
+      }
+
+      checklist.forEach((item) => {
+        item.checked = localStorage.getItem(`readme:${item.dataset.check}`) === 'true';
+        item.addEventListener('change', () => {
+          localStorage.setItem(`readme:${item.dataset.check}`, String(item.checked));
+          updateProgress();
+        });
+      });
+
+      document.querySelector('#reset-progress').addEventListener('click', () => {
+        checklist.forEach((item) => {
+          item.checked = false;
+          localStorage.removeItem(`readme:${item.dataset.check}`);
+        });
+        updateProgress();
+        showToast('Progress reset');
+      });
+
+      document.querySelectorAll('.copy').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const container = button.parentElement;
+          const text =
+            container.querySelector('span')?.textContent ||
+            container.textContent.replace('Copy', '').trim();
+          try {
+            await navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard');
+          } catch {
+            showToast('Clipboard access is not available');
+          }
+        });
+      });
+
+      const tabs = [...document.querySelectorAll('.step-tab')];
+      const panels = [...document.querySelectorAll('.step-panel')];
+
+      function selectTab(selected) {
+        tabs.forEach((tab) => {
+          const active = tab === selected;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', String(active));
+        });
+        panels.forEach((panel) => {
+          const active = panel.id === selected.getAttribute('aria-controls');
+          panel.classList.toggle('active', active);
+          panel.hidden = !active;
+        });
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(tab));
+        tab.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+          event.preventDefault();
+          const offset = event.key === 'ArrowRight' ? 1 : -1;
+          const next = tabs[(index + offset + tabs.length) % tabs.length];
+          selectTab(next);
+          next.focus();
+        });
+      });
+
+      const clientId = document.querySelector('#client-id');
+      const clientSecret = document.querySelector('#client-secret');
+      const tokenKey = document.querySelector('#token-key');
+      const strapiTokenKey = document.querySelector('#strapi-token-key');
+      const envText = document.querySelector('#env-output span');
+
+      function buildEnvironment() {
+        envText.textContent = [
+          'PLATFORM_GOOGLE_ENABLED=true',
+          'PLATFORM_ADMIN_BASE_URL=http://localhost',
+          `GOOGLE_CLIENT_ID=${clientId.value || 'your-client-id.apps.googleusercontent.com'}`,
+          `GOOGLE_CLIENT_SECRET=${clientSecret.value || 'your-client-secret'}`,
+          `PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY=${tokenKey.value || 'generate-a-base64-32-byte-key'}`,
+          `PLATFORM_STRAPI_TOKEN_ENCRYPTION_KEY=${strapiTokenKey.value || 'generate-a-different-base64-32-byte-key'}`,
+          'PLATFORM_BOOKING_PUBLIC_RESOURCE_ID=default',
+          'PLATFORM_BOOKING_MAXIMUM_CALENDAR_SYNC_AGE_SECONDS=300',
+        ].join('\n');
+      }
+
+      [clientId, clientSecret, tokenKey, strapiTokenKey].forEach((input) =>
+        input.addEventListener('input', buildEnvironment),
+      );
+      document.querySelector('#toggle-secret').addEventListener('click', (event) => {
+        const hidden = clientSecret.type === 'password';
+        clientSecret.type = hidden ? 'text' : 'password';
+        event.currentTarget.textContent = hidden ? 'Hide secret' : 'Show secret';
+      });
+      document.querySelector('#generate-key').addEventListener('click', () => {
+        const value = new Uint8Array(32);
+        crypto.getRandomValues(value);
+        tokenKey.value = btoa(String.fromCharCode(...value));
+        const strapiValue = new Uint8Array(32);
+        crypto.getRandomValues(strapiValue);
+        strapiTokenKey.value = btoa(String.fromCharCode(...strapiValue));
+        buildEnvironment();
+        showToast('Encryption keys generated');
+      });
+
+      const links = [...document.querySelectorAll('nav a')];
+      const sections = [...document.querySelectorAll('main section')];
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+          links.forEach((link) =>
+            link.classList.toggle('active', link.hash === `#${visible.target.id}`),
+          );
+        },
+        { rootMargin: '-20% 0px -65%', threshold: [0, 0.2, 0.5] },
+      );
+      sections.forEach((section) => observer.observe(section));
+
+      updateProgress();
+      buildEnvironment();
+    </script>
+  </body>
+</html>

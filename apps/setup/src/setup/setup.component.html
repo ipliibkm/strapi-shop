@@ -1,0 +1,142 @@
+<openshopfront-shell appName="Business setup" subtitle="First installation">
+  <mat-card class="mx-auto max-w-3xl p-6">
+    <h1 class="text-2xl font-semibold">Set up your business</h1>
+    <p class="my-3">Complete each step. You can check the settings before you save them.</p>
+    @if (message()) {
+      <p class="my-4 border rounded p-3" role="status">{{ message() }}</p>
+    }
+    <mat-stepper linear #wizard>
+      <mat-step [completed]="validCompany()">
+        <ng-template matStepLabel>Company</ng-template>
+        <div class="grid gap-3 mt-5 md:grid-cols-2">
+          <mat-form-field>
+            <mat-label>Company name</mat-label>
+            <input matInput [(ngModel)]="company.name" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Contact email</mat-label>
+            <input matInput type="email" [(ngModel)]="company.contactEmail" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Time zone</mat-label>
+            <input matInput [(ngModel)]="company.timezone" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Language code</mat-label>
+            <input matInput [(ngModel)]="company.locale" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Currency</mat-label>
+            <input matInput [(ngModel)]="company.currency" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Address (optional)</mat-label>
+            <input matInput [(ngModel)]="company.address" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Phone (optional)</mat-label>
+            <input matInput [(ngModel)]="company.phone" />
+          </mat-form-field>
+        </div>
+        <button mat-flat-button matStepperNext [disabled]="!validCompany()">Next</button>
+      </mat-step>
+
+      <mat-step [completed]="validAdmin()">
+        <ng-template matStepLabel>Administrator</ng-template>
+        <p class="my-4">Create the first operator record. Sign-in is not available yet.</p>
+        <mat-form-field class="w-full">
+          <mat-label>Admin email</mat-label>
+          <input matInput type="email" [(ngModel)]="admin.email" />
+        </mat-form-field>
+        <mat-form-field class="w-full">
+          <mat-label>Password (14 or more characters)</mat-label>
+          <input
+            matInput
+            type="password"
+            autocomplete="new-password"
+            [(ngModel)]="admin.password"
+          />
+        </mat-form-field>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-flat-button matStepperNext [disabled]="!validAdmin()">Next</button>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Modules</ng-template>
+        <p class="my-3">
+          The website module is required. Other modules remain inactive until you configure them.
+        </p>
+        <div class="grid gap-2">
+          @for (mod of optionalModules; track mod) {
+            <mat-checkbox [checked]="modules.includes(mod)" (change)="toggle(mod, $event.checked)">
+              {{ mod }}
+            </mat-checkbox>
+          }
+        </div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-flat-button matStepperNext>Next</button>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Branding</ng-template>
+        <p class="my-3">Choose independent themes for the admin and the storefront.</p>
+        <mat-form-field>
+          <mat-label>Admin theme</mat-label>
+          <mat-select [(ngModel)]="adminTheme">
+            @for (item of themes; track item.key) {
+              <mat-option [value]="item.key">{{ item.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Storefront theme</mat-label>
+          <mat-select [(ngModel)]="storefrontTheme">
+            @for (item of themes; track item.key) {
+              <mat-option [value]="item.key">{{ item.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-flat-button matStepperNext>Next</button>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Integrations</ng-template>
+        <p class="my-3">
+          Google Calendar, Gmail, and Stripe need account connections. Do not enter API secrets
+          here.
+        </p>
+        <p>The setup saves module choices. It does not connect external services.</p>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-flat-button matStepperNext>Next</button>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Verify and save</ng-template>
+        <p class="my-3">Company: {{ company.name }}. Modules: {{ modules.join(', ') }}.</p>
+        <button mat-stroked-button [disabled]="checking()" (click)="verify()">
+          Check system settings
+        </button>
+        @for (check of checks(); track check.id) {
+          <p class="my-2" role="status">{{ check.id }}: {{ check.status }}. {{ check.message }}</p>
+        }
+        <p class="my-2">A saved setting does not mean that Google or Stripe is connected.</p>
+        <p class="my-2">
+          Run the local setup script to get the setup token. Keep the token private.
+        </p>
+        <mat-form-field class="w-full">
+          <mat-label>One-time setup token</mat-label>
+          <input matInput type="password" autocomplete="off" [(ngModel)]="token" />
+        </mat-form-field>
+        <button mat-button matStepperPrevious>Back</button>
+        <button
+          mat-flat-button
+          [disabled]="saving() || !validCompany() || !validAdmin() || token.length < 32"
+          (click)="save()"
+        >
+          Save setup
+        </button>
+      </mat-step>
+    </mat-stepper>
+  </mat-card>
+</openshopfront-shell>

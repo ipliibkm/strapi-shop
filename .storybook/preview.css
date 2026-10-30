@@ -1,0 +1,228 @@
+/* Minimal styling so UI-lib components render recognizably in Storybook, where the app's
+   global stylesheet is not loaded. Mirrors the key classes used by the components. */
+:root {
+  --openshopfront-bg: #f5f0e8;
+  --surface: #ffffff;
+  --border: #e2d8c9;
+  --muted: #7c7166;
+  --openshopfront-fg: #2a241e;
+  --openshopfront-accent: #a65e37;
+}
+body {
+  margin: 0;
+  background: var(--openshopfront-bg);
+  color: var(--openshopfront-fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Theme picker */
+.theme-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 340px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--openshopfront-fg);
+  text-align: left;
+  cursor: pointer;
+}
+.theme-card.selected {
+  border-color: var(--openshopfront-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--openshopfront-accent) 18%, transparent);
+}
+.swatches {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.swatches i {
+  width: 26px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid rgb(0 0 0 / 0.12);
+}
+.meta {
+  display: grid;
+  gap: 3px;
+}
+.meta strong {
+  font-size: 15px;
+}
+.meta small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.custom-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+.custom-toggle {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+.custom-editor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.color-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+}
+.color-field {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.color-field span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.color-field input[type='color'] {
+  inline-size: 48px;
+  block-size: 34px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.hint-text {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Language list */
+.language-rows {
+  display: grid;
+  gap: 8px;
+  width: 340px;
+}
+.language-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.language-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.language-name small {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* Metric card */
+.metric-grid,
+.story-metric-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.metric {
+  width: 200px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  display: grid;
+  gap: 4px;
+}
+.metric p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.metric strong {
+  font-size: 26px;
+}
+.metric small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.metric-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+}
+.metric-icon.blue {
+  background: #e3edf7;
+  color: #2563a8;
+}
+.metric-icon.amber {
+  background: #f7ecd9;
+  color: #a06b1c;
+}
+.metric-icon.green {
+  background: #dcefe4;
+  color: #2f7d54;
+}
+.metric-icon.violet {
+  background: #ece3f5;
+  color: #6d4aa8;
+}
+
+/* Capability table */
+.capability-table {
+  width: 520px;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.cap-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+.cap-row:last-child {
+  border-bottom: none;
+}
+.cap-row.head {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eee;
+  color: var(--muted);
+}
+.badge.live {
+  background: #dcefe4;
+  color: #2f7d54;
+}

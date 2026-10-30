@@ -1,0 +1,121 @@
+<!-- langVersion() is read here so the whole view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+@if (!auth.ready()) { } @else if (!auth.user()) {
+<main class="auth-gate">
+  <form class="auth-card" (submit)="signIn($event, email.value, password.value)">
+    <span class="auth-mark"><mat-icon>admin_panel_settings</mat-icon></span>
+    <p class="eyebrow">{{ t('OpenShopfront ADMINISTRATION') }}</p>
+    <h1>{{ t('Admin sign-in') }}</h1>
+    <p>{{ t('Use your local Strapi administrator account.') }}</p>
+    <label
+      ><span>{{ t('Email address') }}</span
+      ><input #email type="email" autocomplete="username" required autofocus
+    /></label>
+    <label
+      ><span>{{ t('Password') }}</span
+      ><input #password type="password" autocomplete="current-password" required
+    /></label>
+    @if (auth.error()) {
+    <p class="auth-error" role="alert">{{ t(auth.error()) }}</p>
+    }
+    <button mat-flat-button [disabled]="signingIn()">
+      {{ signingIn() ? t('Signing in') : t('Sign in') }}
+    </button>
+  </form>
+</main>
+} @else {
+<div class="admin-shell">
+  <aside class="sidebar" [class.mobile-open]="menuOpen()">
+    <button
+      class="brand"
+      (click)="select(auth.user()?.superAdmin ? 'overview' : 'content')"
+      [attr.aria-label]="t('Open workspace')"
+    >
+      <span class="brand-mark"><mat-icon>grid_view</mat-icon></span
+      ><span>OpenShopfront</span>
+    </button>
+    <nav aria-label="Administration">
+      @for (item of visibleNavigation(); track item.key) {
+      <button class="nav-item" [class.active]="section() === item.key" (click)="select(item.key)">
+        <mat-icon>{{ item.icon }}</mat-icon><span>{{ t(item.label) }}</span>
+      </button>
+      }
+    </nav>
+    <div class="sidebar-footer">
+      {{ auth.user()?.superAdmin ? status.backendOnline() ? t('Backend online') : t('Backend
+      unavailable') : t('Strapi content access') }}
+    </div>
+  </aside>
+
+  <div class="workspace">
+    <header class="topbar">
+      <button
+        class="menu-button"
+        (click)="menuOpen.set(!menuOpen())"
+        [attr.aria-label]="t('Toggle navigation')"
+      >
+        <mat-icon>menu</mat-icon>
+      </button>
+      <button
+        class="back-button"
+        [disabled]="!canGoBack()"
+        (click)="goBack()"
+        [attr.aria-label]="t('Previous view')"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <p class="breadcrumb">{{ t('Operations') }} / {{ t(sectionLabel()) }}</p>
+        <h1>{{ t(sectionLabel()) }}</h1>
+      </div>
+      <div class="topbar-actions">
+        <label class="lang-switch" [attr.aria-label]="t('Interface language')">
+          <mat-icon>translate</mat-icon>
+          <select [value]="i18n.lang()" (change)="onLangChange($event)">
+            @for (item of languageOptions(); track item.code) {
+            <!-- [selected] is set per option so the persisted language is shown on first render, when the select-level [value] has not yet matched an existing option. -->
+            <option [value]="item.code" [selected]="item.code === i18n.lang()">
+              {{ item.nativeName }}
+            </option>
+            }
+          </select>
+        </label>
+        <button mat-stroked-button (click)="auth.logout()">{{ t('Sign out') }}</button>
+        <span class="avatar"
+          >{{ auth.user()?.profile?.name?.toString()?.charAt(0)?.toUpperCase() || 'A' }}</span
+        >
+      </div>
+    </header>
+
+    <main>
+      @if (section() === 'overview') {
+      <ip-overview (navigate)="select($event)" />
+      } @if (section() === 'dashboard') {
+      <ip-dashboard (navigate)="select($event)" />
+      } @if (section() === 'bookings') {
+      <ip-bookings [enabled]="auth.user()?.superAdmin === true" />
+      } @if (section() === 'content') {
+      <ip-business-profile />
+      } @if (section() === 'resources') {
+      <ip-booking-services [enabled]="auth.user()?.superAdmin === true" />
+      } @if (section() === 'pages') {
+      <ip-pages />
+      } @if (section() === 'forms') {
+      <ip-forms />
+      } @if (section() === 'email') {
+      <ip-email-settings />
+      } @if (section() === 'integrations') {
+      <ip-integrations />
+      } @if (section() === 'commerce') {
+      <ip-commerce />
+      } @if (section() === 'reports') {
+      <ip-reports />
+      } @if (section() === 'appearance') {
+      <ip-appearance />
+      } @if (section() === 'system') {
+      <ip-system />
+      }
+    </main>
+  </div>
+</div>
+}

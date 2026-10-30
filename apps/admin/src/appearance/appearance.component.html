@@ -1,0 +1,153 @@
+<!-- langVersion() is read here so the whole view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('APPEARANCE') }}</p>
+    <h2>{{ t('Appearance and languages') }}</h2>
+    <p>
+      {{
+        t(
+          'Configure the color palette and available languages for your customer site and for this admin panel.'
+        )
+      }}
+    </p>
+  </div>
+</div>
+
+<nav class="form-tabs" role="tablist" [attr.aria-label]="t('Appearance sections')">
+  <button
+    type="button"
+    role="tab"
+    [attr.aria-selected]="tab() === 'storefront'"
+    [class.active]="tab() === 'storefront'"
+    (click)="switchTab('storefront')"
+  >
+    {{ t('Storefront') }}
+  </button>
+  <button
+    type="button"
+    role="tab"
+    [attr.aria-selected]="tab() === 'admin'"
+    [class.active]="tab() === 'admin'"
+    (click)="switchTab('admin')"
+  >
+    {{ t('Admin panel') }}
+  </button>
+</nav>
+
+@if (tab() === 'storefront') {
+  <section class="panel appearance-panel">
+    <header class="appearance-head">
+      <div>
+        <p class="label">{{ t('COLOR PALETTE') }}</p>
+        <h3>{{ t('Storefront color palette') }}</h3>
+      </div>
+      @if (storefrontBusy()) {
+        <span class="badge">{{ t('SAVING') }}</span>
+      }
+    </header>
+    <openshopfront-theme-picker
+      [themes]="themePickerOptions()"
+      [selectedKey]="storefrontTheme()"
+      [usingCustom]="usingCustomStorefront()"
+      [customSwatches]="storefrontCustomSwatches()"
+      [paletteFields]="paletteFieldDefs()"
+      [draftPalette]="storefrontDraft()"
+      [busy]="storefrontBusy()"
+      [labels]="storefrontPickerLabels()"
+      (selectPreset)="saveStorefrontTheme($event)"
+      (openCustom)="openCustomPalette()"
+      (updateColor)="updateDraftColor($event.key, $event.value)"
+      (saveCustom)="saveCustomPalette()"
+    ></openshopfront-theme-picker>
+  </section>
+
+  <section class="panel appearance-panel">
+    <header class="appearance-head">
+      <div>
+        <p class="label">{{ t('INTERNATIONALIZATION') }}</p>
+        <h3>{{ t('Website languages') }}</h3>
+      </div>
+      @if (storefrontBusy()) {
+        <span class="badge">{{ t('SAVING') }}</span>
+      }
+    </header>
+    <p class="hint-text">
+      {{
+        t(
+          'Enabled languages appear in the storefront language switcher. Keep at least one language enabled.'
+        )
+      }}
+    </p>
+    @if (storefrontSettings()) {
+      <openshopfront-language-list
+        [languages]="storefrontLanguages()"
+        [label]="t('Website languages')"
+        (toggle)="onStorefrontLanguageToggle($event)"
+      ></openshopfront-language-list>
+    }
+  </section>
+
+  @if (storefrontNotice()) {
+    <p class="form-notice" role="status">{{ storefrontNotice() }}</p>
+  }
+}
+
+@if (tab() === 'admin') {
+  <section class="panel appearance-panel">
+    <header class="appearance-head">
+      <div>
+        <p class="label">{{ t('COLOR PALETTE') }}</p>
+        <h3>{{ t('Admin panel color palette') }}</h3>
+      </div>
+    </header>
+    <p class="hint-text">
+      {{ t('This selection is saved in this browser and applies to the admin panel.') }}
+    </p>
+    <openshopfront-theme-picker
+      [themes]="themePickerOptions()"
+      [selectedKey]="theme.current()"
+      [usingCustom]="usingCustomAdmin()"
+      [customSwatches]="adminCustomSwatches()"
+      [paletteFields]="paletteFieldDefs()"
+      [draftPalette]="adminDraft()"
+      [labels]="adminPickerLabels()"
+      (selectPreset)="theme.setTheme($event)"
+      (openCustom)="openAdminCustomPalette()"
+      (updateColor)="updateAdminDraftColor($event.key, $event.value)"
+      (saveCustom)="applyAdminCustomPalette()"
+    ></openshopfront-theme-picker>
+  </section>
+
+  <section class="panel appearance-panel">
+    <header class="appearance-head">
+      <div>
+        <p class="label">{{ t('INTERNATIONALIZATION') }}</p>
+        <h3>{{ t('Admin interface languages') }}</h3>
+      </div>
+      @if (adminUi.busy()) {
+        <span class="badge">{{ t('SAVING') }}</span>
+      }
+    </header>
+    <p class="hint-text">
+      {{
+        t(
+          'Enabled languages appear in the admin panel language switcher for every administrator. Keep at least one enabled.'
+        )
+      }}
+    </p>
+    @if (adminUi.languages()) {
+      <openshopfront-language-list
+        [languages]="adminUi.list()"
+        [label]="t('Admin interface languages')"
+        (toggle)="onAdminLanguageToggle($event)"
+      ></openshopfront-language-list>
+    } @else {
+      <p class="hint-text">{{ t('Loading…') }}</p>
+    }
+  </section>
+
+  @if (adminUi.notice()) {
+    <p class="form-notice" role="status">{{ adminUi.notice() }}</p>
+  }
+}

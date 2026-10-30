@@ -1,0 +1,68 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+@if (definition(); as form) {
+  <form class="storefront-form" (submit)="submit($event)">
+    <h2>{{ form.name }}</h2>
+    <input
+      class="form-honeypot"
+      name="website"
+      type="text"
+      tabindex="-1"
+      autocomplete="off"
+      aria-hidden="true"
+    />
+    @for (field of form.fields; track field.key) {
+      @if (field.type === 'checkbox') {
+        <label class="storefront-checkbox">
+          <input [name]="field.key" type="checkbox" [required]="field.required" />
+          <span>{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+        </label>
+      } @else {
+        <label class="storefront-form-field">
+          <span>{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+          @if (field.type === 'textarea') {
+            <textarea
+              [name]="field.key"
+              [placeholder]="field.placeholder"
+              [required]="field.required"
+              [attr.minlength]="field.minLength || null"
+              [attr.maxlength]="field.maxLength || null"
+              rows="5"
+            ></textarea>
+          } @else if (field.type === 'select') {
+            <select [name]="field.key" [required]="field.required">
+              <option value="">{{ t('form.selectOption') }}</option>
+              @for (option of field.options; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select>
+          } @else {
+            <input
+              [name]="field.key"
+              [type]="field.type"
+              [placeholder]="field.placeholder"
+              [required]="field.required"
+              [attr.minlength]="field.minLength || null"
+              [attr.maxlength]="field.maxLength || null"
+            />
+          }
+          @if (field.helpText) {
+            <small>{{ field.helpText }}</small>
+          }
+        </label>
+      }
+    }
+    <button mat-flat-button class="!rounded-full" [disabled]="submitting()">
+      {{ submitting() ? t('form.submitting') : form.submitLabel }}
+    </button>
+    @if (status(); as result) {
+      <p class="form-status" [class.error]="result.error" role="status">
+        {{ result.message }}
+      </p>
+    }
+  </form>
+} @else if (!failed()) {
+  <p class="muted">{{ t('form.loading') }}</p>
+} @else {
+  <p class="muted">{{ t('form.unavailable') }}</p>
+}

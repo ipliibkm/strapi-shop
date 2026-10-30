@@ -1,0 +1,187 @@
+<div class="site min-h-screen">
+  <!-- langVersion() is read here so the whole view re-renders when the language changes -->
+  <span [attr.data-lang]="langVersion()" hidden></span>
+  <div
+    class="announcement bg-slate-950 text-center py-2.5 px-4 text-xs font-medium tracking-wide text-white"
+  >
+    {{ t('announcement') }}
+  </div>
+  <header
+    class="site-header sticky top-0 z-20 theme-bg-blur backdrop-blur-xl border-b theme-border"
+  >
+    <div class="header-inner mx-auto max-w-7xl px-5 md:px-10 h-20 flex items-center gap-6">
+      <button
+        class="brand flex items-center gap-3"
+        (click)="navigate('home')"
+        [attr.aria-label]="t('aria.openHome')"
+      >
+        <span class="brand-mark">S</span
+        ><span class="text-xl font-bold tracking-tight"
+          >STUDIO<span class="text-amber-600">.</span></span
+        >
+      </button>
+      <nav class="hidden md:flex items-center gap-8 ml-auto" [attr.aria-label]="t('aria.mainNav')">
+        @for (item of visibleNav(); track item.key) {
+        <button
+          (click)="navigate(item.key)"
+          [class.active-link]="page() === item.key"
+          class="nav-link text-sm font-medium"
+        >
+          {{ t('nav.' + item.key) }}
+        </button>
+        }
+      </nav>
+      @if (cart.count() > 0) {
+      <button mat-stroked-button class="!rounded-full cart-pill" (click)="navigate('cart')">
+        <mat-icon>shopping_bag</mat-icon>{{ cart.count() }}
+      </button>
+      } @if (enabledLanguageOptions().length > 1) {
+      <label class="lang-switcher">
+        <mat-icon>translate</mat-icon>
+        <select [value]="i18n.lang()" (change)="setLang($any($event.target).value)">
+          @for (item of enabledLanguageOptions(); track item.code) {
+          <!-- [selected] is set per option so the persisted language is shown on first render, when the select-level [value] has not yet matched an existing option. -->
+          <option [value]="item.code" [selected]="item.code === i18n.lang()">
+            {{ item.name }}
+          </option>
+          }
+        </select>
+      </label>
+      } @if (pageIsEnabled('booking')) {
+      <button
+        mat-flat-button
+        class="header-booking !rounded-full ml-auto md:ml-3"
+        (click)="navigate('booking')"
+      >
+        {{ t('header.bookVisit') }} <mat-icon iconPositionEnd>arrow_outward</mat-icon>
+      </button>
+      }
+      <button
+        class="md:hidden p-2"
+        (click)="menuOpen.set(!menuOpen())"
+        [attr.aria-label]="t('aria.toggleMenu')"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-navigation"
+      >
+        <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+    @if (menuOpen()) {
+    <nav
+      id="mobile-navigation"
+      class="mobile-navigation md:hidden px-6 pb-5 grid gap-2 theme-bg"
+      [attr.aria-label]="t('aria.mobileNav')"
+    >
+      @for (item of visibleNav(); track item.key) {
+      <button
+        class="mobile-nav-link text-left"
+        [class.active]="page() === item.key"
+        [attr.aria-current]="page() === item.key ? 'page' : null"
+        (click)="navigate(item.key)"
+      >
+        {{ t('nav.' + item.key) }}
+      </button>
+      }
+    </nav>
+    }
+  </header>
+  <main id="main-content">
+    @if (!pageAvailable()) {
+    <section class="inner-hero">
+      <p class="eyebrow">{{ t('page.notAvailable.eyebrow') }}</p>
+      <h1 class="section-title mt-5">{{ t('page.notAvailable.title') }}</h1>
+    </section>
+    } @else if (page() === 'home') {
+    <ip-home
+      [loaded]="pageLoaded()"
+      [content]="contentFor('home')"
+      [products]="blockProducts()"
+      (navigate)="onBlockNavigate($event)"
+      (open)="openProduct($event)"
+    />
+    } @else if (page() === 'services') {
+    <ip-services
+      [loaded]="pageLoaded()"
+      [content]="contentFor('services')"
+      [products]="blockProducts()"
+      (navigate)="onBlockNavigate($event)"
+      (open)="openProduct($event)"
+    />
+    } @else if (page() === 'booking') {
+    <ip-booking
+      [content]="contentFor('booking')"
+      [products]="blockProducts()"
+      (navigate)="onBlockNavigate($event)"
+      (open)="openProduct($event)"
+    />
+    } @else if (page() === 'shop') {
+    <ip-shop
+      [content]="contentFor('shop')"
+      [products]="blockProducts()"
+      (navigate)="onBlockNavigate($event)"
+      (open)="openProduct($event)"
+    />
+    } @else if (page() === 'product') { @if (productSlug(); as slug) {
+    <ip-product [slug]="slug" (backToShop)="navigate('shop')" (goToCart)="navigate('cart')" />
+    } @else {
+    <section class="inner-hero">
+      <h1 class="section-title mt-5">{{ t('product.notFound') }}</h1>
+      <button mat-flat-button class="!mt-8" (click)="navigate('shop')">
+        {{ t('product.backToShop') }}
+      </button>
+    </section>
+    } } @else if (page() === 'cart') {
+    <ip-cart (browseShop)="navigate('shop')" />
+    } @else if (page() === 'order') { @if (productSlug(); as slug) {
+    <ip-order
+      [orderNumber]="slug"
+      [accessToken]="orderAccessToken()"
+      (backToShop)="navigate('shop')"
+    />
+    } } @else if (page() === 'about' || page() === 'contact') {
+    <ip-about
+      [page]="page()"
+      [loaded]="pageLoaded()"
+      [content]="contentFor(page())"
+      [products]="blockProducts()"
+      (navigate)="onBlockNavigate($event)"
+      (open)="openProduct($event)"
+    />
+    }
+  </main>
+  <footer class="bg-slate-950 text-white px-6 md:px-12 py-16">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
+      <div>
+        <div class="text-2xl font-bold">STUDIO<span class="text-amber-400">.</span></div>
+        <p class="mt-4 text-slate-400 max-w-sm leading-7">{{ t('footer.tagline') }}</p>
+      </div>
+      <div>
+        <p class="font-semibold mb-5">{{ t('footer.explore') }}</p>
+        <div class="grid gap-3">
+          @for (item of visibleNav(); track item.key) {
+          <button class="text-left text-slate-400 hover:text-white" (click)="navigate(item.key)">
+            {{ t('nav.' + item.key) }}
+          </button>
+          }
+        </div>
+      </div>
+      @if (previewMode) {
+      <div>
+        <p class="font-semibold mb-5">Appearance</p>
+        <mat-button-toggle-group
+          [value]="theme.current()"
+          (change)="theme.setTheme($event.value)"
+          aria-label="Storefront theme"
+          ><mat-button-toggle value="light">Maison</mat-button-toggle
+          ><mat-button-toggle value="dark">Noir</mat-button-toggle
+          ><mat-button-toggle value="ocean">Lagoon</mat-button-toggle
+          ><mat-button-toggle value="rosewater">Blush</mat-button-toggle></mat-button-toggle-group
+        >
+      </div>
+      }
+    </div>
+    <div class="max-w-7xl mx-auto border-t theme-border mt-16 pt-6 text-sm on-surface-muted-text">
+      {{ t('footer.copyright', { year: year }) }}
+    </div>
+  </footer>
+</div>

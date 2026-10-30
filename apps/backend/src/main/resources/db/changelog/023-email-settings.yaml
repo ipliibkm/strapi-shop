@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 023-email-settings
+      author: platform
+      changes:
+        # One row holds the configured subject lines and HTML templates per mail channel.
+        - createTable:
+            tableName: email_settings
+            columns:
+              - column: {name: id, type: integer, constraints: {primaryKey: true}}
+              - column:
+                  name: form_subject
+                  type: varchar(254)
+                  defaultValue: "Your form submission was received"
+                  constraints: {nullable: false}
+              - column: {name: form_template, type: text, defaultValue: "", constraints: {nullable: false}}
+              - column:
+                  name: order_subject
+                  type: varchar(254)
+                  defaultValue: "Order confirmed: {orderNumber}"
+                  constraints: {nullable: false}
+              - column: {name: order_template, type: text, defaultValue: "", constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        # Per-form template overrides for form submission receipts.
+        - createTable:
+            tableName: form_email_template
+            columns:
+              - column: {name: form_slug, type: varchar(64), constraints: {primaryKey: true, nullable: false}}
+              - column: {name: template, type: text, constraints: {nullable: false}}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}

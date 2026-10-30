@@ -1,0 +1,570 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('STOREFRONT') }}</p>
+    <h2>{{ t('Form builder') }}</h2>
+    <p>{{ t('Create reusable forms and configure their fields and validation rules.') }}</p>
+  </div>
+  <span class="badge live">{{ t('REUSABLE FORMS') }}</span>
+</div>
+<section class="form-builder-layout">
+  <aside class="sidebar-panel form-list-panel">
+    <header>
+      <p class="label">{{ t('REUSABLE FORMS') }}</p>
+      <h3>{{ t('Forms') }}</h3>
+    </header>
+    <nav class="form-tree" [attr.aria-label]="t('Form list')">
+      @for (item of forms(); track item.slug) {
+        <button
+          type="button"
+          [class.selected]="selectedSlug() === item.slug"
+          (click)="selectForm(item.slug)"
+        >
+          <span>
+            <strong>{{ item.name }}</strong>
+            <small>{{ t('{count} fields', { count: item.fieldCount }) }}</small>
+          </span>
+          <span class="form-state" [class.off]="!item.enabled">{{
+            item.enabled ? t('ON') : t('OFF')
+          }}</span>
+        </button>
+      } @empty {
+        <p class="hint-text">{{ t('No forms exist.') }}</p>
+      }
+    </nav>
+    <button type="button" mat-flat-button class="new-form-button" (click)="newForm()">
+      <mat-icon>add</mat-icon>{{ t('New form') }}
+    </button>
+  </aside>
+
+  @if (form(); as current) {
+    <article class="panel form-builder-main">
+      <header class="editor-head">
+        <div>
+          <p class="label">{{ tab() === 'builder' ? t('FORM BUILDER') : t('SUBMISSIONS') }}</p>
+          <h2>{{ current.name }}</h2>
+        </div>
+        @if (tab() === 'builder') {
+          <div class="page-state-controls">
+            <label class="page-enabled-toggle">
+              <input type="checkbox" [checked]="current.enabled" (change)="setEnabled($event)" />
+              <span>{{ t('Form enabled') }}</span>
+            </label>
+            <label class="page-enabled-toggle">
+              <input
+                type="checkbox"
+                [checked]="current.sendMailEnabled"
+                (change)="setSendMailEnabled($event)"
+              />
+              <span>{{ t('Send mail on submission') }}</span>
+            </label>
+            <span [class]="'badge ' + (current.published ? 'live' : 'draft')">{{
+              current.published ? t('PUBLISHED') : t('DRAFT')
+            }}</span>
+          </div>
+        } @else {
+          <div class="submissions-head-actions">
+            <button mat-stroked-button [disabled]="busy()" (click)="refreshSubmissions()">
+              <mat-icon>refresh</mat-icon>{{ subBusy() ? t('Loading') : t('Refresh') }}
+            </button>
+            <button mat-flat-button [disabled]="subBusy()" (click)="downloadCsv()">
+              <mat-icon>download</mat-icon>{{ t('Download CSV') }}
+            </button>
+          </div>
+        }
+      </header>
+
+      <nav class="form-tabs" role="tablist" [attr.aria-label]="t('Form views')">
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'builder'"
+          [class.active]="tab() === 'builder'"
+          (click)="switchTab('builder')"
+        >
+          {{ t('Builder') }}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="tab() === 'submissions'"
+          [class.active]="tab() === 'submissions'"
+          (click)="switchTab('submissions')"
+        >
+          {{ t('Submissions') }}
+          @if (submissionTotal() > 0) {
+            <span class="tab-count">{{ submissionTotal() }}</span>
+          }
+        </button>
+      </nav>
+
+      @if (tab() === 'builder') {
+        <section class="form-settings">
+          <label class="field">
+            <span>{{ t('Form name') }}</span>
+            <input [value]="current.name" maxlength="200" (change)="setFormValue('name', $event)" />
+          </label>
+          <label class="field">
+            <span>{{ t('Form slug') }}</span>
+            <input
+              [value]="current.slug"
+              maxlength="64"
+              [disabled]="current.documentId !== ''"
+              (change)="setFormValue('slug', $event)"
+            />
+            <small>{{ t('Use lowercase letters, numbers, and underscores.') }}</small>
+          </label>
+          <label class="field">
+            <span>{{ t('Submit button label') }}</span>
+            <input
+              [value]="current.submitLabel"
+              maxlength="80"
+              (change)="setFormValue('submitLabel', $event)"
+            />
+          </label>
+          <label class="field wide">
+            <span>{{ t('Success message') }}</span>
+            <input
+              [value]="current.successMessage"
+              maxlength="500"
+              (change)="setFormValue('successMessage', $event)"
+            />
+          </label>
+        </section>
+
+        @if (current.sendMailEnabled) {
+          <section class="panel email-config">
+            <header class="email-channel-head">
+              <div>
+                <p class="label">{{ t('EMAIL') }}</p>
+                <h3>{{ t('Submission receipt mail') }}</h3>
+              </div>
+            </header>
+            <p class="hint-text">
+              {{ t('The submitter receives a confirmation mail. Choose which template it uses.') }}
+            </p>
+            <label class="radio-row">
+              <input
+                type="radio"
+                name="mail-mode"
+                [checked]="mailChoice() === 'standard'"
+                (change)="setMailMode('standard')"
+              />
+              <span>{{ t('Use the default template from Email settings') }}</span>
+            </label>
+            <label class="radio-row">
+              <input
+                type="radio"
+                name="mail-mode"
+                [checked]="mailChoice() === 'custom'"
+                (change)="setMailMode('custom')"
+              />
+              <span>{{ t('Use a custom template for this form') }}</span>
+            </label>
+            @if (mailChoice() === 'custom') {
+              <ip-template-editor
+                [template]="mailTemplate()"
+                [variables]="mailVariables()"
+                (templateChange)="onMailTemplateChange($event)"
+              ></ip-template-editor>
+            }
+            <div class="email-config-actions">
+              <button mat-stroked-button [disabled]="mailSaving()" (click)="saveMailConfig()">
+                <mat-icon>save</mat-icon
+                >{{ mailSaving() ? t('Saving') : t('Save mail settings for this form') }}
+              </button>
+            </div>
+          </section>
+        }
+
+        <div class="form-fields-heading">
+          <div>
+            <p class="label">{{ t('FIELDS') }}</p>
+            <h3>{{ t('Input fields and validation') }}</h3>
+          </div>
+          <button type="button" mat-stroked-button (click)="addField()">
+            <mat-icon>add</mat-icon>{{ t('Add field') }}
+          </button>
+        </div>
+
+        <div class="form-field-list">
+          @for (field of current.fields; track $index) {
+            <section class="form-field-card">
+              <header>
+                <span class="order-badge">{{ $index + 1 }}</span>
+                <div>
+                  <strong>{{ field.label || t('Untitled field') }}</strong>
+                  <small>{{ field.type }} · {{ field.key || t('no key') }}</small>
+                </div>
+                <div class="block-actions">
+                  <button
+                    type="button"
+                    mat-icon-button
+                    [disabled]="$index === 0"
+                    (click)="moveField($index, -1)"
+                    [attr.aria-label]="t('Move field up')"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    [disabled]="$index === current.fields.length - 1"
+                    (click)="moveField($index, 1)"
+                    [attr.aria-label]="t('Move field down')"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                  <button
+                    type="button"
+                    mat-icon-button
+                    (click)="removeField($index)"
+                    [attr.aria-label]="t('Remove field')"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </header>
+              <div class="form-field-grid">
+                <label class="field">
+                  <span>{{ t('Label') }}</span>
+                  <input
+                    [value]="field.label"
+                    maxlength="120"
+                    (change)="setFieldValue($index, 'label', $event)"
+                  />
+                </label>
+                <label class="field">
+                  <span>{{ t('Field key') }}</span>
+                  <input
+                    [value]="field.key"
+                    maxlength="64"
+                    (change)="setFieldValue($index, 'key', $event)"
+                  />
+                </label>
+                <label class="field">
+                  <span>{{ t('Field type') }}</span>
+                  <select [value]="field.type" (change)="setFieldType($index, $event)">
+                    @for (type of fieldTypes; track type.value) {
+                      <option [value]="type.value">{{ t(type.label) }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="field required-field-toggle">
+                  <span>{{ t('Validation') }}</span>
+                  <span class="checkbox-control">
+                    <input
+                      type="checkbox"
+                      [checked]="field.required"
+                      (change)="setFieldRequired($index, $event)"
+                    />
+                    {{ t('Required field') }}
+                  </span>
+                </label>
+                @if (field.type !== 'checkbox') {
+                  <label class="field">
+                    <span>{{ t('Placeholder') }}</span>
+                    <input
+                      [value]="field.placeholder"
+                      maxlength="200"
+                      (change)="setFieldValue($index, 'placeholder', $event)"
+                    />
+                  </label>
+                  <div class="length-fields">
+                    <label class="field">
+                      <span>{{ t('Minimum length') }}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        [value]="field.minLength"
+                        (change)="setFieldNumber($index, 'minLength', $event)"
+                      />
+                    </label>
+                    <label class="field">
+                      <span>{{ t('Maximum length') }}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10000"
+                        [value]="field.maxLength"
+                        (change)="setFieldNumber($index, 'maxLength', $event)"
+                      />
+                    </label>
+                  </div>
+                }
+                <label class="field wide">
+                  <span>{{ t('Help text') }}</span>
+                  <input
+                    [value]="field.helpText"
+                    maxlength="500"
+                    (change)="setFieldValue($index, 'helpText', $event)"
+                  />
+                </label>
+                @if (field.type === 'select') {
+                  <label class="field wide">
+                    <span>{{ t('Dropdown options') }}</span>
+                    <textarea
+                      rows="4"
+                      [value]="
+                        field.options.join(
+                          '
+'
+                        )
+                      "
+                      (change)="setFieldOptions($index, $event)"
+                    ></textarea>
+                    <small>{{ t('Enter one option on each line.') }}</small>
+                  </label>
+                }
+              </div>
+            </section>
+          }
+        </div>
+
+        <section class="form-builder-preview">
+          <p class="label">{{ t('FORM PREVIEW') }}</p>
+          <h3>{{ current.name }}</h3>
+          @for (field of current.fields; track $index) {
+            @if (field.type === 'checkbox') {
+              <label class="preview-checkbox">
+                <input type="checkbox" [required]="field.required" />
+                <span>{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+              </label>
+            } @else {
+              <label class="preview-form-field">
+                <span>{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+                @if (field.type === 'textarea') {
+                  <textarea [placeholder]="field.placeholder" rows="4"></textarea>
+                } @else if (field.type === 'select') {
+                  <select>
+                    <option value="">{{ t('Select an option') }}</option>
+                    @for (option of field.options; track option) {
+                      <option>{{ option }}</option>
+                    }
+                  </select>
+                } @else {
+                  <input [type]="field.type" [placeholder]="field.placeholder" />
+                }
+                @if (field.helpText) {
+                  <small>{{ field.helpText }}</small>
+                }
+              </label>
+            }
+          }
+          <button type="button" mat-flat-button>{{ current.submitLabel }}</button>
+        </section>
+
+        <footer class="editor-foot sticky-bar">
+          @if (dirty()) {
+            <span class="unsaved-indicator"
+              ><mat-icon>edit</mat-icon>{{ t('Unsaved changes') }}</span
+            >
+          }
+          @if (notice()) {
+            <span class="form-notice" role="status">{{ notice() }}</span>
+          }
+          <span class="spacer"></span>
+          <button type="button" mat-stroked-button [disabled]="busy()" (click)="saveDraft()">
+            {{ t('Save draft') }}
+          </button>
+          <button type="button" mat-flat-button [disabled]="busy()" (click)="publish()">
+            {{ t('Publish form') }}
+          </button>
+        </footer>
+      } @else {
+        <section class="submissions-panel">
+          @if (error()) {
+            <p class="form-error" role="alert">{{ error() }}</p>
+          }
+
+          @if (submissions().length === 0 && !subBusy()) {
+            <div class="empty-submissions">
+              <mat-icon>inbox</mat-icon>
+              <h3>{{ t('No submissions yet.') }}</h3>
+              <p>
+                {{ t('Values appear here after customers send this form from the storefront.') }}
+              </p>
+            </div>
+          }
+
+          @if (submissions().length > 0) {
+            <div class="table-wrap">
+              <table class="data-table submissions-table" role="grid">
+                <thead>
+                  <tr>
+                    <th>{{ t('Date') }}</th>
+                    @for (field of current.fields; track $index) {
+                      <th>{{ field.label }}</th>
+                    }
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of submissions(); track item.id) {
+                    <tr [class.open]="detail()?.id === item.id">
+                      <td class="nowrap">{{ formatDate(item.createdAt) }}</td>
+                      @for (field of current.fields; track $index) {
+                        <td [title]="renderValue(field, item.values)">
+                          {{ renderValue(field, item.values).slice(0, 80) }}
+                        </td>
+                      }
+                      <td class="row-actions">
+                        <button
+                          type="button"
+                          mat-button
+                          (click)="openDetail(item)"
+                          [attr.aria-label]="t('Open submission details')"
+                        >
+                          <mat-icon>visibility</mat-icon>{{ t('View') }}
+                        </button>
+                        <button
+                          type="button"
+                          mat-icon-button
+                          [disabled]="subBusy()"
+                          (click)="confirmDelete(item)"
+                          [attr.aria-label]="t('Delete submission')"
+                        >
+                          <mat-icon>delete_outline</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (hasMorePages()) {
+              <nav class="pagination" [attr.aria-label]="t('Submissions pages')">
+                <button
+                  type="button"
+                  mat-stroked-button
+                  [disabled]="page() <= 1 || subBusy()"
+                  (click)="goToPage(page() - 1)"
+                >
+                  {{ t('Previous') }}
+                </button>
+                <span class="page-indicator">{{
+                  t('Page {current} of {total}', { current: page(), total: pageCount() })
+                }}</span>
+                <button
+                  type="button"
+                  mat-stroked-button
+                  [disabled]="page() >= pageCount() || subBusy()"
+                  (click)="goToPage(page() + 1)"
+                >
+                  {{ t('Next') }}
+                </button>
+              </nav>
+            }
+
+            @if (notice()) {
+              <p class="form-notice" role="status">{{ notice() }}</p>
+            }
+          }
+        </section>
+      }
+    </article>
+  } @else {
+    <div class="empty-builder">
+      <mat-icon>dynamic_form</mat-icon>
+      <h2>{{ t('Create a reusable form.') }}</h2>
+      <p>
+        {{ t('Add fields and validation rules. You can then add the form to a storefront page.') }}
+      </p>
+      <button type="button" mat-flat-button (click)="newForm()">{{ t('Create form') }}</button>
+    </div>
+  }
+
+  @if (detail(); as detail) {
+    <div class="dialog-backdrop" role="presentation">
+      <section
+        class="submission-dialog panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="submission-title"
+      >
+        <header class="dialog-head">
+          <div>
+            <p class="label">{{ t('SUBMISSION') }}</p>
+            <h3 id="submission-title">{{ form()?.name }}</h3>
+          </div>
+          <button
+            type="button"
+            mat-icon-button
+            (click)="closeDetail()"
+            [attr.aria-label]="t('Close dialog')"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </header>
+
+        <dl class="submission-meta">
+          <dt>{{ t('Submitted at') }}</dt>
+          <dd>{{ formatDate(detail.createdAt) }}</dd>
+          <dt>{{ t('Submission ID') }}</dt>
+          <dd class="mono">{{ detail.id }}</dd>
+        </dl>
+
+        <div class="submission-rows">
+          @for (field of form()?.fields; track $index) {
+            <div class="submission-row">
+              <span class="row-label">{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+              <p
+                [class.preserve]="field.type === 'textarea'"
+                [title]="renderValue(field, detail.values)"
+              >
+                {{ renderValue(field, detail.values) || t('(empty)') }}
+              </p>
+            </div>
+          }
+        </div>
+
+        @if (error()) {
+          <p class="form-error" role="alert">{{ error() }}</p>
+        }
+
+        @if (!confirming()) {
+          <footer class="dialog-foot">
+            <span class="spacer"></span>
+            <button
+              type="button"
+              mat-stroked-button
+              [disabled]="subBusy()"
+              (click)="confirmDelete(detail)"
+            >
+              <mat-icon>delete_outline</mat-icon>{{ t('Delete') }}
+            </button>
+            <button type="button" mat-flat-button (click)="closeDetail()">
+              {{ t('Close') }}
+            </button>
+          </footer>
+        }
+
+        @if (confirming()) {
+          <div class="confirm-strip">
+            <span>{{ t('Delete this submission? This action cannot be undone.') }}</span>
+            <span class="confirm-actions">
+              <button
+                type="button"
+                mat-stroked-button
+                [disabled]="subBusy()"
+                (click)="cancelDelete()"
+              >
+                {{ t('Cancel') }}
+              </button>
+              <button
+                type="button"
+                mat-flat-button
+                [disabled]="subBusy()"
+                (click)="performDelete(detail)"
+              >
+                {{ t('Delete') }}
+              </button>
+            </span>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</section>

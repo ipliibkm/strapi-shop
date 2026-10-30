@@ -12,4 +12,29 @@ dist/
 coverage/
 
 config/business.json
+/config/development.env
+/config/production.env
 .setup-state.json
+
+# Storybook build output
+/storybook-static
+
+# CMS build and update state
+/apps/cms/.strapi/
+/apps/cms/.strapi-updater.json
+/apps/cms/build/
+
+# Local browser and Python output
+/.playwright-mcp/
+/.opencode/
+**/__pycache__/
+*.pyc
+*.bak
+/documentation.json
+/storybook-build.log
+/*-desktop.png
+/*-mobile.png
+/admin-page-fields-fixed.png
+/reports-*.png
+/storefront-*.png
+/shop-flow-*.png

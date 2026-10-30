@@ -1,0 +1,136 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<section class="welcome-panel">
+  <div>
+    <p class="eyebrow">{{ t('BUSINESS OVERVIEW') }}</p>
+    <h2>{{ t('Business at a glance.') }}</h2>
+    <p>{{ t('Track bookings, form submissions, and shop orders across the platform.') }}</p>
+  </div>
+  <button mat-flat-button (click)="navigate.emit('bookings')">
+    {{ t('Open bookings') }} <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+  </button>
+</section>
+@if (overviewNotice()) {
+  <div class="notice warning">
+    <mat-icon>info</mat-icon>
+    <p>{{ overviewNotice() }}</p>
+  </div>
+}
+<section class="metric-grid" [attr.aria-label]="t('Business summary')">
+  <openshopfront-metric-card
+    icon="event_available"
+    tone="blue"
+    [label]="t('Bookings')"
+    [value]="metricValue(overview()?.bookings)"
+    [hint]="t('All confirmed bookings')"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="dynamic_form"
+    tone="amber"
+    [label]="t('Form submissions')"
+    [value]="metricValue(overview()?.submissions)"
+    [hint]="t('All storefront forms')"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="shopping_bag"
+    tone="green"
+    [label]="t('Paid orders')"
+    [value]="metricValue(overview()?.paidOrders)"
+    [hint]="t('{count} units sold', { count: overview()?.unitsSold ?? 0 })"
+  ></openshopfront-metric-card>
+  <openshopfront-metric-card
+    icon="payments"
+    tone="violet"
+    [label]="t('Revenue')"
+    [value]="money(overview()?.revenueCents)"
+    [hint]="t('{amount} refunded', { amount: money(overview()?.refundedCents) })"
+  ></openshopfront-metric-card>
+</section>
+<section class="two-column">
+  <article class="panel">
+    <div class="panel-heading">
+      <div>
+        <p class="eyebrow">{{ t('BUSINESS FIGURES') }}</p>
+        <h2>{{ t('Detailed numbers') }}</h2>
+      </div>
+      <button mat-button [disabled]="overviewBusy()" (click)="refreshOverview()">
+        {{ overviewBusy() ? t('Loading') : t('Refresh') }}
+      </button>
+    </div>
+    @if (overview()) {
+      <div class="check-list">
+        <div class="check-row">
+          <span class="status-dot online"></span>
+          <div>
+            <strong>{{ t('Paid orders') }}</strong>
+            <p>
+              {{
+                t('{count} paid, {cancelled} cancelled', {
+                  count: overview()!.paidOrders,
+                  cancelled: overview()!.cancelledOrders,
+                })
+              }}
+            </p>
+          </div>
+          <span class="badge">{{ money(overview()!.revenueCents) }}</span>
+        </div>
+        <div class="check-row">
+          <span class="status-dot online"></span>
+          <div>
+            <strong>{{ t('Bookings') }}</strong>
+            <p>
+              {{ t('{count} confirmed bookings in total', { count: overview()!.bookings }) }}
+            </p>
+          </div>
+          <span class="badge">{{ overview()!.bookings }}</span>
+        </div>
+        <div class="check-row">
+          <span class="status-dot online"></span>
+          <div>
+            <strong>{{ t('Form submissions') }}</strong>
+            <p>
+              {{ t('{count} submissions across all forms', { count: overview()!.submissions }) }}
+            </p>
+          </div>
+          <span class="badge">{{ overview()!.submissions }}</span>
+        </div>
+      </div>
+    } @else {
+      <p class="muted">{{ t('No business figures are available yet.') }}</p>
+    }
+  </article>
+  <article class="panel">
+    <p class="eyebrow">{{ t('QUICK ACCESS') }}</p>
+    <h2>{{ t('Business tools') }}</h2>
+    <div class="quick-links">
+      <button (click)="navigate.emit('bookings')">
+        <mat-icon>calendar_month</mat-icon
+        ><span
+          ><strong>{{ t('Booking operations') }}</strong
+          ><small>{{ t('Review and manage customer bookings') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <button (click)="navigate.emit('forms')">
+        <mat-icon>dynamic_form</mat-icon
+        ><span
+          ><strong>{{ t('Form submissions') }}</strong
+          ><small>{{ t('Review the messages customers send') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <button (click)="navigate.emit('commerce')">
+        <mat-icon>storefront</mat-icon
+        ><span
+          ><strong>{{ t('Shop orders') }}</strong
+          ><small>{{ t('Manage products, stock, and payments') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <button (click)="navigate.emit('reports')">
+        <mat-icon>query_stats</mat-icon
+        ><span
+          ><strong>{{ t('Reports') }}</strong
+          ><small>{{ t('Sales, revenue, and booking figures by range') }}</small></span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </article>
+</section>

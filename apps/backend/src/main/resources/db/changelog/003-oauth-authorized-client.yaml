@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-oauth-authorized-client
+      author: platform
+      changes:
+        - createTable:
+            tableName: oauth2_authorized_client
+            columns:
+              - column: {name: client_registration_id, type: varchar(100), constraints: {nullable: false}}
+              - column: {name: principal_name, type: varchar(200), constraints: {nullable: false}}
+              - column: {name: access_token_value, type: bytea, constraints: {nullable: false}}
+              - column: {name: access_token_issued_at, type: timestamp with time zone, constraints: {nullable: false}}
+              - column: {name: access_token_expires_at, type: timestamp with time zone, constraints: {nullable: false}}
+              - column: {name: access_token_scopes, type: varchar(2000)}
+              - column: {name: refresh_token_value, type: bytea}
+              - column: {name: refresh_token_issued_at, type: timestamp with time zone}
+              - column: {name: refresh_token_expires_at, type: timestamp with time zone}
+              - column: {name: updated_at, type: timestamp with time zone, defaultValueComputed: now(), constraints: {nullable: false}}
+        - addPrimaryKey:
+            tableName: oauth2_authorized_client
+            columnNames: client_registration_id,principal_name
+            constraintName: pk_oauth2_authorized_client

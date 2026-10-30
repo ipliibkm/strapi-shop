@@ -1,109 +1,302 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { IpliThemeService } from '@ipli/ui';
+import { OpenShopfrontThemeService, parseCustomPalette } from '@openshopfront/ui';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { LANGUAGES, Lang } from './shared/i18n';
+import { StorefrontI18n } from './shared/i18n.service';
+import { StorefrontCartService } from './shared/cart.service';
+import { StorefrontShopService } from './shared/shop.service';
+import { BookingComponent } from './booking/booking.component';
+import { ShopComponent } from './shop/shop.component';
+import { ProductComponent } from './product/product.component';
+import { CartComponent } from './cart/cart.component';
+import { OrderComponent } from './order/order.component';
+import { AboutComponent } from './about/about.component';
+import { HomeComponent } from './home/home.component';
+import { ServicesComponent } from './services/services.component';
+import {
+  Page,
+  Product,
+  PublicPageSummary,
+  PublishedPage,
+  StorefrontLanguage,
+} from './shared/types';
 
-type Page='home'|'services'|'shop'|'about'|'contact';
 @Component({
- selector:'app-root',standalone:true,
- imports:[MatButtonModule,MatIconModule,MatCardModule,MatButtonToggleModule],
- template:`
- <div class="site min-h-screen">
-   <div class="bg-slate-950 text-center py-2.5 px-4 text-xs font-medium tracking-wide text-white">
-     Welcome to our website. Contact us to learn more about our services.
-   </div>
-   <header class="site-header sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-slate-100">
-     <div class="mx-auto max-w-7xl px-5 md:px-10 h-20 flex items-center gap-6">
-       <button class="brand flex items-center gap-3" (click)="navigate('home')" aria-label="Open home page">
-         <span class="brand-mark">S</span><span class="text-xl font-bold tracking-tight">STUDIO<span class="text-amber-600">.</span></span>
-       </button>
-       <nav class="hidden md:flex items-center gap-8 ml-auto" aria-label="Main navigation">
-         @for(item of nav;track item.key){<button (click)="navigate(item.key)" [class.active-link]="page()===item.key" class="nav-link text-sm font-medium">{{item.label}}</button>}
-       </nav>
-       <button mat-flat-button class="!rounded-full ml-auto md:ml-3" (click)="navigate('contact')">Contact us <mat-icon iconPositionEnd>arrow_outward</mat-icon></button>
-       <button class="md:hidden p-2" (click)="menuOpen.set(!menuOpen())" aria-label="Toggle menu"><mat-icon>menu</mat-icon></button>
-     </div>
-     @if(menuOpen()){<nav class="md:hidden px-6 pb-5 grid gap-4 bg-white" aria-label="Mobile navigation">
-       @for(item of nav;track item.key){<button class="text-left py-2" (click)="navigate(item.key)">{{item.label}}</button>}
-     </nav>}
-   </header>
-   <main id="main-content">
-   @if(page()==='home'){
-     <section class="hero relative overflow-hidden">
-       <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center px-6 md:px-12 py-16 lg:py-24">
-         <div class="relative z-10">
-           <p class="eyebrow mb-5">YOUR BUSINESS. YOUR STORY.</p>
-           <h1 class="hero-title">Good things<br/>start <span class="serif-accent">here.</span></h1>
-           <p class="mt-7 text-lg leading-8 max-w-lg text-slate-600">Welcome to a space built for your customers. Show your services, share your work, and help people get in touch.</p>
-           <div class="mt-10 flex gap-4 flex-wrap">
-             <button mat-flat-button class="!rounded-full !px-8" (click)="navigate('services')">Explore services <mat-icon iconPositionEnd>arrow_forward</mat-icon></button>
-             <button mat-stroked-button class="!rounded-full !px-8" (click)="navigate('about')">Our story</button>
-           </div>
-           <div class="mt-14 flex items-center gap-8 border-t border-slate-200 pt-6">
-             <div><span class="block text-xl font-bold">01</span><span class="text-xs text-slate-500">Your own design</span></div>
-             <div><span class="block text-xl font-bold">02</span><span class="text-xs text-slate-500">Your own content</span></div>
-             <div><span class="block text-xl font-bold">03</span><span class="text-xs text-slate-500">Room to grow</span></div>
-           </div>
-         </div>
-         <div class="relative hero-visual min-h-[430px] lg:min-h-[570px] rounded-[2rem] overflow-hidden">
-           <div class="absolute inset-0 visual-gradient"></div>
-           <div class="absolute left-10 top-12 text-white/80 text-xs tracking-[.3em] uppercase">Your brand space</div>
-           <div class="absolute right-9 top-9 w-24 h-24 rounded-full border border-white/50"></div>
-           <div class="absolute -left-12 bottom-16 w-44 h-44 rounded-full border border-white/35"></div>
-           <div class="absolute bottom-12 left-10 right-10 text-white"><div class="text-7xl md:text-8xl font-light italic" style="font-family:Georgia,serif">Create.</div><div class="w-full h-px bg-white/40 my-4"></div><p class="text-sm tracking-widest uppercase">Make it yours</p></div>
-         </div>
-       </div>
-     </section>
-     <section class="max-w-7xl mx-auto px-6 md:px-12 py-24">
-       <div class="flex items-end justify-between gap-5 flex-wrap mb-12">
-         <div><p class="eyebrow">WHAT WE OFFER</p><h2 class="section-title mt-4">Discover our <i>services</i></h2></div>
-         <button mat-stroked-button class="!rounded-full" (click)="navigate('services')">View all services <mat-icon iconPositionEnd>arrow_forward</mat-icon></button>
-       </div>
-       <div class="grid md:grid-cols-3 gap-5">
-         @for(service of services;track service.number){
-           <article class="service-card p-8 rounded-3xl">
-             <span class="text-xs tracking-widest font-semibold text-amber-700">{{service.number}}</span>
-             <div class="my-12 text-5xl">{{service.symbol}}</div>
-             <h3 class="text-2xl font-semibold mb-3">{{service.title}}</h3>
-             <p class="text-slate-600 leading-7">{{service.description}}</p>
-             <button class="mt-8 inline-flex items-center gap-2 text-sm font-semibold" (click)="navigate('contact')">Ask about this service <mat-icon>arrow_outward</mat-icon></button>
-           </article>
-         }
-       </div>
-     </section>
-     <section class="statement text-center px-6 py-28"><p class="eyebrow">THE NEXT STEP</p><h2 class="section-title mx-auto max-w-3xl mt-6">Let's build something <i>meaningful.</i></h2><p class="mt-7 text-slate-600">Tell us what you need. We will help you find the next step.</p><button mat-flat-button class="!rounded-full !mt-8" (click)="navigate('contact')">Get in touch</button></section>
-   } @else if(page()==='services'){
-     <section class="inner-hero"><p class="eyebrow">OUR SERVICES</p><h1 class="section-title mt-5">What we <i>offer.</i></h1><p class="mt-6 text-slate-600 max-w-xl mx-auto">Explore our services. Contact us for details and available times.</p></section>
-     <section class="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-3 gap-6">
-       @for(service of services;track service.number){<mat-card class="!rounded-3xl !p-7"><p class="text-5xl py-8">{{service.symbol}}</p><h2 class="text-2xl font-semibold">{{service.title}}</h2><p class="py-5 text-slate-600">{{service.description}}</p><button mat-stroked-button (click)="navigate('contact')">Contact us</button></mat-card>}
-     </section>
-   } @else if(page()==='shop'){
-     <section class="inner-hero"><p class="eyebrow">SHOP</p><h1 class="section-title mt-5">Our <i>collection.</i></h1><p class="mt-6 text-slate-600 max-w-xl mx-auto">The shop is not open yet. Visit this page again after the store owner adds products.</p><button mat-flat-button class="!mt-8" (click)="navigate('contact')">Contact us</button></section>
-   } @else if(page()==='about'){
-     <section class="inner-hero"><p class="eyebrow">OUR STORY</p><h1 class="section-title mt-5">People come <i>first.</i></h1><p class="mt-6 text-slate-600 max-w-xl mx-auto">This website is ready for your company's story. Add your own text and media when the content editor is connected.</p></section>
-   } @else {
-     <section class="inner-hero"><p class="eyebrow">CONTACT</p><h1 class="section-title mt-5">Say <i>hello.</i></h1><p class="mt-6 text-slate-600 max-w-xl mx-auto">We would like to hear from you. Contact details will appear here after the business profile is connected.</p></section>
-   }
-   </main>
-   <footer class="bg-slate-950 text-white px-6 md:px-12 py-16">
-     <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
-       <div><div class="text-2xl font-bold">STUDIO<span class="text-amber-400">.</span></div><p class="mt-4 text-slate-400 max-w-sm leading-7">Your place for services, products, and helpful information.</p></div>
-       <div><p class="font-semibold mb-5">Explore</p><div class="grid gap-3">@for(item of nav;track item.key){<button class="text-left text-slate-400 hover:text-white" (click)="navigate(item.key)">{{item.label}}</button>}</div></div>
-       <div><p class="font-semibold mb-5">Appearance</p><mat-button-toggle-group [value]="theme.current()" (change)="theme.setTheme($event.value)" aria-label="Storefront theme"><mat-button-toggle value="light">Light</mat-button-toggle><mat-button-toggle value="dark">Dark</mat-button-toggle><mat-button-toggle value="ocean">Ocean</mat-button-toggle></mat-button-toggle-group><p class="mt-5 text-sm text-slate-400">Theme preview. The business owner will select the published theme.</p></div>
-     </div><div class="max-w-7xl mx-auto border-t border-slate-700 mt-16 pt-6 text-sm text-slate-400">© {{year}} STUDIO. Example content. Replace it before publication.</div>
-   </footer>
- </div>`
+  selector: 'app-root',
+  standalone: true,
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatButtonToggleModule,
+    HomeComponent,
+    ServicesComponent,
+    BookingComponent,
+    ShopComponent,
+    ProductComponent,
+    CartComponent,
+    OrderComponent,
+    AboutComponent,
+  ],
+  templateUrl: './main.html',
 })
 class StorefrontApp {
- readonly theme=inject(IpliThemeService);
- readonly page=signal<Page>('home');readonly menuOpen=signal(false);
- readonly year=new Date().getFullYear();
- readonly nav:{key:Page;label:string}[]=[{key:'home',label:'Home'},{key:'services',label:'Services'},{key:'shop',label:'Shop'},{key:'about',label:'About'},{key:'contact',label:'Contact'}];
- readonly services=[{number:'01',symbol:'✦',title:'Personal service',description:'Make each visit feel special. Tell your customers what makes your service unique.'},{number:'02',symbol:'◈',title:'Care and detail',description:'Show your experience and explain how you work.'},{number:'03',symbol:'✳',title:'Time for you',description:'Help customers learn about your business and contact your team.'}];
- constructor(){this.theme.load('storefront');}
- navigate(page:Page){this.page.set(page);this.menuOpen.set(false);window.scrollTo({top:0,behavior:'smooth'});}
+  readonly theme = inject(OpenShopfrontThemeService);
+  private readonly http = inject(HttpClient);
+  readonly i18n = inject(StorefrontI18n);
+  readonly cart = inject(StorefrontCartService);
+  readonly shop = inject(StorefrontShopService);
+  readonly page = signal<Page>(this.initialPage());
+  readonly previewMode = new URLSearchParams(window.location.search).get('preview') === '1';
+  /** Website languages published by the administrator, in display order. */
+  readonly enabledLanguages = signal<StorefrontLanguage[]>([]);
+
+  t(key: string, params?: Record<string, string | number>): string {
+    return this.i18n.t(key, params);
+  }
+  langVersion(): Lang {
+    return this.i18n.lang();
+  }
+
+  enabledLanguageOptions(): StorefrontLanguage[] {
+    return this.enabledLanguages().filter((item) => item.enabled);
+  }
+
+  setLang(code: string) {
+    const lang = (Object.keys(LANGUAGES) as Lang[]).includes(code as Lang) ? (code as Lang) : 'en';
+    if (!this.enabledLanguageOptions().some((item) => item.code === lang)) return;
+    this.i18n.lang.set(lang);
+    try {
+      localStorage.setItem('openshopfront-lang', lang);
+    } catch {
+      // Storage may be unavailable; the in-memory language still works.
+    }
+    document.documentElement.lang = lang;
+  }
+
+  /** Loads published languages and palette, then resolves this visitor's language. */
+  private async loadSettings() {
+    try {
+      const settings = await firstValueFrom(
+        this.http.get<{
+          languages: StorefrontLanguage[];
+          theme: string;
+          customPalette?: string | null;
+        }>('/api/v1/public/settings'),
+      );
+      this.enabledLanguages.set(settings.languages ?? []);
+      if (!this.previewMode) {
+        const palette = parseCustomPalette(settings.customPalette ?? null);
+        // A published custom palette wins over the preset when one is set.
+        if (palette) this.theme.applyCustom(palette);
+        else this.theme.setTheme(settings.theme);
+      }
+    } catch {
+      // Keep the default language and palette when settings are unavailable.
+    }
+    const enabled = this.enabledLanguageOptions().map((item) => item.code as Lang);
+    const saved = ((): string | null => {
+      try {
+        return localStorage.getItem('openshopfront-lang');
+      } catch {
+        return null;
+      }
+    })();
+    let resolved: Lang = 'en';
+    if (saved && enabled.includes(saved as Lang)) resolved = saved as Lang;
+    else {
+      const browser = navigator.language.slice(0, 2).toLowerCase();
+      if (enabled.includes(browser as Lang)) resolved = browser as Lang;
+      else if (enabled.length) resolved = enabled[0];
+    }
+    this.setLang(resolved);
+  }
+  readonly pageAvailable = signal(true);
+  readonly enabledPageSlugs = signal<Set<string> | null>(null);
+  readonly menuOpen = signal(false);
+  readonly year = new Date().getFullYear();
+
+  // Dynamic page state
+  readonly pageLoaded = signal(false);
+  readonly pageData = signal<PublishedPage | null>(null);
+
+  readonly nav: { key: Page; label: string }[] = [
+    { key: 'home', label: 'Home' },
+    { key: 'services', label: 'Services' },
+    { key: 'booking', label: 'Book' },
+    { key: 'shop', label: 'Shop' },
+    { key: 'about', label: 'About' },
+    { key: 'contact', label: 'Contact' },
+  ];
+
+  constructor() {
+    inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
+    this.theme.load('storefront');
+    window.addEventListener('message', (event) => this.receivePreview(event));
+    window.addEventListener('popstate', () => this.restorePageFromHistory());
+    if (this.previewMode) {
+      window.parent.postMessage({ type: 'openshopfront:storefront-preview-ready' }, '*');
+    }
+    void this.loadSettings();
+    if (!this.previewMode) void this.loadEnabledPages();
+    const initial = this.initialPage();
+    if (!this.previewMode && this.contentPages.includes(initial)) void this.loadPage(initial);
+    if (initial === 'shop' || initial === 'product') void this.shop.load();
+  }
+
+  /** Pages rendered from the published page builder content. */
+  readonly contentPages: Page[] = ['home', 'services', 'booking', 'shop', 'about', 'contact'];
+
+  navigate(page: Page, params?: { slug?: string }) {
+    if (!this.previewMode && this.isManagedPage(page) && !this.pageIsEnabled(page)) {
+      this.pageAvailable.set(false);
+      return;
+    }
+    this.page.set(page);
+    this.pageAvailable.set(true);
+    const hash = page === 'home' ? '' : `#${page}${params?.slug ? '/' + params.slug : ''}`;
+    window.history.pushState({}, '', `${window.location.pathname}${window.location.search}${hash}`);
+    this.menuOpen.set(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (this.contentPages.includes(page)) void this.loadPage(page);
+    if (page === 'shop' || page === 'product') void this.shop.load();
+  }
+
+  /** Restores the page when the customer uses the browser Back or Forward button. */
+  private restorePageFromHistory() {
+    const page = this.initialPage();
+    this.page.set(page);
+    this.pageAvailable.set(true);
+    this.menuOpen.set(false);
+    if (this.contentPages.includes(page)) void this.loadPage(page);
+    if (page === 'shop' || page === 'product') void this.shop.load();
+  }
+
+  /** Returns the loaded published page when it matches the requested slug. */
+  contentFor(slug: string): PublishedPage | null {
+    const current = this.pageData();
+    return current && current.slug === slug ? current : null;
+  }
+
+  visibleNav(): { key: Page; label: string }[] {
+    if (this.previewMode || this.enabledPageSlugs() === null) return this.nav;
+    return this.nav.filter((item) => this.pageIsEnabled(item.key));
+  }
+
+  pageIsEnabled(page: Page): boolean {
+    const enabled = this.enabledPageSlugs();
+    return this.previewMode || enabled === null || enabled.has(page);
+  }
+
+  private async loadEnabledPages() {
+    try {
+      const pages = await firstValueFrom(
+        this.http.get<PublicPageSummary[]>('/api/v1/public/pages'),
+      );
+      const enabled = new Set((pages ?? []).map((item) => item.slug));
+      this.enabledPageSlugs.set(enabled);
+      if (!this.previewMode && this.isManagedPage(this.page()) && !enabled.has(this.page())) {
+        this.pageAvailable.set(false);
+      }
+    } catch {
+      // Keep the default navigation if the page list is temporarily unavailable.
+    }
+  }
+
+  private receivePreview(event: MessageEvent) {
+    if (!this.previewMode || event.source !== window.parent) return;
+    const message = event.data as { type?: string; page?: PublishedPage } | null;
+    if (message?.type !== 'openshopfront:storefront-preview' || !message.page) return;
+    if (!this.isManagedPage(message.page.slug)) return;
+    const blocks = Array.isArray(message.page.blocks) ? message.page.blocks : [];
+    this.page.set(message.page.slug as Page);
+    this.pageData.set({ ...message.page, blocks });
+    this.pageLoaded.set(true);
+    this.pageAvailable.set(true);
+    if (message.page.slug === 'shop') void this.shop.load();
+  }
+
+  private isManagedPage(page: string): boolean {
+    return (this.contentPages as string[]).includes(page);
+  }
+
+  private async loadPage(slug: Page) {
+    const key = slug as string;
+    this.pageLoaded.set(false);
+    this.pageData.set(null);
+    try {
+      const data = await firstValueFrom(
+        this.http.get<PublishedPage>(`/api/v1/public/pages/${key}`),
+      );
+      this.pageData.set(data);
+    } catch {
+      // The page may not be published yet; fall back to the static hero.
+    } finally {
+      this.pageLoaded.set(true);
+    }
+  }
+
+  /** The slug of a product or order hash, without fragment query parameters. */
+  productSlug(): string | null {
+    const value = window.location.hash.slice(1);
+    const path = value.split('?', 1)[0];
+    if (path.startsWith('product/')) return path.slice('product/'.length) || null;
+    if (path.startsWith('order/')) return path.slice('order/'.length) || null;
+    return null;
+  }
+
+  /** Returns the customer access token from the order fragment. */
+  orderAccessToken(): string {
+    const fragment = window.location.hash.slice(1);
+    const query = fragment.includes('?') ? fragment.slice(fragment.indexOf('?') + 1) : '';
+    return new URLSearchParams(query).get('token') ?? '';
+  }
+
+  /** The first catalog products for "products" blocks and the about page. */
+  blockProducts() {
+    return this.shop.first(6);
+  }
+
+  /** Maps a product to the content-blocks renderer's shape with a formatted price. */
+  blockProductView(item: Product) {
+    return { id: item.id, name: item.name, priceLabel: this.minPrice(item) };
+  }
+
+  /** Translated labels for the content-blocks renderer. */
+  blockLabels() {
+    return { continue: this.t('block.continue'), productsNone: this.t('products.none') };
+  }
+
+  private onBlockNavigate(target?: string) {
+    if (!target) return;
+    const allowed: Page[] = ['booking', 'shop', 'services', 'about', 'contact', 'home'];
+    if ((allowed as string[]).includes(target)) this.navigate(target as Page);
+  }
+
+  async openProduct(item: { id: string; name: string }) {
+    // The product component loads its own detail by slug; route to it.
+    const catalog = this.shop.products().find((p) => p.id === item.id);
+    if (catalog) this.navigate('product', { slug: catalog.slug });
+  }
+
+  minPrice(product: { variantCount?: number }): string {
+    // Without a variant price on the list endpoint, show a neutral label.
+    if (!product.variantCount) return this.t('price.ask');
+    return this.t('price.fromShop');
+  }
+
+  private initialPage(): Page {
+    const value = window.location.hash.slice(1);
+    if (value.startsWith('product/')) return 'product';
+    if (value.startsWith('order/')) return 'order';
+    return ['home', 'services', 'booking', 'shop', 'cart', 'about', 'contact'].includes(value)
+      ? (value as Page)
+      : 'home';
+  }
 }
-bootstrapApplication(StorefrontApp).catch(console.error);
+
+bootstrapApplication(StorefrontApp, { providers: [provideHttpClient()] }).catch(console.error);

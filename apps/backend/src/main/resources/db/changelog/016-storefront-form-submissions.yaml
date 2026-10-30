@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-storefront-form-submissions
+      author: platform
+      changes:
+        - createTable:
+            tableName: storefront_form_submission
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: form_slug
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: jsonb
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: storefront_form_submission
+            indexName: ix_storefront_form_submission_form_created
+            columns:
+              - column: {name: form_slug}
+              - column: {name: created_at, descending: true}

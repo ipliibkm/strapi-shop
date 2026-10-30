@@ -1,0 +1,84 @@
+@if (items().length) {
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    @for (item of items(); track item.id; let i = $index) {
+      <button
+        type="button"
+        class="gallery-tile group relative aspect-square rounded-3xl overflow-hidden border theme-border bg-slate-100 text-left"
+        (click)="open(i)"
+      >
+        @if (item.url) {
+          <img
+            [src]="item.url"
+            [alt]="item.title || item.caption || ''"
+            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        } @else {
+          <span
+            class="gallery-placeholder absolute inset-0 flex items-center justify-center text-6xl font-light"
+          >
+            {{ initialOf(item.title) }}
+          </span>
+        }
+        @if (item.caption || item.title) {
+          <span
+            class="absolute inset-x-0 bottom-0 px-4 py-3 bg-gradient-to-t from-black/70 to-transparent text-white text-sm"
+            >{{ item.title }}{{ item.title && item.caption ? ' — ' : '' }}{{ item.caption }}</span
+          >
+        }
+      </button>
+    }
+  </div>
+
+  @if (activeItem(); as active) {
+    <div class="gallery-lightbox" (click)="close()">
+      <button
+        type="button"
+        class="gallery-lightbox-btn absolute top-4 right-4 z-10"
+        [attr.aria-label]="labels().close || 'Close'"
+        (click)="$event.stopPropagation(); close()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      @if (items().length > 1) {
+        <button
+          type="button"
+          class="gallery-lightbox-btn absolute left-4 top-1/2 -translate-y-1/2 z-10"
+          [attr.aria-label]="labels().previous || 'Previous image'"
+          (click)="$event.stopPropagation(); step(-1)"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+      }
+      <figure class="max-w-5xl w-full" (click)="$event.stopPropagation()">
+        @if (active.url) {
+          <img
+            [src]="active.url"
+            [alt]="active.title || active.caption || ''"
+            class="max-h-[80vh] w-auto mx-auto rounded-2xl shadow-2xl"
+          />
+        } @else {
+          <div
+            class="gallery-placeholder aspect-square max-w-md mx-auto flex items-center justify-center text-8xl font-light rounded-2xl"
+          >
+            {{ initialOf(active.title) }}
+          </div>
+        }
+        @if (active.title || active.caption) {
+          <figcaption class="mt-4 text-center text-white/90">
+            {{ active.title }}{{ active.title && active.caption ? ' — ' : '' }}{{ active.caption }}
+          </figcaption>
+        }
+      </figure>
+      @if (items().length > 1) {
+        <button
+          type="button"
+          class="gallery-lightbox-btn absolute right-4 top-1/2 -translate-y-1/2 z-10"
+          [attr.aria-label]="labels().next || 'Next image'"
+          (click)="$event.stopPropagation(); step(1)"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      }
+    </div>
+  }
+}

@@ -1,0 +1,37 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+@if (content(); as page) {
+  <openshopfront-content-blocks
+    [blocks]="page.blocks"
+    [products]="blockProducts()"
+    [labels]="blockLabels()"
+    (navigate)="onNavigate($event)"
+    (openProduct)="open.emit($any($event))"
+  >
+    <ng-template #formBlock openshopfront-form-block let-slug>
+      <ip-storefront-form [slug]="slug" />
+    </ng-template>
+  </openshopfront-content-blocks>
+} @else {
+  <section class="inner-hero">
+    <p class="eyebrow">{{ t('shop.eyebrow') }}</p>
+    <h1 class="section-title mt-5">
+      {{ t('shop.titleA') }}<i>{{ t('shop.accent') }}</i>
+    </h1>
+    <p class="mt-6 text-slate-600 max-w-xl mx-auto">{{ t('shop.text') }}</p>
+  </section>
+}
+
+@if (shop.loading()) {
+  <p class="muted center">{{ t('shop.loading') }}</p>
+} @else if (!shop.open()) {
+  <p class="muted center">{{ t('shop.closed') }}</p>
+} @else {
+  <div class="max-w-7xl mx-auto px-6 py-12">
+    <openshopfront-product-list
+      [products]="listProducts()"
+      [labels]="listLabels()"
+      (open)="onOpen($event)"
+    />
+  </div>
+}

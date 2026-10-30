@@ -1,10 +1,14 @@
 # System Architecture and Operational Boundaries
 
+Provider extension boundaries and their current compliance state are defined in [EXTENSION-ARCHITECTURE.md](EXTENSION-ARCHITECTURE.md).
+
 ## Context and principles
+
 Build a **configurable product platform**, not one bespoke store. Installation profiles: content-only website; content + ecommerce; content + bookings; combined. Modules off by default unless configured. Single business is initial default; tenant isolation and storefront/channel separation are explicit later decisions, not hidden assumptions.
 
 ### Logical dataflow
-Browser/SEO crawlers -> CDN/WAF -> reverse proxy -> Angular storefront SSR or static/prerender routes -> backend-for-frontend/commerce/booking public APIs.
+
+Browser/SEO crawlers -> reverse proxy -> static Angular storefront -> backend-for-frontend, commerce, and booking public APIs. CDN/WAF and SSR or prerendering remain production work.
 Editors -> Strapi Admin -> CMS DB/media.
 Operations staff -> Angular Admin -> commerce/booking APIs.
 CMS -> publish webhook/outbox bridge -> worker -> content cache invalidation/search indexing.
@@ -13,24 +17,28 @@ Payments PSP -> signed webhooks -> commerce/booking transaction handler -> idemp
 OTel collectors scrape/receive every component; secrets never traverse the public network.
 
 ## Component responsibility matrix
-| Component | Owns | Must not own |
-| --- | --- | --- |
-| Strapi | content models, landing pages, navigation, localized content, product marketing details, SEO, media, publishing approvals | inventory truth, paid order ledger, PCI-sensitive card data, slot allocation |
-| Commerce | SKUs/variants, prices, promotions, tax calculation orchestration, stock movements, carts, checkout, orders, payment intent state, refunds, fulfillment | rich editorial page layouts |
-| Booking | resource calendars, opening rules, service durations, blocked dates, slot holds, confirmed appointments, cancellation policy | CMS page data, card details |
-| Storefront | public UI, SSR, forms, client routing, UX & performance | authoritative payments or stock |
-| Admin | operational commerce/booking controls, analytics read models, RBAC UI | direct DB writes |
-| Workers | scheduled and asynchronous workflows, retries, delivery, index projections | trust in unverified webhook input |
-| Infrastructure | composition, health, networking, TLS, deployments, backup and telemetry | domain business logic |
-| Contracts | OpenAPI + event definitions, version policy and SDK generation | hand-maintained duplicate DTOs |
+
+| Component      | Owns                                                                                                                                                   | Must not own                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Strapi         | content models, landing pages, navigation, localized content, product marketing details, SEO, media, publishing approvals                              | inventory truth, paid order ledger, PCI-sensitive card data, slot allocation |
+| Commerce       | SKUs/variants, prices, promotions, tax calculation orchestration, stock movements, carts, checkout, orders, payment intent state, refunds, fulfillment | rich editorial page layouts                                                  |
+| Booking        | resource calendars, opening rules, service durations, blocked dates, slot holds, confirmed appointments, cancellation policy                           | CMS page data, card details                                                  |
+| Storefront     | public UI, forms, client routing, UX and performance                                                                                                   | authoritative payments or stock                                              |
+| Admin          | operational commerce/booking controls, analytics read models, RBAC UI                                                                                  | direct DB writes                                                             |
+| Workers        | scheduled and asynchronous workflows, retries, delivery, index projections                                                                             | trust in unverified webhook input                                            |
+| Infrastructure | composition, health, networking, TLS, deployments, backup and telemetry                                                                                | domain business logic                                                        |
+| Contracts      | OpenAPI + event definitions, version policy and SDK generation                                                                                         | hand-maintained duplicate DTOs                                               |
 
 ## Identity and authorization
-Decision required: Strapi local users vs external OIDC (prefer separate OIDC provider for customers and staff); never assume Strapi admin users are customer identities. RBAC + object-level authorization + least privilege; support guest checkout as configured; MFA for staff; reset/invite, account verification, session/token refresh, CSRF/CORS, secure cookies, consent, deletion/export workflows, rate limiting and bot defense.
+
+Local Strapi administrator accounts and server-side Strapi sessions authenticate staff. The platform does not support an external OIDC administrator mode. Never use Strapi administrator identities as customer identities. Select a separate customer identity design before customer accounts are added. Apply RBAC, object-level authorization, least privilege, staff MFA, secure session cookies, CSRF protection, consent, deletion and export workflows, rate limits, and bot defenses.
 
 ## Data/database rule
+
 Use PostgreSQL databases `cms`, `commerce`, `booking` (or isolated namespaces when justified), separate credentials and backup policies. Strapi uses its schema management and native migrations. Liquibase alone controls the dedicated commerce/booking/worker-owned schemas. Check startup migration ordering, rollback/preconditions, failed migration safety, read replica support, indexes/constraints, zero-downtime expand-migrate-contract compatibility and restoring migration state alongside data. Never point Liquibase at Strapi-owned tables. Prefer transactional outbox for event publication.
 
 ## Domain integration
+
 - Versioned REST OpenAPI as baseline. GraphQL only for justified use cases; never expose unrestricted query complexity.
 - Define consistent pagination/filter/sort conventions, identifiers, optimistic locking/ETags, timestamps (UTC persisted, local timezone IANA identifiers), RFC7807 errors, correlation IDs, request validation, rate limiting, API deprecation and payload size limits.
 - Decide async transport: PostgreSQL outbox + polling for simple deployments, RabbitMQ when durable queues needed, Kafka only if scale/operations justify it. At-least-once delivery + idempotent consumers, poison queues and replays.
@@ -39,47 +47,57 @@ Use PostgreSQL databases `cms`, `commerce`, `booking` (or isolated namespaces wh
 - Feature flags for commerce/booking/payment provider, localization, search and future channels.
 
 ## UI architecture
+
 Angular 22 target (verify exact compatible patch), standalone components/signals and typed reactive forms; Angular SSR/prerender route strategies with cache-control and hydration. Storybook for isolated documented components; test compatibility against Angular builder + package versions. Angular CDK and accessible primitives as foundations; decide whether to adopt Angular Material, PrimeNG or custom components by design review, avoid copying third-party components. Design tokens (CSS variables, semantic themes, contrast), responsive layouts, keyboard navigation, focus and screen reader testing WCAG 2.2 AA. Component playground, visual snapshot diffs, interaction tests, component API docs, mock data fixtures. Share built UI library via versioned npm/GitHub packages (not git submodule), compatibility matrix, semantic versions, changesets, dependency policy.
 
 ## Infrastructure / deployment
-Docker Compose files: `compose.yaml` base + `compose.dev.yaml` + `compose.prod.yaml` + optional observability and profiles. Services: edge proxy (Traefik/Caddy decision), CMS, storefront SSR, commerce, booking, workers, PostgreSQL, optional Redis, broker, S3-compatible object store in dev; production object storage may be external. Isolated internal networks, no exposed databases, healthchecks/readiness, startup dependency checks, resource ceilings, graceful shutdown, stateless app images, read-only mounts where possible. Immutable pinned image digests, SBOM, scanning, non-root containers. Production secrets via approved secret manager/file mounts; no .env secrets in Git. Separate storage lifecycle for DB, media and backups.
+
+Docker Compose uses one `compose.yaml` file with separate local and production environment files. Services include Traefik, CMS, Storefront, Admin, Backend, PostgreSQL, and optional development tools. Internal services do not publish host ports. Production secrets come from an approved secret manager or restricted environment file. Git must not contain secret values.
 
 **Important:** Compose single-host is not a high availability strategy. Define target RPO/RTO and disaster recovery: encrypted backups, offsite retention, WAL/PITR, recurring restore drills, media consistency, certificate/DNS runbooks, deployments and rollback of compatible versions. Uptime SLO and on-call escalation. CI needs per-repo checks, artifacts, integration smoke against pinned versions, staged promotion and protected environments. Plan cross-repo version manifest/release orchestration.
 
 ## Observability
+
 OpenTelemetry SDKs/collector; Prometheus/Grafana-compatible metrics; Loki-like centralized logs; Tempo/Jaeger traces; Alertmanager; optional Sentry for client errors. Golden signals (traffic, errors, latency, saturation); business indicators (abandoned checkout, failed transactions, webhook lag, appointment utilization). Trace checkout and booking end-to-end with redaction. Define dashboards, alerts, thresholds, ownership and incident response. Never collect payment card details, credentials or unnecessary PII.
 
 ## Security / compliance
+
 Document threat model (OWASP ASVS/API Top 10), dependency/supply-chain controls, scanning, CSP, HSTS, TLS, CSRF, XSS, SSRF, SQL injection, upload restrictions, user-generated content moderation, audit trails, malware scanning where needed, rate limits, WAF, SAST/DAST, secrets rotation, auth tests and tenant isolation tests. For EU business, data inventory, GDPR legal bases, DPA, retention/deletion, subject rights, cookie consent and regional residency; Germany/EU store requires legal review for checkout, tax/VAT, pricing and consumer rights. PSP hosted fields/checkout to minimize PCI footprint.
 
 ## Nonfunctional acceptance
+
 Define load baseline and targets for p95 API latency, storefront Core Web Vitals, availability, backup RPO/RTO, concurrency per SKU/booking slot, region and localization, expected catalogs/orders, accessibility and performance budgets. Tests must prove oversell and double-booking protection, duplicate webhook handling, crash/retry recovery, successful restore and rollout/rollback. No claim of production readiness without operational drills.
 
-
 ## Approved architecture amendments — 2026-10-19
+
 ### Deployable topology vs source code layout
+
 Approve **Java / Spring Boot**, PostgreSQL, Liquibase, Strapi latest supported v5, Angular 22 target, Angular Material and Storybook; full optional module set deployed via Docker Compose on **one VPS** for **one business per installation**. Avoid premature microservices: compose backend as a **modular Spring Boot monolith** with separate commerce, booking, identity-adapter, Google-integration, shared-kernel (strictly minimal), scheduler and outbox/notification modules; expose one coherent versioned API gateway/BFF surface. Split a module into a service only after scaling, isolation, release cadence or security evidence requires it. Avoid distributed transactions for operations within the same transactional application database; use outbox for cross-process and third-party side effects.
 
 Retain separate CMS PostgreSQL database/schema + credentials managed only by Strapi and separate application PostgreSQL database/schema + credentials managed by Liquibase. Could be **one PostgreSQL server/container on the VPS** with multiple databases and role isolation. Commerce/booking in the same application DB may use distinct schemas and Liquibase changelog namespaces, enabling atomic workflows when necessary. Strapi schema sync is authoritative for CMS-managed tables; Liquibase must never modify those tables. Do not assume Git repo count, number of Compose services and number of databases must coincide. Git repository boundary is now a follow-up decision: 11 previously approved private repository names can remain as independent projects or become workspace packages/directories within a single private monorepo; monorepo is the operational simplicity recommendation.
 
 ### Angular public website + custom Angular admin
+
 Both Angular applications depend on **one separately versioned Angular Material-based design-system package**, built from reusable tokens/components and documented/tested in Storybook. Public storefront theme may be selected independently from admin theme; confirm policy. **Admin must be bespoke**, not generic Strapi admin skinned. Features: staff dashboard, bookings list/calendar (day/week/month/resource views), drag or explicit reschedule with conflict checks, create/edit/cancel, group roster/capacity and waitlist, resource/staff availability, calendar connection status, sync conflicts, customer records with privacy controls, payments/refunds, orders/inventory, reporting, RBAC audit logs, themes manager. Strapi editor UI remains separate for content editing unless a later explicit decision replaces it. Theme controls: preview, choose named presets, light/dark, safe token overrides/brand assets, save/publish/rollback, per-user vs global preference decision, a11y compliance. Disallow arbitrary scripts or user supplied unsafe CSS.
 
 ### Google Calendar and Gmail integration
+
 **Google Calendar API**: OAuth 2.0 user consent to connect owner/staff accounts, least-privilege event/freebusy scopes, encrypted at-rest refresh tokens, access revocation, reconnect UI, tenant/account/resource mappings, a robust sync worker and durable cursors. Booking DB is source of truth for booking records/holds; Google Calendar is an integration/projection or external busy-time constraint. Define direction (one-way/two-way), sync conflicts, idempotent event mapping, daylight-saving IANA timezone, deleted/edited external events, notification and recovery from sync outages. A Google-side event is not itself an atomic reservation; confirm availability and lock the booking DB transaction. Calendar webhooks/watch and polling resync need subscription renewal and validation.
 
 **Gmail API** is separate from Google Calendar API. For booking-confirmation/reminder emails, connect same Google identity with the separately consented `gmail.send` scope if Gmail is specifically required; do not request mailbox-read scopes unless inbound email features are explicitly approved. Queue outbound sends, dedupe message delivery, handle quotas, bounces/limits, account revocation and fallback provider decision. Domain-wide delegation or server-to-server authentication must not be assumed for personal Gmail accounts. OAuth consent verification/public app restrictions may apply.
 
 ### Required proof of production readiness for single VPS
+
 RAM/CPU/disk sizing, sustained request concurrency, DB max connections, DNS/TLS automation, immutable image builds, ingress/network isolation, hardening and secret handling; encrypted automated **off-host** PostgreSQL/WAL and object storage backups; restoration rehearsal; monitoring/alerts even if VPS fails (prefer external heartbeat); upgrade/rollback, power outage and disk-full scenarios; document no multi-host HA. License/vendor viability and security GDPR obligations.
 
 ## FINALIZED system architecture — authoritative (2026-10-19)
+
 Earlier text describing 11 independent repositories or keeping the native Strapi editor for business editorial staff is **obsolete**. The system is organized in **one private monorepo** with logical module boundaries:
 
 ```
 /
   apps/
-    storefront/          # Angular SSR public website/storefront
+    storefront/          # Angular public website/storefront; currently a static SPA
     admin/               # Angular custom content, booking, commerce & settings admin
     cms/                 # Strapi headless content API/server
     backend/             # Spring Boot modular monolith entrypoint
@@ -105,23 +123,30 @@ Earlier text describing 11 independent repositories or keeping the native Strapi
     security/
   docs/
 ```
-The directory names are planning candidates, not created filesystem layout. Build tooling (Gradle/Maven, Nx/Angular workspace, Storybook setup), release strategy, ownership and CI path filters must be decided. Strapi uses own CMS database/schema management; Spring Boot modules use Liquibase-managed application schema; can use one PostgreSQL host with isolated DBs/roles.
+
+The repository implements the `apps/` and `packages/` layout. Backend modules currently use Java packages under `apps/backend`; the other listed directories remain planning candidates. Strapi manages its CMS database. Liquibase manages the application database.
 
 ### ALL content editing in Angular admin
+
 Business editors must NEVER need native Strapi admin for regular content work. Angular custom admin contains page builder with typed/versioned components, CRUD for all selected content types, media/library uploads, relations, locale switching, draft/review/publish/unpublish, revisions/restore, content previews, SEO/redirects, forms and navigation management, permissions, validated inputs, moderation and audit logs. Angular `apps/admin` uses `packages/ui` exclusively as the design system with Angular Material. Admin request goes through authenticated Spring Boot BFF/Strapi adapter (or audited equivalent): no Strapi privileged API token in browser, server-side content permissions enforced, CSRF/authorization and upload security. Strapi native admin remains provisioned for maintenance only and blocked from public/editor routes.
 
 ### Two independent themes
+
 Admin user selects admin theme independently of the **published storefront theme**. A design token set covers Material theme palette, typography, density, shape, dark/light accessibility, responsive behavior. Provide theme catalog, preview (without publishing), versioned theme presets, publish/revert, user preferences, protected roles and WCAG tests. Resolve per-user/storefront-global priority via B07; no arbitrary script/style injection.
 
 ### Two-way Google Calendar synchronization
+
 Connected user OAuth with least-privilege Calendar scopes and encrypted rotating refresh tokens. Booking system authoritative for holds/confirmed bookings; Google-side edits/imports must be reconciled according to B01. Publish platform bookings into mapped Google calendars; watch/poll incremental Google changes back into the platform; maintain external IDs, etags, sync tokens, watch channel renewals and retries. Detect and expose conflicts, cancellations, deletions, permission revocation, expired tokens and DST mismatches; avoid silently erasing real confirmed bookings. Google events can block availability but cannot bypass PostgreSQL concurrency-safe reservations. **Two-way synchronization is not identical to blindly mirroring every event field or treating personal events as customer bookings.**
 
 ### Gmail send-only
+
 OAuth separate consent for minimal Gmail send scope; send booking confirmations and reminders via background jobs with durable delivery history, retry/dedupe, rate-limit/quotas, account reconnect, opt-outs where relevant. No Gmail read permission. Service fallback for bulk/transactional email deliverability unresolved.
 
 ### Deployable set on VPS
-Ingress/TLS -> Angular storefront SSR, custom admin SPA/SSR, Spring Boot app, Strapi headless service, PostgreSQL database server (isolated CMS and application DBs), worker/queue services only if needed, observability, scheduled backup. Docker Compose is **not high availability**. External backups and restore tests required.
+
+Current runtime: Traefik ingress -> static Angular Storefront and Admin SPAs -> Spring Boot -> PostgreSQL and Strapi. SSR, a separate queue, full observability, scheduled backups, and restore tests remain open. Docker Compose is **not high availability**.
 
 ## Google busy-time conflict contract and Tailwind rule
+
 Google external busy blocks take precedence over requested bookings. Before commit, refresh/reconcile known Google changes as far as consistency budget allows, verify local busy projection freshness and perform a serialized PostgreSQL lock/check of overlapping holds/bookings/busy blocks. If overlap (including a newly synchronized Google event), reject with HTTP 409 and `AVAILABILITY_CONFLICT`, sending refreshed free slots or a recalculation URL/version. UI must show a clear human error and reload choices; do not automatically shift a paid appointment, silently drop external events or promise immediate external consistency during provider outage. Define Google API unavailable/freshness policy before accepting potentially conflicting bookings.
 Both Angular applications use **Angular Material for accessible primitives + Tailwind 4 for utility styling**, one shared token/theming package, independent theme selections, CSS isolation. Angular Material component theme configuration and Tailwind/PostCSS pipeline must be tested together.

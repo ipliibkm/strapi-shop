@@ -1,0 +1,28 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<section class="inner-hero">
+  <p class="eyebrow">{{ page() === 'about' ? t('about.eyebrow') : t('contact.eyebrow') }}</p>
+  <h1 class="section-title mt-5">
+    {{
+      content()?.title || (page() === 'about' ? t('about.defaultTitle') : t('contact.defaultTitle'))
+    }}
+  </h1>
+</section>
+
+@if (!loaded()) {
+  <p class="muted center">{{ t('page.loading') }}</p>
+} @else if (content(); as page) {
+  <openshopfront-content-blocks
+    [blocks]="page.blocks"
+    [products]="blockProducts()"
+    [labels]="blockLabels()"
+    (navigate)="onNavigate($event)"
+    (openProduct)="open.emit($any($event))"
+  >
+    <ng-template #formBlock openshopfront-form-block let-slug>
+      <ip-storefront-form [slug]="slug ?? ''" />
+    </ng-template>
+  </openshopfront-content-blocks>
+} @else {
+  <p class="muted center">{{ t('page.notPublished') }}</p>
+}

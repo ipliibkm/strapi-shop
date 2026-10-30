@@ -1,0 +1,562 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('SHOP AND PAYMENTS') }}</p>
+    <h2>{{ t('Commerce operations') }}</h2>
+    <p>{{ t('Manage products, stock, orders, fulfillment, refunds, and shop settings.') }}</p>
+  </div>
+</div>
+@if (!loaded()) {
+  <p class="muted">{{ t('Loading the commerce workspace…') }}</p>
+} @else {
+  <section class="commerce-status">
+    <span [class]="'badge ' + (stripeConfigured() ? 'live' : '')">{{
+      stripeConfigured() ? t('STRIPE CONNECTED') : t('NO PAYMENT PROVIDER')
+    }}</span>
+    <span [class]="'badge ' + (settings().shopEnabled ? 'live' : '')">{{
+      settings().shopEnabled ? t('SHOP OPEN') : t('SHOP CLOSED')
+    }}</span>
+    <span class="spacer"></span>
+    @if (!stripeConfigured()) {
+      <small class="hint">{{
+        t('Orders are created as PENDING_PAYMENT. Mark them paid manually.')
+      }}</small>
+    }
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button [class.active]="tab() === 'orders'" (click)="setTab('orders')" role="tab">
+      {{ t('Orders') }}
+    </button>
+    <button [class.active]="tab() === 'products'" (click)="setTab('products')" role="tab">
+      {{ t('Products') }}
+    </button>
+    <button [class.active]="tab() === 'settings'" (click)="setTab('settings')" role="tab">
+      {{ t('Settings') }}
+    </button>
+  </div>
+
+  @switch (tab()) {
+    @case ('orders') {
+      <section class="commerce-grid">
+        <article class="panel orders-panel">
+          <header class="row-between">
+            <div>
+              <p class="label">{{ t('RECENT ORDERS') }}</p>
+              <h3>{{ t('Customer orders') }}</h3>
+            </div>
+            <button mat-stroked-button (click)="loadOrders()">{{ t('Refresh') }}</button>
+          </header>
+          <select
+            [value]="filter()"
+            (change)="setFilter($event)"
+            [attr.aria-label]="t('Order status filter')"
+          >
+            @for (option of filters; track option.value) {
+              <option [value]="option.value">{{ t(option.label) }}</option>
+            }
+          </select>
+          <div class="order-list">
+            @for (item of orders(); track item.id) {
+              <button
+                [class.selected]="selectedOrder()?.order.id === item.id"
+                (click)="openOrder(item)"
+              >
+                <span
+                  ><strong>{{ item.orderNumber }}</strong
+                  ><small>{{ item.customerName }} · {{ money(item.totalCents) }}</small></span
+                >
+                <span [class]="'badge ' + statusClass(item.status)">{{
+                  shortStatus(item.status)
+                }}</span>
+              </button>
+            } @empty {
+              <p class="muted">{{ t('No orders match this filter yet.') }}</p>
+            }
+          </div>
+        </article>
+
+        <article class="panel detail-panel" [class.empty]="!selectedOrder()">
+          @if (selectedOrder(); as detail) {
+            <header class="row-between">
+              <div>
+                <p class="label">{{ t('ORDER') }}</p>
+                <h3>{{ detail.order.orderNumber }}</h3>
+              </div>
+              <span [class]="'badge ' + statusClass(detail.order.status)">{{
+                shortStatus(detail.order.status)
+              }}</span>
+            </header>
+            <dl class="facts">
+              <dt>{{ t('Customer') }}</dt>
+              <dd>
+                {{ detail.order.customerName }}<br />
+                @if (detail.order.customerEmail) {
+                  <a class="customer-email" [href]="'mailto:' + detail.order.customerEmail">
+                    {{ detail.order.customerEmail }}
+                  </a>
+                } @else {
+                  <span class="muted">{{ t('No email provided') }}</span>
+                }
+              </dd>
+              <dt>{{ t('Subtotal') }}</dt>
+              <dd>{{ money(detail.order.subtotalCents) }}</dd>
+              <dt>{{ t('Tax') }}</dt>
+              <dd>{{ money(detail.order.taxCents) }}</dd>
+              <dt>{{ t('Shipping') }}</dt>
+              <dd>{{ money(detail.order.shippingCents) }}</dd>
+              <dt>{{ t('Total') }}</dt>
+              <dd>
+                <strong>{{ money(detail.order.totalCents) }}</strong>
+              </dd>
+            </dl>
+            <h4 class="subhead">{{ t('Items') }}</h4>
+            @for (item of detail.items; track $index) {
+              <p class="order-item">
+                {{ item.quantity }} × {{ item.productName
+                }}<span>{{ money(item.lineTotalCents) }}</span>
+              </p>
+            }
+            @if (detail.payment) {
+              <h4 class="subhead">{{ t('Payment') }}</h4>
+              <p>
+                <span [class]="'badge ' + statusClass(detail.payment.status)">{{
+                  shortStatus(detail.payment.status)
+                }}</span>
+                {{ money(detail.payment.amountCents) }} {{ t('via') }}
+                {{ detail.payment.provider }}
+              </p>
+            } @else {
+              <p class="muted">{{ t('No payment recorded yet.') }}</p>
+            }
+            @if (detail.shipment?.status === 'SHIPPED') {
+              <h4 class="subhead">{{ t('Shipment') }}</h4>
+              <p>
+                {{ detail.shipment.carrier || t('Carrier') }} ·
+                {{ detail.shipment.trackingNumber || t('no tracking number') }}
+              </p>
+            }
+
+            <footer class="order-actions">
+              @if (detail.order.status === 'PENDING_PAYMENT') {
+                <button mat-flat-button [disabled]="actionBusy()" (click)="markPaid(detail)">
+                  {{ t('Mark paid') }}
+                </button>
+                <button mat-stroked-button [disabled]="actionBusy()" (click)="cancelOrder(detail)">
+                  {{ t('Cancel order') }}
+                </button>
+              }
+              @if (detail.order.status === 'PAID') {
+                <label class="field"
+                  ><span>{{ t('Carrier') }}</span
+                  ><input #carrier value="DHL"
+                /></label>
+                <label class="field grow"
+                  ><span>{{ t('Tracking number') }}</span
+                  ><input #tracking [attr.placeholder]="t('e.g. 1234567890')"
+                /></label>
+                <button
+                  mat-flat-button
+                  [disabled]="actionBusy()"
+                  (click)="fulfill(detail, carrier.value, tracking.value)"
+                >
+                  {{ t('Fulfill order') }}
+                </button>
+              }
+              @if (detail.order.status === 'PAID' || detail.order.status === 'FULFILLED') {
+                <button
+                  mat-stroked-button
+                  class="refund"
+                  [disabled]="actionBusy()"
+                  (click)="refundOrder(detail)"
+                >
+                  {{ t('Refund order') }}
+                </button>
+              }
+            </footer>
+          } @else {
+            <p class="muted">
+              {{ t('Select an order to review items, payment, and actions.') }}
+            </p>
+          }
+        </article>
+      </section>
+    }
+
+    @case ('products') {
+      <section class="commerce-grid two">
+        <article class="panel products-panel">
+          <header>
+            <p class="label">{{ t('CATALOG') }}</p>
+            <h3>{{ t('Products') }}</h3>
+          </header>
+          <div class="product-list">
+            @for (item of products(); track item.id) {
+              <button
+                [class.selected]="selectedProduct()?.id === item.id"
+                (click)="selectProduct(item)"
+              >
+                <span
+                  ><strong>{{ item.name }}</strong
+                  ><small
+                    >/{{ item.slug }} ·
+                    {{ t('{count} option(s)', { count: item.variantCount }) }}</small
+                  ></span
+                >
+              </button>
+            } @empty {
+              <p class="muted">
+                {{ t('No products yet. Create your first product on the right.') }}
+              </p>
+            }
+          </div>
+        </article>
+
+        <article class="panel editor-panel" [class.empty]="!selectedProduct()">
+          @if (editingNew()) {
+            <header>
+              <p class="label">{{ t('NEW PRODUCT') }}</p>
+              <h3>{{ t('Create a product') }}</h3>
+            </header>
+            <label class="field"
+              ><span>{{ t('Slug') }}</span
+              ><input #newSlug placeholder="running-shoe"
+            /></label>
+            <label class="field"
+              ><span>{{ t('Name') }}</span
+              ><input #newName placeholder="Road Runner 2" maxlength="200"
+            /></label>
+            <label class="field"
+              ><span>{{ t('Description') }}</span
+              ><textarea #newDesc rows="3"></textarea>
+            </label>
+            <openshopfront-image-upload
+              class="product-images"
+              [images]="productImageUrls()"
+              [labels]="imageUploadLabels()"
+              [uploading]="imageUploading()"
+              (filesSelected)="uploadProductImages($event)"
+              (removeImage)="removeProductImage($event)"
+              (selectionRejected)="imageSelectionRejected($event)"
+            />
+            @if (imageUploadError()) {
+              <p class="image-upload-error" role="alert">{{ imageUploadError() }}</p>
+            }
+            <p class="label">{{ t('FIRST PURCHASABLE OPTION') }}</p>
+            <div class="row">
+              <label class="field grow"
+                ><span>SKU</span><input #newSku placeholder="RR2-41"
+              /></label>
+              <label class="field"
+                ><span>{{ t('Label') }}</span
+                ><input #newLabel value="Size 41" maxlength="200"
+              /></label>
+            </div>
+            <div class="row">
+              <label class="field grow"
+                ><span>{{ t('Price (EUR)') }}</span
+                ><input type="number" min="0" step="0.01" #newPrice value="89.95"
+              /></label>
+              <label class="field"
+                ><span>{{ t('Stock') }}</span
+                ><input type="number" min="0" #newStock value="25"
+              /></label>
+            </div>
+            <button
+              mat-flat-button
+              [disabled]="actionBusy()"
+              (click)="
+                createProduct(
+                  newSlug.value,
+                  newName.value,
+                  newDesc.value,
+                  newSku.value,
+                  newLabel.value,
+                  newPrice.value,
+                  newStock.value
+                )
+              "
+            >
+              {{ t('Create product') }}
+            </button>
+          } @else if (selectedProduct(); as product) {
+            <header class="row-between editor-header">
+              <div>
+                <p class="label">{{ t('EDITING') }}</p>
+                <h3>{{ product.name }}</h3>
+              </div>
+              <div class="editor-header-actions">
+                <div class="preview-switch" role="group" [attr.aria-label]="t('Editor mode')">
+                  <button
+                    type="button"
+                    [class.active]="!previewMode()"
+                    [attr.aria-pressed]="!previewMode()"
+                    (click)="previewMode.set(false)"
+                  >
+                    <mat-icon>edit</mat-icon>{{ t('Edit') }}
+                  </button>
+                  <button
+                    type="button"
+                    [class.active]="previewMode()"
+                    [attr.aria-pressed]="previewMode()"
+                    (click)="previewMode.set(true)"
+                  >
+                    <mat-icon>visibility</mat-icon>{{ t('Preview') }}
+                  </button>
+                </div>
+                <span [class]="'badge ' + (product.variantCount ? 'live' : '')">{{
+                  t('{count} OPTION(S)', { count: product.variantCount })
+                }}</span>
+              </div>
+            </header>
+            @if (previewMode()) {
+              <section class="product-preview" [attr.aria-label]="t('Product preview')">
+                <div class="preview-media">
+                  @if (previewImages().length) {
+                    <openshopfront-gallery [items]="previewImages()" />
+                  } @else {
+                    <div class="preview-placeholder">{{ productName().charAt(0) || '?' }}</div>
+                  }
+                </div>
+                <div class="preview-copy">
+                  <p class="label">/{{ product.slug }}</p>
+                  <h2>{{ productName() || t('Untitled product') }}</h2>
+                  <p class="preview-description">{{ productDescription() }}</p>
+                  <div class="preview-options">
+                    @for (variant of variants(); track $index) {
+                      <div>
+                        <span
+                          ><strong>{{ variant.label || variant.sku }}</strong></span
+                        >
+                        <span
+                          >{{ money(variant.priceCents) }} · {{ variant.stockQuantity }}
+                          {{ t('in stock') }}</span
+                        >
+                      </div>
+                    }
+                  </div>
+                </div>
+              </section>
+            } @else {
+              <label class="field"
+                ><span>{{ t('Name') }}</span
+                ><input
+                  #editName
+                  [value]="productName()"
+                  maxlength="200"
+                  (input)="productName.set(editName.value)"
+              /></label>
+              <label class="field"
+                ><span>{{ t('Description') }}</span
+                ><textarea
+                  #editDesc
+                  rows="3"
+                  [value]="productDescription()"
+                  (input)="productDescription.set(editDesc.value)"
+                ></textarea>
+              </label>
+              <openshopfront-image-upload
+                class="product-images"
+                [images]="productImageUrls()"
+                [labels]="imageUploadLabels()"
+                [uploading]="imageUploading()"
+                (filesSelected)="uploadProductImages($event)"
+                (removeImage)="removeProductImage($event)"
+                (selectionRejected)="imageSelectionRejected($event)"
+              />
+              @if (imageUploadError()) {
+                <p class="image-upload-error" role="alert">{{ imageUploadError() }}</p>
+              }
+              <div class="row">
+                @for (variant of variants(); track $index) {
+                  <div class="variant-row">
+                    <input
+                      class="v-sku"
+                      [value]="variant.sku"
+                      [attr.aria-label]="t('SKU')"
+                      (input)="updateVariant($index, 'sku', $any($event.target).value)"
+                    />
+                    <input
+                      class="v-label"
+                      [value]="variant.label"
+                      [attr.aria-label]="t('Label')"
+                      (input)="updateVariant($index, 'label', $any($event.target).value)"
+                    />
+                    <input
+                      class="v-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      [value]="(variant.priceCents / 100).toFixed(2)"
+                      [attr.aria-label]="t('Price')"
+                      (input)="updateVariant($index, 'priceCents', $any($event.target).value)"
+                    />
+                    <input
+                      class="v-stock"
+                      type="number"
+                      min="0"
+                      [value]="variant.stockQuantity"
+                      [attr.aria-label]="t('Stock')"
+                      (input)="updateVariant($index, 'stockQuantity', $any($event.target).value)"
+                    />
+                    <button
+                      mat-icon-button
+                      (click)="removeVariant($index)"
+                      [attr.aria-label]="t('Remove option')"
+                    >
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                } @empty {
+                  <p class="muted">{{ t('Add at least one purchasable option.') }}</p>
+                }
+              </div>
+              <div class="row">
+                <label class="field grow"
+                  ><span>{{ t('New SKU') }}</span
+                  ><input #vSku placeholder="RR2-42"
+                /></label>
+                <label class="field grow"
+                  ><span>{{ t('New label') }}</span
+                  ><input #vLabel value="Size 42" maxlength="200"
+                /></label>
+                <label class="field"
+                  ><span>{{ t('Price (EUR)') }}</span
+                  ><input type="number" min="0" step="0.01" #vPrice value="89.95"
+                /></label>
+                <label class="field"
+                  ><span>{{ t('Stock') }}</span
+                  ><input type="number" min="0" #vStock value="25"
+                /></label>
+              </div>
+              <button
+                mat-stroked-button
+                class="add-option-button"
+                (click)="addVariant(vSku.value, vLabel.value, vPrice.value, vStock.value)"
+              >
+                + {{ t('Add option') }}
+              </button>
+            }
+
+            <footer class="editor-foot">
+              <p class="notice">{{ notice() }}</p>
+              <span class="spacer"></span>
+              <button
+                mat-stroked-button
+                [disabled]="actionBusy()"
+                (click)="deleteProduct(product.id)"
+                class="refund"
+              >
+                {{ t('Delete product') }}
+              </button>
+              <button mat-flat-button [disabled]="actionBusy()" (click)="saveProduct(product)">
+                {{ t('Save changes') }}
+              </button>
+            </footer>
+          }
+        </article>
+      </section>
+    }
+
+    @case ('settings') {
+      <section class="commerce-grid two">
+        <article class="panel settings-panel">
+          <header>
+            <p class="label">{{ t('SHOP SETTINGS') }}</p>
+            <h3>{{ t('Sales, tax, shipping') }}</h3>
+          </header>
+          <label class="toggle-row"
+            ><span>{{ t('Open the shop to customers') }}</span
+            ><input
+              type="checkbox"
+              [checked]="settings().shopEnabled"
+              (change)="setShopEnabled($event)"
+          /></label>
+
+          <div class="row">
+            <label class="field grow"
+              ><span>{{ t('Tax rate (%)') }}</span
+              ><input
+                type="number"
+                min="0"
+                max="350"
+                step="0.1"
+                inputmode="decimal"
+                [attr.placeholder]="t('Example: 19')"
+                aria-describedby="tax-rate-help"
+                [value]="(settings().taxRateBps / 100).toFixed(1)"
+                #tax
+              />
+              <small id="tax-rate-help" class="field-help">{{
+                t('Enter 19 for a 19% tax rate.')
+              }}</small>
+            </label>
+          </div>
+          <div class="row">
+            <label class="field grow"
+              ><span>{{ t('Flat shipping cost (EUR)') }}</span
+              ><input
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="(settings().shippingFlatCents / 100).toFixed(2)"
+                #flat
+            /></label>
+          </div>
+          <div class="row">
+            <label class="field grow"
+              ><span>{{ t('Free shipping from (EUR, empty = never)') }}</span
+              ><input
+                type="number"
+                min="0"
+                step="0.01"
+                [value]="
+                  settings().freeShippingThresholdCents
+                    ? (settings()!.freeShippingThresholdCents! / 100).toFixed(2)
+                    : ''
+                "
+                #threshold
+            /></label>
+          </div>
+
+          <footer class="editor-foot">
+            <p class="notice">{{ notice() }}</p>
+            <span class="spacer"></span>
+            <button
+              mat-flat-button
+              [disabled]="actionBusy()"
+              (click)="saveSettings(tax.value, flat.value, threshold.value)"
+            >
+              {{ t('Save settings') }}
+            </button>
+          </footer>
+        </article>
+
+        <article class="panel">
+          <header>
+            <p class="label">{{ t('HOW IT WORKS') }}</p>
+            <h3>{{ t('Order lifecycle') }}</h3>
+          </header>
+          <ol class="lifecycle">
+            <li>
+              <strong>PENDING_PAYMENT</strong> — {{ t('stock held, customer not yet paid.') }}
+            </li>
+            <li>
+              <strong>PAID</strong> —
+              {{ t('payment confirmed (Stripe webhook or manual), hold released.') }}
+            </li>
+            <li>
+              <strong>FULFILLED</strong> —
+              {{ t('shipped with carrier and tracking number; stock deducted.') }}
+            </li>
+            <li>
+              <strong>CANCELLED</strong> —
+              {{ t('unpaid order closed, or paid order refunded and restocked.') }}
+            </li>
+          </ol>
+        </article>
+      </section>
+    }
+  }
+}

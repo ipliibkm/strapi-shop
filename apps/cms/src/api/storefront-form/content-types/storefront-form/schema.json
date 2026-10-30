@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "storefront_forms",
+  "info": {
+    "singularName": "storefront-form",
+    "pluralName": "storefront-forms",
+    "displayName": "Storefront Form",
+    "description": "Reusable forms for storefront pages"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 64
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "submitLabel": {
+      "type": "string",
+      "required": true,
+      "default": "Submit",
+      "maxLength": 80
+    },
+    "successMessage": {
+      "type": "string",
+      "required": true,
+      "default": "Thank you. Your form was submitted.",
+      "maxLength": 500
+    },
+    "sendMailEnabled": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "fields": {
+      "type": "json",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,71 @@
+<div class="dynamic-page max-w-4xl mx-auto px-6 py-10">
+  @for (block of blocks(); track $index) {
+    @switch (block.type) {
+      @case ('heading') {
+        <div class="dyn-heading">
+          <small>{{ block.eyebrow }}</small>
+          <h2>{{ block.title }}</h2>
+        </div>
+      }
+      @case ('text') {
+        <article class="dyn-text" [innerHTML]="block.html"></article>
+      }
+      @case ('image') {
+        <figure class="dyn-image">
+          @if (block.url) {
+            <img [src]="block.url" alt="" />
+          }
+          @if (block.caption) {
+            <figcaption>{{ block.caption }}</figcaption>
+          }
+        </figure>
+      }
+      @case ('gallery') {
+        <openshopfront-gallery [items]="galleryItems(block)" />
+      }
+      @case ('cta') {
+        <p>
+          <button
+            mat-flat-button
+            class="!rounded-full dyn-cta"
+            (click)="navigate.emit(block.target)"
+          >
+            {{ block.label || labels().continue }}<mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+        </p>
+      }
+      @case ('products') {
+        <div class="grid md:grid-cols-3 gap-5 dyn-product-grid">
+          @for (item of products(); track item.id) {
+            <button
+              mat-card
+              class="product-card !rounded-2xl !p-0 text-left"
+              (click)="openProduct.emit(item)"
+            >
+              <div class="product-media">
+                <span>{{ initialOf(item.name) }}</span>
+              </div>
+              <div class="!px-5 !py-4">
+                <h3 class="font-semibold">{{ item.name }}</h3>
+                <p class="mt-2 text-sm font-medium">{{ item.priceLabel }}</p>
+              </div>
+            </button>
+          } @empty {
+            <p class="muted md:col-span-3">{{ labels().productsNone }}</p>
+          }
+        </div>
+      }
+      @case ('form') {
+        @if (formBlock) {
+          <ng-container
+            [ngTemplateOutlet]="formBlock"
+            [ngTemplateOutletContext]="{ $implicit: block.formSlug }"
+          ></ng-container>
+        }
+      }
+    }
+  }
+</div>
+
+<!-- The consuming app projects its form template here via an openshopfront-form-block ng-template. -->
+<ng-content select="[openshopfront-form-block]" />

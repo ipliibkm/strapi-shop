@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Example Platform — First Setup Walkthrough</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f1a30; --panel2:#12203c; --line:rgba(148,163,184,.18);
+    --ink:#e7eef9; --muted:#9fb0c9; --accent:#f5b455; --accent2:#5aa9ff;
+    --ok:#38d39f; --warn:#ffb454; --bad:#ff6b6b; --radius:18px;
+    --maxw:1080px; --shadow:0 24px 60px -24px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#173056 0%,transparent 60%),
+               radial-gradient(900px 500px at -10% 10%,#241a3a 0%,transparent 55%), var(--bg);
+    color:var(--ink); line-height:1.6; min-height:100vh; padding-bottom:72px;
+    overflow-x:hidden;
+  }
+  a{color:var(--accent2)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:48px 22px 40px}
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:36px}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.28em;color:var(--accent);text-transform:uppercase;margin:0 0 14px}
+  h1{font-size:clamp(30px,5.2vw,52px);line-height:1.05;margin:0 0 16px;font-weight:800;letter-spacing:-.02em}
+  h1 .grad{background:linear-gradient(90deg,#f5b455,#ffd79a 40%,#5aa9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);max-width:640px;margin:0 auto;font-size:16px}
+
+  /* ---------- Progress rail (stepper) ---------- */
+  .rail{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;margin:30px 0 42px;padding:14px 16px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow)}
+  .rail .node{display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:999px;cursor:pointer;background:transparent;border:1px solid transparent;color:var(--muted);font-size:13.5px;font-weight:600;transition:.25s}
+  .rail .node:hover{color:var(--ink)}
+  .rail .num{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#1a2743;color:var(--muted);font-size:12px;font-weight:800;border:1px solid var(--line)}
+  .rail .node.active{color:#fff;background:rgba(90,169,255,.12);border-color:rgba(90,169,255,.4)}
+  .rail .node.active .num{background:var(--accent2);color:#04101f;border-color:transparent}
+  .rail .node.done .num{background:var(--ok);color:#04120c}
+  .rail .sep{width:26px;height:2px;background:linear-gradient(90deg,var(--line),transparent);border-radius:2px}
+
+  /* ---------- Stage / cards ---------- */
+  .stage{position:relative;display:flex;flex-direction:column;gap:22px}
+  .card{
+    position:relative;overflow:hidden;border-radius:var(--radius);padding:30px 30px 28px;
+    background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),var(--panel);
+    border:1px solid var(--line);box-shadow:var(--shadow);
+  }
+  .card .glow{position:absolute;inset:-40% -30% auto -30%;height:60%;background:radial-gradient(600px 220px at 50% 0%,rgba(90,169,255,.18),transparent 70%);pointer-events:none}
+  .card-head{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px}
+  .badge-ico{flex:0 0 auto;display:grid;place-items:center;width:46px;height:46px;border-radius:13px;font-size:22px;background:linear-gradient(180deg,#1b2c50,#16234a);border:1px solid var(--line)}
+  .step-tag{font-size:11.5px;font-weight:700;letter-spacing:.2em;color:var(--accent);text-transform:uppercase}
+  h2{margin:6px 0 4px;font-size:clamp(20px,3vw,27px);font-weight:800;letter-spacing:-.01em}
+  .lede{color:var(--muted);margin:0;font-size:15px}
+
+  /* ---------- Timeline of sub-actions (the animated part) ---------- */
+  .timeline{position:relative;margin-top:6px;padding-left:34px}
+  .timeline::before{content:"";position:absolute;left:13px;top:8px;bottom:8px;width:2px;background:linear-gradient(180deg,var(--accent2),rgba(90,169,255,.08))}
+  .tl-item{position:relative;padding:0 0 22px 4px}
+  .tl-item:last-child{padding-bottom:0}
+  .dot{position:absolute;left:-34px;top:2px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#16233f;border:1px solid var(--line);color:var(--muted);font-size:13px;font-weight:800;z-index:1}
+  .tl-item.active .dot{background:var(--accent2);color:#04101f;box-shadow:0 0 0 5px rgba(90,169,255,.18),0 0 22px rgba(90,169,255,.5)}
+  .tl-item.done .dot{background:var(--ok);color:#04120c}
+  .tl-title{font-weight:700;font-size:16px;margin-bottom:3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .pill{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:#182746;color:var(--muted);border:1px solid var(--line)}
+  .pill.ext{background:rgba(245,180,85,.12);color:var(--accent);border-color:rgba(245,180,85,.35)}
+  .tl-desc{color:var(--muted);font-size:14px;max-width:760px}
+
+  /* ---------- Code blocks ---------- */
+  pre.code{position:relative;margin:14px 0 2px;padding:15px 16px;border-radius:13px;background:#080d18;border:1px solid var(--line);overflow:auto;font-size:13.5px;line-height:1.7}
+  pre.code code{font-family:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,monospace;color:#cfe0ff;white-space:pre}
+  .tok-cmd{color:#7fd4a8}.tok-flag{color:#f5b455}.tok-var{color:#9ecbff}.tok-note{color:#6b7fa3;font-style:italic}
+  .copy{position:absolute;top:10px;right:10px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:9px;background:#182746;color:var(--muted);border:1px solid var(--line);cursor:pointer;transition:.2s}
+  .copy:hover{color:#fff}.copy.ok{background:rgba(56,211,159,.15);color:var(--ok)}
+
+  /* ---------- External action buttons ---------- */
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;padding:10px 16px;border-radius:11px;text-decoration:none;border:1px solid var(--line);background:#16234a;color:var(--ink);transition:.2s;white-space:nowrap}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.ext{background:linear-gradient(180deg,#1d3157,#16264a);border-color:rgba(90,169,255,.45)}
+  .btn.ext:hover{box-shadow:0 10px 26px -12px rgba(90,169,255,.7)}
+  .btn.gold{background:linear-gradient(180deg,#3a2c14,#2c2110);border-color:rgba(245,180,85,.5);color:#ffdca4}
+  .btn svg{width:16px;height:16px;flex:0 0 auto}
+
+  /* ---------- Env table ---------- */
+  table.env{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px}
+  table.env th,table.env td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.env thead th{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  table.env td.var{font-family:ui-monospace,Menlo,monospace;color:#9ecbff;font-weight:600;white-space:nowrap}
+  .tag-req{color:var(--warn)}.tag-opt{color:var(--muted)}
+
+  /* ---------- Check / status chip ---------- */
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;background:#132040;border:1px solid var(--line);color:var(--muted)}
+  .chip.ok{background:rgba(56,211,159,.12);border-color:rgba(56,211,159,.4);color:var(--ok)}
+  .chip .led{width:8px;height:8px;border-radius:50%;background:#16234a;box-shadow:0 0 8px currentColor}
+  .chip.ok .led{background:var(--ok)}
+
+  /* ---------- Footer nav ---------- */
+  .footnav{display:flex;justify-content:space-between;gap:12px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+  .ghost{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--muted);padding:12px 18px;border-radius:12px;background:#132040;border:1px solid var(--line);cursor:pointer;text-decoration:none}
+  .ghost:hover{color:#fff}
+  .primary-cta{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:15px;color:#04120c;padding:13px 24px;border-radius:12px;background:linear-gradient(180deg,#ffd79a,var(--accent));border:none;cursor:pointer;box-shadow:0 16px 34px -16px rgba(245,180,85,.8)}
+  .primary-cta:hover{transform:translateY(-1px)}
+
+  /* ---------- Toast ---------- */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(30px);background:#0c1730;border:1px solid var(--line);color:var(--ink);padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:99}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------- Progress bar (top) ---------- */
+  .topbar{position:fixed;top:0;left:0;right:0;height:4px;background:rgba(255,255,255,.06);z-index:50}
+  #progressbar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+  /* ---------- Reveal animation ---------- */
+  @media (prefers-reduced-motion:no-preference){
+    .card{opacity:0;transform:translateY(26px) scale(.985);transition:opacity .7s ease,transform .7s cubic-bezier(.16,.84,.3,1)}
+    .stage.playing .card.in-view{opacity:1;transform:none}
+    .tl-item{opacity:.35;transform:translateX(-6px);transition:opacity .5s,transform .5s}
+    .tl-item.lit{opacity:1;transform:none}
+    .badge-ico{animation:floaty 4.5s ease-in-out infinite}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  }
+  @media (max-width:640px){ .card{padding:22px 18px} .footnav{flex-direction:column-reverse;align-items:stretch} .ghost,.primary-cta{justify-content:center} }
+
+  /* ---------- Google env builder (step 5) ---------- */
+  .envbuild{margin-top:16px;padding:18px 18px 12px;border-radius:13px;background:#0c1529;border:1px solid var(--line)}
+  .envbuild h3{margin:0 0 4px;font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+  .fld{display:block;margin-top:12px;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .envbuild input{width:100%;margin-top:6px;background:#080d18;border:1px solid var(--line);border-radius:9px;padding:9px 12px;color:var(--ink);font-size:13.5px;font-family:"SFMono-Regular",ui-monospace,Menlo,monospace}
+  .envbuild input:focus{outline:none;border-color:rgba(90,169,255,.5)}
+</style>
+</head>
+<body>
+  <div class="topbar"><div id="progressbar"></div></div>
+
+  <div class="wrap">
+    <!-- ============ HERO ============ -->
+    <header class="hero">
+      <p class="kicker">Example Platform · Development setup</p>
+      <h1>First-run walkthrough,<br><span class="grad">from empty repo to live shop.</span></h1>
+      <p class="sub">Six short steps. Each one opens the exact page you need — Stripe keys, Google Cloud Console, and your own local dashboard — so nothing is a dead end.</p>
+    </header>
+
+    <!-- ============ PROGRESS RAIL (clickable stepper) ============ -->
+    <nav class="rail" id="rail" aria-label="Setup steps">
+      <button class="node active" data-step="1"><span class="num">1</span> Prerequisites</button><span class="sep"></span>
+      <button class="node" data-step="2"><span class="num">2</span> Start stack</button><span class="sep"></span>
+      <button class="node" data-step="3"><span class="num">3</span> First admin</button><span class="sep"></span>
+      <button class="node" data-step="4"><span class="num">4</span> Stripe</button><span class="sep"></span>
+      <button class="node" data-step="5"><span class="num">5</span> Google</button><span class="sep"></span>
+      <button class="node" data-step="6"><span class="num">6</span> Verify</button>
+    </nav>
+
+    <!-- ============ STAGE (cards) ============ -->
+    <div class="stage playing" id="stage">
+
+      <!-- ===== STEP 1 · PREREQUISITES ===== -->
+      <section class="card" data-step="1">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">🧰</div>
+          <div>
+            <p class="step-tag">Step 01 · One time</p>
+            <h2>Check the tools on this machine</h2>
+            <p class="lede">The stack runs in Docker. You need these installed, then nothing more.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Docker Engine + Compose v2 <span class="pill ext">Required</span></div>
+            <p class="tl-desc">Runs the Postgres, Strapi CMS, Spring Boot backend, and Traefik edge router as one stack.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Python 3.10 or later <span class="pill ext">Required</span></div>
+            <p class="tl-desc">Drives the setup script that generates secrets and starts the services.</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Git + an internet connection <span class="pill ext">Required</span></div>
+            <p class="tl-desc">First build pulls the application images, so a working network is needed.</p>
+          </div>
+        </div>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-verify">Copy</button><code id="0a1730-verify"><span class="tok-cmd">docker --version</span>   <span class="tok-note"># Docker 24+</span>
+<span class="tok-cmd">docker compose version</span>   <span class="tok-note"># v2.x</span>
+<span class="tok-cmd">python3 --version</span>    <span class="tok-note"># 3.10 or later</span></code></pre>
+
+        <div class="actions">
+          <a class="btn ext" href="https://docs.docker.com/engine/install/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Docker install docs</a>
+          <a class="btn" href="https://docs.python.org/3/install/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Python install</a>
+        </div>
+      </section>
+
+      <!-- ===== STEP 2 · START THE STACK ===== -->
+      <section class="card" data-step="2">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">🚀</div>
+          <div>
+            <p class="step-tag">Step 02 · ~5 minutes</p>
+            <h2>Start the full stack with one command</h2>
+            <p class="lede">The script generates secrets, boots every service, and only finishes once each health check passes.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Run the setup script</div>
+            <p class="tl-desc">From the repository root. It writes <code>.env</code> (private secrets) and <code>config/business.json</code> (your company details), then starts Docker Compose.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Enter your business profile</div>
+            <p class="tl-desc">Company name, contact email, time zone, language and currency. Address and phone are optional. Confirm with <b>yes</b>.</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Wait for health checks</div>
+            <p class="tl-desc">The script waits for every container to become healthy, then probes the Storefront, Admin and CMS routes through Traefik. It stops on any failure.</p>
+          </div>
+        </div>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-start">Copy</button><code id="0a1730-start"><span class="tok-cmd">sh setup.sh</span></code></pre>
+
+        <table class="env">
+          <thead><tr><th>What you get</th><th>Local address</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td class="var">storefront.localhost</td><td>Public shop + checkout</td><td>Your customers browse here.</td></tr>
+            <tr><td class="var">admin.localhost</td><td>Operator dashboard</td><td>You manage orders, products, settings.</td></tr>
+            <tr><td class="var">cms.localhost</td><td>Strapi content manager</td><td>Structural content + Strapi admin.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <a class="btn ext" href="http://storefront.localhost" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Open Storefront</a>
+          <a class="btn ext" href="http://admin.localhost" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Open Admin</a>
+        </div>
+      </section>
+
+      <!-- ===== STEP 3 · FIRST ADMINISTRATOR ===== -->
+      <section class="card" data-step="3">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">👤</div>
+          <div>
+            <p class="step-tag">Step 03 · One time</p>
+            <h2>Create the first technical administrator</h2>
+            <p class="lede">This is a Strapi CMS account. It is separate from the operator sign-in used by the Angular admin.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Accept the Strapi administrator setup</div>
+            <p class="tl-desc">When the script asks, enter <b>yes</b>. It opens Strapi's interactive administrator creation.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Enter name, email and password</div>
+            <p class="tl-desc">Use a strong password (14+ characters). It is stored as a BCrypt hash in Postgres — never in plain text.</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Sign in to the CMS later</div>
+            <p class="tl-desc">Open Strapi after setup. The Angular admin uses a separate local operator account.</p>
+          </div>
+        </div>
+
+        <table class="env">
+          <thead><tr><th>Account type</th><th>Used for</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Strapi Super Admin</td><td>Content model, roles, CMS structure</td><td><span class="chip ok"><span class="led"></span>Required now</span></td></tr>
+            <tr><td>Angular operator (local)</td><td>Orders, products, shop settings</td><td><span class="chip">Via admin.localhost</span></td></tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <a class="btn ext" href="http://cms.localhost/admin" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Open Strapi admin</a>
+        </div>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-recover">Copy</button><code id="0a1730-recover"><span class="tok-note"># If administrator creation stops, run this to recover:</span>
+<span class="tok-cmd">docker compose exec cms npm run strapi -- admin:create-user</span></code></pre>
+      </section>
+
+      <!-- ===== STEP 4 · STRIPE (payments) ===== -->
+      <section class="card" data-step="4">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">💳</div>
+          <div>
+            <p class="step-tag">Step 04 · Payments go live here</p>
+            <h2>Connect Stripe (sandbox first)</h2>
+            <p class="lede">Two secrets plus a signed webhook. Grab both from the same Stripe dashboard — no guessing.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Open your Stripe account <span class="pill ext">Register / sign in</span></div>
+            <p class="tl-desc">Create a business account, or use the existing one. Choose <b>test mode</b> while you verify checkout and webhooks.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Copy the Secret key (<code>sk_test_…</code>) <span class="pill ext">API keys</span></div>
+            <p class="tl-desc">Found under Developers → API keys. This is the <b>secret</b> key — never expose it to the browser.</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Create the webhook endpoint <span class="pill ext">Developers → Webhooks</span></div>
+            <p class="tl-desc">Point it at your local listener, forward to the backend, and copy the signing secret (<code>whsec_…</code>). Select the events below.</p>
+          </div>
+        </div>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-listen">Copy</button><code id="0a1730-listen"><span class="tok-note"># Local webhook listener — run in its own terminal.</span>
+<span class="tok-cmd">stripe listen --forward-to http://storefront.localhost/webhooks/stripe \</span>
+  <span class="tok-flag">--events</span> checkout.session.completed,checkout.session.async_payment_failed</code></pre>
+
+        <table class="env">
+          <thead><tr><th>Add to your private <code>.env</code></th><th>Value from Stripe</th><th>Required?</th></tr></thead>
+          <tbody>
+            <tr><td class="var">STRIPE_SECRET_KEY</td><td>The secret key <code>sk_test_…</code> (or <code>sk_live_…</code>)</td><td><span class="tag-req">Required</span></td></tr>
+            <tr><td class="var">STRIPE_WEBHOOK_SECRET</td><td>The webhook signing secret <code>whsec_…</code></td><td><span class="tag-req">Required</span></td></tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <a class="btn gold" href="https://dashboard.stripe.com/register" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Open Stripe Dashboard</a>
+          <a class="btn gold" href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> API Keys</a>
+          <a class="btn gold" href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Webhooks</a>
+          <a class="btn" href="https://stripe.com/docs/checkout/accept-a-payment" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Checkout guide</a>
+          <a class="btn" href="https://stripe.com/docs/testing" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Test card numbers</a>
+        </div>
+
+        <p class="lede" style="margin-top:16px"><span class="chip ok"><span class="led"></span>Test mode ready</span>&nbsp; Use card <b>4242 4242 4242 4242</b>, any future expiry, CVC <b>123</b>.</p>
+      </section>
+
+      <!-- ===== STEP 5 · GOOGLE (calendar + email) ===== -->
+      <section class="card" data-step="5">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">📅</div>
+          <div>
+            <p class="step-tag">Step 05 · Bookings sync + email</p>
+            <h2>Connect Google (optional but recommended)</h2>
+            <p class="lede">Calendar import keeps double-bookings impossible; Gmail sends confirmations. Both use one OAuth client.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Create a Google Cloud project <span class="pill ext">Console → Projects</span></div>
+            <p class="tl-desc">One project per business. This is where APIs and credentials live.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Enable the APIs you need <span class="pill ext">API Library</span></div>
+            <p class="tl-desc">Turn on the <b>Google Calendar API</b>. Enable the <b>Gmail API</b> only if you will send email (the platform requests <code>gmail.send</code>, never mailbox read).</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Configure the OAuth consent screen <span class="pill ext">OAuth consent</span></div>
+            <p class="tl-desc">Set the app name and your support email so Google can show a proper permission page.</p>
+          </div>
+          <div class="tl-item"><span class="dot">4</span>
+            <div class="tl-title">Create an OAuth client (Web) <span class="pill ext">Credentials</span></div>
+            <p class="tl-desc">Type <b>Web application</b>. Add the local redirect URI below (plain <code>localhost</code> — Google Cloud rejects <code>admin.localhost</code>). Copy the Client ID and secret.</p>
+          </div>
+        </div>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-redirect">Copy</button><code id="0a1730-redirect"><span class="tok-note"># Authorized redirect URI for local use (add the production HTTPS one before deploy):</span>
+http://localhost/login/oauth2/code/google</code></pre>
+
+        <table class="env">
+          <thead><tr><th>Add to your private <code>.env</code></th><th>Value</th><th>Required?</th></tr></thead>
+          <tbody>
+            <tr><td class="var">PLATFORM_GOOGLE_ENABLED</td><td><code>true</code></td><td><span class="tag-req">Required to connect</span></td></tr>
+            <tr><td class="var">GOOGLE_CLIENT_ID</td><td>Your OAuth client ID from the Console</td><td><span class="tag-req">Required</span></td></tr>
+            <tr><td class="var">GOOGLE_CLIENT_SECRET</td><td>Your OAuth client secret (keep out of Git)</td><td><span class="tag-req">Required</span></td></tr>
+            <tr><td class="var">PLATFORM_ADMIN_BASE_URL</td><td><code>http://localhost</code></td><td><span class="tag-req">Must match the registered URI</span></td></tr>
+          </tbody>
+        </table>
+
+        <p class="lede" style="margin-top:16px">Google Cloud rejects <code>.localhost</code> subdomains with a top-level-domain error, so the local redirect uses plain <code>localhost</code>. Traefik routes both <b><code>http://admin.localhost</code></b> and <b><code>http://localhost</code></b> to the admin UI.</p>
+
+        <div class="envbuild">
+          <h3>Build the Google environment block</h3>
+          <p class="lede" style="margin:4px 0 8px">This builder does not save input. Clear this page before screen sharing if it contains a client secret.</p>
+          <label class="fld">Google client ID<input id="fs5-client-id" type="text" autocomplete="off" spellcheck="false" placeholder="000000.apps.googleusercontent.com"></label>
+          <label class="fld">Google client secret<input id="fs5-client-secret" type="password" autocomplete="new-password" placeholder="Enter the secret locally"></label>
+          <label class="fld">Token encryption key — keep it stable, stored Google tokens cannot be decrypted after a change<input id="fs5-token-key" type="text" autocomplete="off" spellcheck="false" placeholder="Generate or paste a Base64 32-byte key"></label>
+          <div class="actions"><button class="btn ext" id="fs5-generate" type="button">Generate encryption key</button><span class="chip" style="align-self:center">Equivalent to: openssl rand -base64 32</span></div>
+          <pre class="code"><button class="copy" data-copy="#0a1730-genv">Copy</button><code id="0a1730-genv"></code></pre>
+          <p class="lede">Put this block into your private .env at the repository root, then restart the backend and admin.</p>
+        </div>
+
+        <div class="actions">
+          <a class="btn ext" href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Create Cloud project</a>
+          <a class="btn ext" href="https://console.cloud.google.com/apis/library?hl=en" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> API Library</a>
+          <a class="btn ext" href="https://console.cloud.google.com/apis/credentials/oauthclient" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> OAuth client</a>
+          <a class="btn" href="https://developers.google.com/calendar/api/docs/reference/rest/v3/users.calendars/list" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Calendar API</a>
+          <a class="btn" href="https://developers.google.com/gmail/api/reference/rest/user/messages/send?auth-label=gmail-sendonly#scopes" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Gmail scopes</a>
+        </div>
+
+        <p class="lede" style="margin-top:16px">Then in the admin, open <b>Connections → Connect Google services</b> and map each resource to a calendar.</p>
+      </section>
+
+      <!-- ===== STEP 6 · VERIFY EVERYTHING ===== -->
+      <section class="card" data-step="6">
+        <span class="glow"></span>
+        <div class="card-head">
+          <div class="badge-ico">✅</div>
+          <div>
+            <p class="step-tag">Step 06 · Go live with confidence</p>
+            <h2>Verify, then place a test order</h2>
+            <p class="lede">A green status plus one real sandbox purchase is the whole definition of done.</p>
+          </div>
+        </div>
+
+        <div class="timeline" data-timeline>
+          <div class="tl-item"><span class="dot">1</span>
+            <div class="tl-title">Read the system checks in the admin</div>
+            <p class="tl-desc">Open <b>System → Checks</b>. A row that says “configuration present” only means a value exists — it does not prove the connection works. Run a live action to confirm.</p>
+          </div>
+          <div class="tl-item"><span class="dot">2</span>
+            <div class="tl-title">Place a sandbox order end-to-end</div>
+            <p class="tl-desc">Buy one product on the Storefront, pay with card 4242…123, and confirm the webhook flips the order to PAID and decrements stock.</p>
+          </div>
+          <div class="tl-item"><span class="dot">3</span>
+            <div class="tl-title">Refund it (optional)</div>
+            <p class="tl-desc">From the admin, refund the order to confirm restock and the Stripe refund path.</p>
+          </div>
+        </div>
+
+        <table class="env">
+          <thead><tr><th>Check</th><th>Where</th><th>Expected</th></tr></thead>
+          <tbody>
+            <tr><td>Stripe connected</td><td>Admin → Commerce → status badge</td><td><span class="chip ok"><span class="led"></span>LIVE / CONNECTED</span></td></tr>
+            <tr><td>Google calendar mapped</td><td>Admin → Connections</td><td><span class="chip ok"><span class="led"></span>CONNECTED</span></td></tr>
+            <tr><td>Test order paid + stock −1</td><td>Admin → Commerce → Orders</td><td>Status PAID, quantity reduced</td></tr>
+          </tbody>
+        </table>
+
+        <div class="actions">
+          <a class="btn gold" href="http://storefront.localhost/#shop" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Shop now</a>
+          <a class="btn ext" href="http://admin.localhost/#commerce" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6m-9-3h.01M21 12a9 9 0 1 0-18 0c0 5 4 9 9 9s9-4 9-9Z"/></svg> Commerce dashboard</a>
+          <button class="btn" id="replay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 12a9 9 0 1 0 9-9m0 9V3m0 9h5"/></svg> Replay walkthrough</button>
+        </div>
+
+        <h3 style="margin-top:28px;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Start over with a clean slate</h3>
+        <p class="lede" style="margin-bottom:4px">This removes all local data (databases, uploads) and re-runs the setup. Your Google Cloud client ID and secret stay valid.</p>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-reset-full">Copy</button><code id="0a1730-reset-full"><span class="tok-note"># Full reset — new company details and new secrets:</span>
+docker compose down -v
+rm -f .env config/business.json .setup-state.json
+sh setup.sh</code></pre>
+
+        <p class="lede">Keep the company details and existing secrets? Remove only the state flag, then re-run the setup.</p>
+
+        <pre class="code"><button class="copy" data-copy="#0a1730-reset-data">Copy</button><code id="0a1730-reset-data"><span class="tok-note"># Data reset — wipe databases and uploads, keep .env:</span>
+docker compose down -v
+rm -f .setup-state.json
+sh setup.sh</code></pre>
+
+        <p class="lede">After a full reset, add the Stripe keys (Step 04) and the Google credentials (Step 05) to the new .env by hand.</p>
+
+        <footer class="footnav">
+          <span style="color:var(--muted);font-size:13px;align-self:center">Built from the project docs · FIRST-RUN-SETUP, GOOGLE-OAUTH, INTEGRATIONS-ONBOARDING, PRODUCTION-DEPLOYMENT</span>
+        </footer>
+      </section>
+
+    </div><!-- /stage -->
+  </div><!-- /wrap -->
+
+  <div id="toast" role="status"></div>
+
+<script>
+(() => {
+  "use strict";
+  const stage   = document.getElementById("stage");
+  const rail    = document.getElementById("rail");
+  const nodes   = [...rail.querySelectorAll(".node")];
+  const progress= document.getElementById("progressbar");
+  const cards   = [...stage.querySelectorAll(".card[data-step]")];
+
+  /* ---------- toast helper ---------- */
+  let toastTimer;
+  function toast(msg){
+    const el = document.getElementById("toast");
+    el.textContent = msg; el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 1900);
+  }
+
+  /* ---------- copy buttons ---------- */
+  stage.querySelectorAll(".copy").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const targetId = btn.getAttribute("data-copy");
+      // getElementById accepts IDs with leading digits; querySelector('#0a…') throws because a CSS identifier cannot start with a digit.
+      let codeEl = null;
+      if (targetId) {
+        const id = targetId.charAt(0) === "#" ? targetId.slice(1) : targetId;
+        codeEl = document.getElementById(id) || null;
+      }
+      let text = "";
+      if (codeEl) {
+        text = codeEl.innerText.trim();
+      } else {
+        // fallback: nearest pre.code in same card
+        const pre = btn.closest(".card")?.querySelector("pre.code");
+        text = (pre ? pre.innerText : "").trim();
+      }
+      try { await navigator.clipboard.writeText(text); toast("Copied to clipboard ✓"); }
+      catch {
+        // file:// may block clipboard; use execCommand fallback
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); toast("Copied to clipboard ✓"); }
+        catch { toast("Copy failed — select the text manually"); }
+        ta.remove();
+      }
+    });
+  });
+
+  /* ---------- scroll-driven: light timeline items + mark steps done ---------- */
+  const io = ("IntersectionObserver" in window) ? new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("lit"); }});
+  }, {threshold:.35, rootMargin:"0px 0px -10% 0px"}) : null;
+
+  stage.querySelectorAll(".tl-item").forEach(item=>{
+    if (io) io.observe(item); else item.classList.add("lit");
+  });
+  // Reveal cards into view as the user scrolls
+  const cardIO = ("IntersectionObserver" in window) ? new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in-view"); }});
+  }, {threshold:.18}) : null;
+  cards.forEach(c=>{ if(cardIO) cardIO.observe(c); else c.classList.add("in-view"); });
+
+  /* ---------- progress bar + active step from scroll position ---------- */
+  const cardEls = [...document.querySelectorAll(".card[data-step]")];
+  function onScroll(){
+    const docH = document.documentElement.scrollHeight - window.innerHeight;
+    const pct  = docH > 0 ? Math.max(0, Math.min(1, (window.scrollY / docH) * 100)) : 0;
+    progress.style.width = pct.toFixed(1) + "%";
+
+    // find the card closest to the top third of the viewport
+    const probe = window.innerHeight * 0.34;
+    let current = "1";
+    let best = Infinity;
+    for (const c of cardEls){
+      const r = c.getBoundingClientRect();
+      if (r.top <= probe && r.bottom > 0){
+        const dist = Math.abs(r.top - probe);
+        if (dist < best){ best = dist; current = c.getAttribute("data-step"); }
+      }
+    }
+    // If nothing yet, default to the first visible one above
+    nodes.forEach((n) => {
+      const s = n.getAttribute("data-step");
+      n.classList.toggle("active", s === current);
+      // mark earlier steps done once we've passed them
+      n.classList.toggle("done", Number(s) < Number(current));
+    });
+  }
+
+  /* ---------- rail click → scroll to that step ---------- */
+  nodes.forEach((n) => {
+    n.addEventListener("click", () => {
+      const s = n.getAttribute("data-step");
+      const c = document.querySelector('.card[data-step="' + s + '"]');
+      if (c){
+        const y = c.getBoundingClientRect().top + window.scrollY - 18;
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      }
+    });
+  });
+
+  /* ---------- replay button ---------- */
+  const replay = document.getElementById("replay");
+  if (replay) replay.addEventListener("click", () => {
+    window.scrollTo({top:0, behavior:"smooth"});
+    toast("Restarted from Step 1");
+  });
+
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking){ requestAnimationFrame(()=>{ onScroll(); ticking=false; }); ticking=true; }
+  }, {passive:true});
+  onScroll();
+
+  // Auto-light the first card's timeline items so nothing looks dead on load
+  const firstCard = cards[0];
+  if (firstCard) firstCard.querySelectorAll(".tl-item").forEach((i,idx)=> setTimeout(()=> i.classList.add("lit"), 250 + idx*380));
+
+  /* ---------- Google environment builder (step 5) ---------- */
+  const fs5Id = document.getElementById("fs5-client-id");
+  const fs5Secret = document.getElementById("fs5-client-secret");
+  const fs5Key = document.getElementById("fs5-token-key");
+  const fs5Out = document.getElementById("0a1730-genv");
+  function fs5Build(){
+    if(!fs5Out) return;
+    fs5Out.textContent = [
+      "PLATFORM_GOOGLE_ENABLED=true",
+      "PLATFORM_ADMIN_BASE_URL=http://localhost",
+      `GOOGLE_CLIENT_ID=${fs5Id.value.trim() || "your-client-id.apps.googleusercontent.com"}`,
+      `GOOGLE_CLIENT_SECRET=${fs5Secret.value.trim() || "your-google-client-secret"}`,
+      `PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY=${fs5Key.value.trim() || "generate-with-the-button-above"}`
+    ].join("\n");
+  }
+  if (fs5Id && fs5Out){
+    [fs5Id, fs5Secret, fs5Key].forEach((el) => el.addEventListener("input", fs5Build));
+    const gen = document.getElementById("fs5-generate");
+    if (gen) gen.addEventListener("click", () => {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      fs5Key.value = btoa(String.fromCharCode(...bytes));
+      fs5Build(); toast("Encryption key generated ✓");
+    });
+    fs5Build();
+  }
+
+})();
+</script>
+</body>
+</html>

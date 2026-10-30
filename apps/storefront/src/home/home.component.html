@@ -1,0 +1,120 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+@if (loaded() && content(); as page) {
+  <openshopfront-content-blocks
+    [blocks]="page.blocks"
+    [products]="blockProducts()"
+    [labels]="blockLabels()"
+    (navigate)="onNavigate($event)"
+    (openProduct)="open.emit($any($event))"
+  >
+    <ng-template #formBlock openshopfront-form-block let-slug>
+      <ip-storefront-form [slug]="slug" />
+    </ng-template>
+  </openshopfront-content-blocks>
+} @else {
+  <section class="hero relative overflow-hidden">
+    <div
+      class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center px-6 md:px-12 py-16 lg:py-24"
+    >
+      <div class="relative z-10">
+        <p class="eyebrow mb-5">{{ t('home.hero.eyebrow') }}</p>
+        <h1 class="hero-title">
+          {{ t('home.hero.line1') }}<br />{{ t('home.hero.line2')
+          }}<span class="serif-accent">{{ t('home.hero.accent') }}</span>
+        </h1>
+        <p class="mt-7 text-lg leading-8 max-w-lg text-slate-600">
+          {{ t('home.hero.text') }}
+        </p>
+        <div class="mt-10 flex gap-4 flex-wrap">
+          <button mat-flat-button class="!rounded-full !px-8" (click)="navigate.emit('booking')">
+            {{ t('header.bookVisit') }}
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+          <button mat-stroked-button class="!rounded-full !px-8" (click)="navigate.emit('about')">
+            {{ t('home.hero.ctaStory') }}
+          </button>
+        </div>
+        <div class="mt-14 flex items-center gap-8 border-t theme-border pt-6">
+          <div>
+            <span class="block text-xl font-bold">01</span
+            ><span class="text-xs text-slate-500">{{ t('home.feature1') }}</span>
+          </div>
+          <div>
+            <span class="block text-xl font-bold">02</span
+            ><span class="text-xs text-slate-500">{{ t('home.feature2') }}</span>
+          </div>
+          <div>
+            <span class="block text-xl font-bold">03</span
+            ><span class="text-xs text-slate-500">{{ t('home.feature3') }}</span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="relative hero-visual min-h-[430px] lg:min-h-[570px] rounded-[2rem] overflow-hidden"
+      >
+        <div class="absolute inset-0 visual-gradient"></div>
+        <div class="absolute left-10 top-12 text-white/80 text-xs tracking-[.3em] uppercase">
+          {{ t('home.visual.brandSpace') }}
+        </div>
+        <div class="absolute right-9 top-9 w-24 h-24 rounded-full border border-white/50"></div>
+        <div
+          class="absolute -left-12 bottom-16 w-44 h-44 rounded-full border border-white/35"
+        ></div>
+        <div class="absolute bottom-12 left-10 right-10 text-white">
+          <div class="text-7xl md:text-8xl font-light italic" style="font-family: Georgia, serif">
+            {{ t('home.visual.create') }}
+          </div>
+          <div class="w-full h-px theme-border-light my-4"></div>
+          <p class="text-sm tracking-widest uppercase">{{ t('home.visual.makeYours') }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="max-w-7xl mx-auto px-6 md:px-12 py-24">
+    <div class="flex items-end justify-between gap-5 flex-wrap mb-12">
+      <div>
+        <p class="eyebrow">{{ t('home.services.eyebrow') }}</p>
+        <h2 class="section-title mt-4">
+          {{ t('home.services.titleA') }}<i>{{ t('home.services.accent') }}</i>
+        </h2>
+      </div>
+      <button mat-stroked-button class="!rounded-full" (click)="navigate.emit('services')">
+        {{ t('home.services.viewAll') }}
+        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+      </button>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5">
+      @for (service of serviceCards; track service.number) {
+        <article class="service-card p-8 rounded-3xl">
+          <span class="text-xs tracking-widest font-semibold text-amber-700">{{
+            service.number
+          }}</span>
+          <div class="my-12 text-5xl">{{ service.symbol }}</div>
+          <h3 class="text-2xl font-semibold mb-3">
+            {{ t('service' + service.number + '.title') }}
+          </h3>
+          <p class="text-slate-600 leading-7">
+            {{ t('service' + service.number + '.text') }}
+          </p>
+          <button
+            class="mt-8 inline-flex items-center gap-2 text-sm font-semibold"
+            (click)="navigate.emit('booking')"
+          >
+            {{ t('home.services.bookThis') }} <mat-icon>arrow_outward</mat-icon>
+          </button>
+        </article>
+      }
+    </div>
+  </section>
+  <section class="statement text-center px-6 py-28">
+    <p class="eyebrow">{{ t('statement.eyebrow') }}</p>
+    <h2 class="section-title mx-auto max-w-3xl mt-6">
+      {{ t('statement.titleA') }}<i>{{ t('statement.accent') }}</i>
+    </h2>
+    <p class="mt-7 text-slate-600">{{ t('statement.text') }}</p>
+    <button mat-flat-button class="!rounded-full !mt-8" (click)="navigate.emit('booking')">
+      {{ t('header.bookVisit') }}
+    </button>
+  </section>
+}

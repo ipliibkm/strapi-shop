@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-product-images
+      author: platform
+      changes:
+        - createTable:
+            tableName: product_image
+            columns:
+              - column: {name: product_id, type: uuid, constraints: {nullable: false, references: product(id), foreignKeyName: fk_product_image_product}}
+              - column: {name: position, type: integer, constraints: {nullable: false}}
+              - column: {name: url, type: varchar(500), constraints: {nullable: false}}
+        - addPrimaryKey:
+            tableName: product_image
+            columnNames: product_id, position
+            constraintName: pk_product_image
+        - sql:
+            sql: insert into product_image (product_id, position, url) select id, 0, image_url from product where image_url <> ''

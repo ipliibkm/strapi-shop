@@ -1,0 +1,469 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<div class="page-intro">
+  <div>
+    <p class="eyebrow">{{ t('STOREFRONT') }}</p>
+    <h2>{{ t('Page editor') }}</h2>
+    <p>
+      {{
+        t('Edit each storefront page with sections, publish the changes, and preview them live.')
+      }}
+    </p>
+  </div>
+  <span class="badge live">{{ t('WYSIWYG') }}</span>
+</div>
+<section class="pages-layout">
+  <!-- LEFT SIDEBAR: Path tree + article manager toggle -->
+  <aside class="sidebar-panel">
+    <header>
+      <p class="label">{{ t('STOREFRONT PAGES') }}</p>
+      <h3>{{ t('Navigate pages') }}</h3>
+    </header>
+
+    @if (tab() === 'pages') {
+      <nav [attr.aria-label]="t('Page tree')" class="page-tree">
+        @for (item of pageOptions(); track item.slug) {
+          <button
+            type="button"
+            [class.selected]="selectedPage() === item.slug && tab() === 'pages'"
+            (click)="selectPageBySlug(item.slug)"
+          >
+            <span>{{ t(item.title) }}</span>
+            <small [class.disabled-page]="!item.enabled">{{
+              item.enabled ? t('ON') : t('OFF')
+            }}</small>
+          </button>
+        }
+      </nav>
+
+      <div class="add-article-row">
+        <p class="hint-text">{{ t('Write articles once, tag them to pages:') }}</p>
+        <button type="button" mat-stroked-button (click)="switchToArticles()">
+          + {{ t('Manage Articles') }}
+        </button>
+      </div>
+    } @else if (tab() === 'articles') {
+      <nav [attr.aria-label]="t('Article list')" class="article-tree">
+        @for (item of articles(); track item.slug) {
+          <button
+            type="button"
+            [class.selected]="selectedArticle() === item.slug && tab() === 'articles'"
+            (click)="selectArticleBySlug(item.slug)"
+          >
+            {{ item.title }}
+          </button>
+        }
+      </nav>
+
+      <div class="add-article-row">
+        <button type="button" mat-flat-button (click)="newArticle()">
+          + {{ t('New Article') }}
+        </button>
+      </div>
+    }
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <article class="panel main-panel" [class.empty]="!contentLoaded()">
+    @if (failed() && notice()) {
+      <div class="load-error" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ notice() }}</p>
+      </div>
+    }
+
+    @if (tab() === 'pages' && pageDetail()) {
+      <header class="editor-head">
+        <div>
+          <p class="label">{{ t('EDITING PAGE') }}</p>
+          <h2>{{ pageDetail()?.title || t('Loading...') }}</h2>
+        </div>
+        <div class="page-state-controls">
+          <label class="page-enabled-toggle">
+            <input type="checkbox" [checked]="enabled()" (change)="setEnabled($event)" />
+            <span>{{ t('Page enabled') }}</span>
+          </label>
+          <span [class]="'badge ' + (published() ? 'live' : 'draft')">
+            {{
+              published()
+                ? enabled()
+                  ? t('LIVE ON STOREFRONT')
+                  : t('PUBLISHED BUT DISABLED')
+                : t('DRAFT')
+            }}
+          </span>
+        </div>
+      </header>
+
+      <!-- Blocks editor -->
+      <div class="blocks-container">
+        @for (block of blocks(); track $index) {
+          <section
+            class="block-card"
+            [class.type-heading]="block.type === 'heading'"
+            [class.type-text]="block.type === 'text'"
+            [class.type-image]="block.type === 'image'"
+            [class.type-cta]="block.type === 'cta'"
+            [class.type-products]="block.type === 'products'"
+            [class.type-form]="block.type === 'form'"
+          >
+            <header class="block-card-head">
+              <span class="order-badge">{{ $index + 1 }}</span>
+              <h4>{{ blockLabel(block.type) }}</h4>
+              <div class="block-actions">
+                <button
+                  type="button"
+                  mat-icon-button
+                  [disabled]="$index === 0"
+                  (click)="moveBlock($index, -1)"
+                  [attr.aria-label]="t('Move up')"
+                >
+                  <mat-icon>arrow_upward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  [disabled]="$index === blocks().length - 1"
+                  (click)="moveBlock($index, 1)"
+                  [attr.aria-label]="t('Move down')"
+                >
+                  <mat-icon>arrow_downward</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="removeBlock($index)"
+                  [attr.aria-label]="t('Remove section')"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </header>
+
+            @switch (block.type) {
+              @case ('heading') {
+                <label class="field"
+                  ><span>{{ t('Small label above heading (optional)') }}</span
+                  ><input
+                    [value]="block.eyebrow ?? ''"
+                    (change)="setField($index, 'eyebrow', $event)"
+                    maxlength="120"
+                    [attr.placeholder]="t('e.g., OUR SERVICES')"
+                /></label>
+                <label class="field"
+                  ><span>{{ t('Main heading') }}</span
+                  ><input
+                    [value]="block.title ?? ''"
+                    (change)="setField($index, 'title', $event)"
+                    maxlength="200"
+                    [attr.placeholder]="t('e.g., Browse our collection')"
+                /></label>
+              }
+              @case ('text') {
+                <div class="richtext-toolbar">
+                  <button
+                    type="button"
+                    [disabled]="!focusedBlock()"
+                    (click)="formatFocused('bold')"
+                    [attr.title]="t('Bold')"
+                  >
+                    <strong>B</strong>
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="!focusedBlock()"
+                    (click)="formatFocused('italic')"
+                    [attr.title]="t('Italic')"
+                  >
+                    <em>I</em>
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="!focusedBlock()"
+                    (click)="formatFocused('underline')"
+                    [attr.title]="t('Underline')"
+                  >
+                    <u>U</u>
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="!focusedBlock()"
+                    (click)="formatFocused('insertUnorderedList')"
+                    [attr.title]="t('Bulleted list')"
+                  >
+                    <mat-icon>list</mat-icon>
+                  </button>
+                </div>
+                <div
+                  class="richtext-editor"
+                  contenteditable="true"
+                  [innerHTML]="block.html ?? ''"
+                  (focus)="onRichtextFocus($index)"
+                  (blur)="onRichtextBlur($index, $event)"
+                  [attr.aria-label]="t('Rich text editor')"
+                ></div>
+              }
+              @case ('image') {
+                <label class="field"
+                  ><span>{{ t('Image URL') }}</span
+                  ><input
+                    [value]="block.url ?? ''"
+                    (change)="setField($index, 'url', $event)"
+                    placeholder="https://example.com/photo.jpg or /media/photo.jpg"
+                /></label>
+                <label class="field"
+                  ><span>{{ t('Caption below image (optional)') }}</span
+                  ><input
+                    [value]="block.caption ?? ''"
+                    (change)="setField($index, 'caption', $event)"
+                    maxlength="200"
+                    [attr.placeholder]="t('Describe this photo...')"
+                /></label>
+              }
+              @case ('gallery') {
+                <p class="muted">
+                  {{
+                    t(
+                      'Add the images for this gallery. Each image needs an address; the caption is optional.'
+                    )
+                  }}
+                </p>
+                @for (item of block.items ?? []; track $index; let i = $index) {
+                  <div class="row fields-inline">
+                    <label class="field grow"
+                      ><span>{{ t('Image URL') }} {{ i + 1 }}</span
+                      ><input
+                        [value]="item.url"
+                        (change)="setGalleryItem(block, i, 'url', $event)"
+                        placeholder="https://example.com/photo.jpg or /media/photo.jpg"
+                    /></label>
+                    <label class="field grow"
+                      ><span>{{ t('Caption') }}</span
+                      ><input
+                        [value]="item.caption"
+                        (change)="setGalleryItem(block, i, 'caption', $event)"
+                        maxlength="200"
+                        [attr.placeholder]="t('Describe this photo...')"
+                    /></label>
+                    <button
+                      type="button"
+                      class="icon-button"
+                      [disabled]="(block.items ?? []).length <= 1"
+                      (click)="removeGalleryItem(block, i)"
+                      [attr.aria-label]="t('Remove image') + ' ' + (i + 1)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                }
+                <button
+                  type="button"
+                  mat-stroked-button
+                  class="!rounded-full"
+                  (click)="addGalleryItem(block)"
+                >
+                  {{ t('Add image') }}
+                  <mat-icon iconPositionEnd>add</mat-icon>
+                </button>
+              }
+              @case ('cta') {
+                <div class="row fields-inline">
+                  <label class="field grow"
+                    ><span>{{ t('Button text') }}</span
+                    ><input
+                      [value]="block.label ?? ''"
+                      (change)="setField($index, 'label', $event)"
+                      maxlength="80"
+                      [attr.placeholder]="t('e.g., Book a visit')"
+                  /></label>
+                  <label class="field fixed-width"
+                    ><span>{{ t('Link to page') }}</span>
+                    <select
+                      [value]="block.target ?? 'booking'"
+                      (change)="setField($index, 'target', $event)"
+                    >
+                      @for (opt of ctaTargets; track opt.value) {
+                        <option [value]="opt.value">{{ t(opt.label) }}</option>
+                      }
+                    </select>
+                  </label>
+                </div>
+              }
+              @case ('products') {
+                <label class="field narrow"
+                  ><span>{{ t('Number of products to display') }}</span
+                  ><input
+                    type="number"
+                    min="1"
+                    max="24"
+                    [value]="block.limit ?? 6"
+                    (change)="setLimit($index, $event)"
+                /></label>
+              }
+              @case ('form') {
+                <label class="field">
+                  <span>{{ t('Reusable form') }}</span>
+                  <select
+                    [value]="block.formSlug ?? ''"
+                    (change)="setField($index, 'formSlug', $event)"
+                  >
+                    <option value="">{{ t('Select a form') }}</option>
+                    @for (form of formOptions(); track form.slug) {
+                      <option [value]="form.slug">
+                        {{ form.name }}{{ !form.published ? ' — ' + t('draft') : ''
+                        }}{{ !form.enabled ? ' — ' + t('disabled') : '' }}
+                      </option>
+                    }
+                  </select>
+                  <small>{{
+                    t('Create and publish reusable forms in the Forms workspace.')
+                  }}</small>
+                </label>
+              }
+            }
+          </section>
+        }
+
+        <div class="add-block-row">
+          <p>{{ t('Add a new section:') }}</p>
+          @for (kind of blockKinds; track kind.type) {
+            <button type="button" mat-stroked-button (click)="addBlock(kind.type)">
+              + {{ t(kind.label) }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Sticky action bar -->
+      <footer class="editor-foot sticky-bar">
+        @if (dirty()) {
+          <span class="unsaved-indicator" role="status"
+            ><mat-icon>edit</mat-icon> {{ t('Unsaved changes') }}</span
+          >
+        }
+        <span class="spacer"></span>
+        <button mat-stroked-button [disabled]="busy()" (click)="saveDraft()">
+          {{ t('Save draft') }}
+        </button>
+        <button mat-flat-button [disabled]="busy()" (click)="publishPage()">
+          {{ t('Publish page') }}
+        </button>
+      </footer>
+
+      <!-- Live preview -->
+      <section class="preview-section">
+        <header class="preview-head">
+          <div>
+            <p class="label">{{ t('STOREFRONT PREVIEW') }}</p>
+            <h3>{{ t('The preview uses the real storefront renderer.') }}</h3>
+          </div>
+          <button type="button" mat-stroked-button (click)="sendPreview()">
+            {{ t('Refresh preview') }}
+          </button>
+        </header>
+        @if (previewUrl()) {
+          <iframe
+            id="storefront-page-preview"
+            [attr.title]="t('Storefront page preview')"
+            [src]="previewUrl()"
+            (load)="sendPreview()"
+          ></iframe>
+        } @else {
+          <p class="hint-text">{{ t('The storefront preview address is not available.') }}</p>
+        }
+      </section>
+    }
+
+    @if (tab() === 'articles' && articleEditor()) {
+      <header class="editor-head">
+        <div>
+          <p class="label">{{ t('EDITING ARTICLE') }}</p>
+          <h2>{{ articleEditor()?.title || t('New Article') }}</h2>
+        </div>
+        <span [class]="'badge ' + ((articleEditor()?.published ?? false) ? 'live' : 'draft')">{{
+          (articleEditor()?.published ?? false) ? t('PUBLISHED') : t('DRAFT')
+        }}</span>
+      </header>
+
+      <label class="field"
+        ><span>{{ t('Article title') }}</span
+        ><input
+          [value]="articleTitle()"
+          (change)="onArticleTitleChange($event)"
+          maxlength="200"
+          [attr.placeholder]="t('e.g., How to care for your lash extensions')"
+      /></label>
+
+      <div class="richtext-toolbar">
+        <button
+          type="button"
+          [disabled]="!focusedBlock()"
+          (click)="formatFocused('bold')"
+          [attr.title]="t('Bold')"
+        >
+          <strong>B</strong>
+        </button>
+        <button
+          type="button"
+          [disabled]="!focusedBlock()"
+          (click)="formatFocused('italic')"
+          [attr.title]="t('Italic')"
+        >
+          <em>I</em>
+        </button>
+        <button
+          type="button"
+          [disabled]="!focusedBlock()"
+          (click)="formatFocused('underline')"
+          [attr.title]="t('Underline')"
+        >
+          <u>U</u>
+        </button>
+      </div>
+
+      <div
+        class="richtext-editor article-content"
+        contenteditable="true"
+        [innerHTML]="articleContent()"
+        (focus)="onRichtextFocus(-1)"
+        (blur)="onArticleBlur($event)"
+        [attr.aria-label]="t('Article content editor')"
+      ></div>
+
+      <fieldset class="tags-fieldset">
+        <legend>
+          <strong>{{ t('Tag this article to pages') }}</strong>
+        </legend>
+        <p class="hint-text">
+          {{ t('Select which storefront pages should display this article:') }}
+        </p>
+        @for (opt of pageOptions(); track opt.slug) {
+          <label class="tag-option"
+            ><input
+              type="checkbox"
+              [checked]="articleTags().includes(opt.slug)"
+              (change)="toggleArticleTag(opt.slug, $event)"
+            /><span>{{ t(opt.title) }}</span></label
+          >
+        }
+      </fieldset>
+
+      <footer class="editor-foot sticky-bar">
+        @if (articleDirty()) {
+          <span class="unsaved-indicator" role="status"
+            ><mat-icon>edit</mat-icon> {{ t('Unsaved changes') }}</span
+          >
+        }
+        <span class="spacer"></span>
+        <button mat-stroked-button [disabled]="busy()" (click)="saveArticle()">
+          {{ t('Save article') }}
+        </button>
+        @if (articleEditor()?.published) {
+          <button mat-flat-button [disabled]="!articleDirty()" (click)="unpublishArticle()">
+            {{ t('Unpublish') }}
+          </button>
+        }
+      </footer>
+    }
+  </article>
+</section>

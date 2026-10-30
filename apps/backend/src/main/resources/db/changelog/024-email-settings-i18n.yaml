@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 024-email-settings-i18n
+      author: platform
+      changes:
+        # Per-language subject lines and templates. Keys are storefront language codes; the key "default" is the fallback.
+        - addColumn:
+            tableName: email_settings
+            columns:
+              - column: {name: form_subjects, type: jsonb, defaultValue: "{}", constraints: {nullable: false}}
+              - column: {name: form_templates, type: jsonb, defaultValue: "{}", constraints: {nullable: false}}
+              - column: {name: order_subjects, type: jsonb, defaultValue: "{}", constraints: {nullable: false}}
+              - column: {name: order_templates, type: jsonb, defaultValue: "{}", constraints: {nullable: false}}
+        # Migrate the existing single-language values into the "default" key.
+        - sql: |
+            update email_settings set
+              form_subjects = jsonb_build_object('default', form_subject),
+              form_templates = case when coalesce(form_template, '') <> '' then jsonb_build_object('default', form_template) else '{}'::jsonb end,
+              order_subjects = jsonb_build_object('default', order_subject),
+              order_templates = case when coalesce(order_template, '') <> '' then jsonb_build_object('default', order_template) else '{}'::jsonb end
+            where id = 1;
+        - dropColumn:
+            tableName: email_settings
+            columnName: form_subject
+        - dropColumn:
+            tableName: email_settings
+            columnName: form_template
+        - dropColumn:
+            tableName: email_settings
+            columnName: order_subject
+        - dropColumn:
+            tableName: email_settings
+            columnName: order_template
+        # Remember the customer's storefront language on each order so later confirmations use it.
+        - addColumn:
+            tableName: shop_order
+            columns:
+              - column: {name: locale, type: varchar(16), constraints: {nullable: true}}

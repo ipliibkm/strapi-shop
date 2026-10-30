@@ -1,0 +1,192 @@
+<!-- langVersion() is read here so the view re-renders when the language changes -->
+<span [attr.data-lang]="langVersion()" hidden></span>
+<section class="booking-page">
+  <div class="booking-intro" [class.cms-intro]="content() !== null">
+    @if (content(); as page) {
+      <openshopfront-content-blocks
+        [blocks]="page.blocks"
+        [products]="blockProducts()"
+        [labels]="blockLabels()"
+        (navigate)="onNavigate($event)"
+        (openProduct)="open.emit($any($event))"
+      >
+        <ng-template #formBlock openshopfront-form-block let-slug>
+          <ip-storefront-form [slug]="slug ?? ''" />
+        </ng-template>
+      </openshopfront-content-blocks>
+    } @else {
+      <p class="eyebrow">{{ t('booking.eyebrow') }}</p>
+      <h1>
+        {{ t('booking.line1') }}<br /><i>{{ t('booking.line2') }}</i>
+      </h1>
+      <p>
+        {{
+          bookingSettings().customerBookingEnabled
+            ? t('booking.introEnabled')
+            : t('booking.introDisabled')
+        }}
+      </p>
+    }
+    <div class="booking-promise">
+      <span
+        ><mat-icon>schedule</mat-icon
+        ><strong>{{ bookingDuration() }} {{ t('booking.minutes') }}</strong
+        ><small>{{ bookingName() }}</small></span
+      >
+      <span
+        ><mat-icon>event_available</mat-icon><strong>{{ t('booking.instantConfirmation') }}</strong
+        ><small>{{ t('booking.noAccount') }}</small></span
+      >
+    </div>
+  </div>
+  @if (confirmation(); as result) {
+    <article class="booking-confirmation">
+      <span class="confirmation-mark"><mat-icon>check</mat-icon></span>
+      <p class="eyebrow">{{ t('booking.confirmed.eyebrow') }}</p>
+      <h2>{{ t('booking.confirmed.title') }}</h2>
+      <p>{{ t('booking.confirmed.reserved', { date: confirmationDate(result) }) }}</p>
+      <div class="confirmation-reference">
+        <small>{{ t('booking.referenceLabel') }}</small
+        ><strong>{{ result.id.slice(0, 8).toUpperCase() }}</strong>
+      </div>
+      <button mat-flat-button class="!rounded-full" (click)="resetBooking()">
+        {{ t('booking.bookAnother') }}
+      </button>
+    </article>
+  } @else {
+    <article class="customer-booking-card">
+      @if (!bookingSettings().customerBookingEnabled) {
+        <div class="booking-disabled">
+          <mat-icon>event_busy</mat-icon>
+          <p class="eyebrow">{{ t('booking.disabled.eyebrow') }}</p>
+          <h2>{{ t('booking.disabled.title') }}</h2>
+          <p>
+            {{ bookingSettings().unavailableReason || t('booking.disabled.defaultReason') }}
+          </p>
+        </div>
+      } @else {
+        <header>
+          <span>01</span>
+          <div>
+            <h2>
+              {{
+                bookingServices().length
+                  ? t('booking.step1.servicesTitle')
+                  : t('booking.step1.durationTitle')
+              }}
+            </h2>
+            <p>
+              {{
+                bookingServices().length
+                  ? t('booking.step1.servicesText')
+                  : t('booking.step1.durationText')
+              }}
+            </p>
+          </div>
+        </header>
+        <div class="offering-options">
+          @for (item of bookingServices(); track item.id) {
+            <button
+              [class.selected]="selectedServiceId() === item.id"
+              (click)="chooseService(item)"
+            >
+              <span
+                ><strong>{{ item.name }}</strong
+                ><small>{{ item.durationMinutes }} minutes</small></span
+              >
+              <mat-icon>{{
+                selectedServiceId() === item.id ? 'check_circle' : 'arrow_forward'
+              }}</mat-icon>
+            </button>
+          } @empty {
+            <div class="no-services default-appointment">
+              <mat-icon>schedule</mat-icon
+              ><span
+                ><strong>{{ t('booking.standardAppointment') }}</strong
+                ><small
+                  >{{ bookingSettings().defaultDurationMinutes }} {{ t('booking.minutes') }}</small
+                ></span
+              >
+              <mat-icon>check_circle</mat-icon>
+            </div>
+          }
+        </div>
+        <div class="form-divider">
+          <span>02</span>
+          <div>
+            <h2>{{ t('booking.step2.title') }}</h2>
+            <p>{{ t('booking.step2.text', { timeZone: timeZone }) }}</p>
+          </div>
+        </div>
+        <label class="customer-field"
+          ><span>{{ t('booking.dateLabel') }}</span
+          ><input
+            type="date"
+            #bookingDate
+            [value]="selectedDate()"
+            [min]="minimumDate"
+            (change)="changeDate(bookingDate.value)"
+        /></label>
+        <div class="time-slots" aria-label="Available times">
+          @for (slot of timeSlots; track slot) {
+            <button
+              [class.selected]="selectedTime() === slot"
+              [disabled]="checking()"
+              (click)="chooseTime(slot)"
+            >
+              {{ slot }}
+            </button>
+          }
+        </div>
+        @if (availabilityMessage()) {
+          <div
+            class="slot-status"
+            [class.available]="available()"
+            [class.error]="availabilityError()"
+          >
+            <mat-icon>{{
+              available() ? 'check_circle' : availabilityError() ? 'error' : 'event_busy'
+            }}</mat-icon
+            >{{ availabilityMessage() }}
+          </div>
+        }
+        <div class="form-divider">
+          <span>03</span>
+          <div>
+            <h2>{{ t('booking.detailsTitle') }}</h2>
+            <p>{{ t('booking.detailsText') }}</p>
+          </div>
+        </div>
+        <div class="customer-fields">
+          <label class="customer-field"
+            ><span>{{ t('field.name') }}</span
+            ><input
+              #customerName
+              autocomplete="name"
+              maxlength="200"
+              [placeholder]="t('placeholder.fullName')"
+          /></label>
+          <label class="customer-field"
+            ><span>{{ t('field.email') }}</span
+            ><input
+              #customerEmail
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              [placeholder]="t('placeholder.email')"
+          /></label>
+        </div>
+        <button
+          mat-flat-button
+          class="booking-submit"
+          [disabled]="!available() || submitting()"
+          (click)="createBooking(customerName.value, customerEmail.value)"
+        >
+          {{ submitting() ? t('booking.confirming') : t('booking.confirm') }}
+          <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+        </button>
+        <p class="privacy-note"><mat-icon>lock</mat-icon>{{ t('booking.privacyNote') }}</p>
+      }
+    </article>
+  }
+</section>

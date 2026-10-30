@@ -1,0 +1,18 @@
+<section class="panel capability-table">
+  <div class="cap-row head">
+    <span>{{ labels().capability }}</span
+    ><span>{{ labels().status }}</span
+    ><span>{{ labels().owner }}</span>
+  </div>
+  @for (item of rows(); track item.name) {
+    <div class="cap-row">
+      <strong>{{ item.name }}</strong
+      ><span
+        ><span class="badge" [class.live]="item.live">{{
+          item.live ? labels().available : labels().notImplemented
+        }}</span></span
+      >
+      <span>{{ item.owner }}</span>
+    </div>
+  }
+</section>

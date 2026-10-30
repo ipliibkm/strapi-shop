@@ -1,4 +1,4 @@
-name: ipli-platform
+name: openshopfront-platform
 services:
   postgres:
     image: postgres:17-alpine
@@ -17,6 +17,15 @@ services:
       timeout: 5s
       retries: 10
     networks: [internal]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 200
+    mem_limit: 1g
+    cpus: 1.0
+    logging: &service-logging
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '5'
   backend:
     build: ./apps/backend
     restart: unless-stopped
@@ -25,20 +34,51 @@ services:
       SPRING_DATASOURCE_USERNAME: platform
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       PLATFORM_SETUP_TOKEN: ${PLATFORM_SETUP_TOKEN:?Run setup.sh to generate a setup token}
-      PLATFORM_AUTH_ENABLED: ${PLATFORM_AUTH_ENABLED:-false}
-      PLATFORM_OIDC_ISSUER: ${PLATFORM_OIDC_ISSUER:-}
-      PLATFORM_OIDC_AUDIENCE: ${PLATFORM_OIDC_AUDIENCE:-}
-      PLATFORM_OIDC_CLIENT_ID: ${PLATFORM_OIDC_CLIENT_ID:-}
+      PLATFORM_GOOGLE_ENABLED: ${PLATFORM_GOOGLE_ENABLED:-false}
+      PLATFORM_ADMIN_BASE_URL: ${PLATFORM_ADMIN_BASE_URL:-http://admin.localhost}
+      PLATFORM_STRAPI_BASE_URL: http://cms:1337
+      PLATFORM_STRAPI_TOKEN_ENCRYPTION_KEY: ${PLATFORM_STRAPI_TOKEN_ENCRYPTION_KEY:-${PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY:-}}
+      # Long-lived Strapi API token used by anonymous storefront form submissions.
+      STRAPI_SERVICE_TOKEN: ${STRAPI_SERVICE_TOKEN:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY: ${PLATFORM_OAUTH_TOKEN_ENCRYPTION_KEY:-}
+      PLATFORM_GOOGLE_SYNC_INTERVAL_MS: ${PLATFORM_GOOGLE_SYNC_INTERVAL_MS:-60000}
+      PLATFORM_GOOGLE_SYNC_INITIAL_LOOKBACK_DAYS: ${PLATFORM_GOOGLE_SYNC_INITIAL_LOOKBACK_DAYS:-31}
+      PLATFORM_GOOGLE_DELIVERY_INTERVAL_MS: ${PLATFORM_GOOGLE_DELIVERY_INTERVAL_MS:-15000}
+      PLATFORM_BOOKING_PUBLIC_RESOURCE_ID: ${PLATFORM_BOOKING_PUBLIC_RESOURCE_ID:-default}
+      PLATFORM_BOOKING_MAXIMUM_CALENDAR_SYNC_AGE_SECONDS: ${PLATFORM_BOOKING_MAXIMUM_CALENDAR_SYNC_AGE_SECONDS:-${PLATFORM_BOOKING_MAXIMUM_GOOGLE_SYNC_AGE_SECONDS:-300}}
+      PLATFORM_ADMIN_SESSION_TIMEOUT: ${PLATFORM_ADMIN_SESSION_TIMEOUT:-8h}
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: ${SERVER_SERVLET_SESSION_COOKIE_SECURE:-false}
+      PLATFORM_SETUP_ENABLED: ${PLATFORM_SETUP_ENABLED:-true}
+      PLATFORM_STOREFRONT_BASE_URL: ${PLATFORM_STOREFRONT_BASE_URL:-http://storefront.localhost}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_API_BASE_URL: ${STRIPE_API_BASE_URL:-https://api.stripe.com}
+      # Mail: set MAIL_HOST to use SMTP; leave empty to send via the connected Google account (gmail.send scope).
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      PLATFORM_MAIL_FROM_ADDRESS: ${PLATFORM_MAIL_FROM_ADDRESS:-}
+      PLATFORM_PRODUCT_UPLOAD_DIRECTORY: /app/uploads/products
+      PLATFORM_COMMERCE_EXPIRY_INTERVAL_MS: ${PLATFORM_COMMERCE_EXPIRY_INTERVAL_MS:-60000}
     healthcheck:
       test: [CMD, curl, -fsS, 'http://127.0.0.1:8080/actuator/health']
       interval: 10s
       timeout: 5s
       retries: 15
       start_period: 45s
-    ports: ['127.0.0.1:8080:8080']
+    volumes:
+      - productuploads:/app/uploads
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     networks: [internal]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 300
+    mem_limit: 1g
+    cpus: 1.0
+    logging: *service-logging
   cms:
     build: ./apps/cms
     restart: unless-stopped
@@ -60,27 +100,160 @@ services:
       ENCRYPTION_KEY: ${STRAPI_ENCRYPTION_KEY:?Set STRAPI_ENCRYPTION_KEY}
       BUSINESS_SETUP_FILE: /opt/app/config/business.json
     healthcheck:
-      test: [CMD, node, -e, "fetch('http://127.0.0.1:1337/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          CMD,
+          node,
+          -e,
+          "fetch('http://127.0.0.1:1337/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
       start_period: 75s
-    ports: ['127.0.0.1:1337:1337']
     volumes:
       - cmsuploads:/opt/app/public/uploads
       - ./config/business.json:/opt/app/config/business.json:ro
     depends_on:
-      postgres: {condition: service_healthy}
-    networks: [internal]
+      postgres: { condition: service_healthy }
+    networks: [internal, edge]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 300
+    mem_limit: 1g
+    cpus: 1.0
+    logging: *service-logging
+    labels:
+      traefik.enable: '${TRAEFIK_CMS_ENABLED:-true}'
+      traefik.docker.network: openshopfront-edge
+      traefik.http.routers.cms.entrypoints: web
+      traefik.http.routers.cms.rule: Host(`${CMS_HOST:-cms.localhost}`)
+      traefik.http.routers.cms.middlewares: '${TRAEFIK_HTTP_MIDDLEWARES:-security-headers@file}'
+      traefik.http.services.cms.loadbalancer.server.port: '1337'
   storefront:
     build:
       context: .
       dockerfile: apps/storefront/Dockerfile
     restart: unless-stopped
-    ports: ['127.0.0.1:8081:80']
-    networks: [internal]
+    depends_on:
+      backend: { condition: service_healthy }
+    networks: [internal, edge]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: 0.5
+    logging: *service-logging
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: openshopfront-edge
+      traefik.http.routers.storefront.entrypoints: web
+      traefik.http.routers.storefront.rule: Host(`${STOREFRONT_HOST:-storefront.localhost}`)
+      traefik.http.routers.storefront.middlewares: '${TRAEFIK_HTTP_MIDDLEWARES:-security-headers@file}'
+      traefik.http.routers.storefront-secure.entrypoints: websecure
+      traefik.http.routers.storefront-secure.rule: Host(`${STOREFRONT_HOST:-storefront.localhost}`)
+      traefik.http.routers.storefront-secure.middlewares: '${TRAEFIK_HTTPS_MIDDLEWARES:-security-headers@file}'
+      traefik.http.routers.storefront-secure.tls: 'true'
+      traefik.http.routers.storefront-secure.tls.certresolver: '${TRAEFIK_CERT_RESOLVER:-}'
+      traefik.http.services.storefront.loadbalancer.server.port: '80'
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend: { condition: service_healthy }
+    networks: [internal, edge]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: 0.5
+    logging: *service-logging
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: openshopfront-edge
+      traefik.http.routers.admin.entrypoints: web
+      traefik.http.routers.admin.rule: Host(`${ADMIN_HOST:-admin.localhost}`) || Host(`localhost`)
+      traefik.http.routers.admin.middlewares: '${TRAEFIK_HTTP_MIDDLEWARES:-security-headers@file}'
+      traefik.http.routers.admin-secure.entrypoints: websecure
+      traefik.http.routers.admin-secure.rule: Host(`${ADMIN_HOST:-admin.localhost}`) || Host(`localhost`)
+      traefik.http.routers.admin-secure.middlewares: '${TRAEFIK_HTTPS_MIDDLEWARES:-security-headers@file}'
+      traefik.http.routers.admin-secure.tls: 'true'
+      traefik.http.routers.admin-secure.tls.certresolver: '${TRAEFIK_CERT_RESOLVER:-}'
+      traefik.http.services.admin.loadbalancer.server.port: '80'
+  storybook:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.storybook
+    restart: unless-stopped
+    networks: [internal, edge]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 100
+    mem_limit: 128m
+    cpus: 0.5
+    logging: *service-logging
+    labels:
+      traefik.enable: '${TRAEFIK_STORYBOOK_ENABLED:-true}'
+      traefik.docker.network: openshopfront-edge
+      traefik.http.routers.storybook.entrypoints: web
+      traefik.http.routers.storybook.rule: Host(`${STORYBOOK_HOST:-storybook.localhost}`)
+      # The Storybook manager HTML needs inline scripts. Keep the CSP off this
+      # development-only router; production disables Storybook in the env file.
+      traefik.http.routers.storybook.middlewares: '${TRAEFIK_STORYBOOK_MIDDLEWARES:-}'
+      traefik.http.services.storybook.loadbalancer.server.port: '80'
+  traefik:
+    image: traefik:v3.6@sha256:31267173a15b4944e797a76ffd9c419707c8d8b32fe5b610f80cd0cfa05f372d
+    restart: unless-stopped
+    command:
+      - --api.dashboard=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=openshopfront-edge
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --entrypoints.web.address=:8080
+      - --entrypoints.websecure.address=:8443
+      - --entrypoints.health.address=:8082
+      - --ping=true
+      - --ping.entrypoint=health
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-operations@localhost.invalid}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.caserver=${ACME_CA_SERVER:-https://acme-staging-v02.api.letsencrypt.org/directory}
+      - --accesslog=true
+      - --accesslog.format=json
+      - --accesslog.fields.headers.defaultmode=drop
+      - --accesslog.fields.queryparameters.defaultmode=drop
+      - --log.format=json
+    ports:
+      - target: 8080
+        published: '${HTTP_PORT:-80}'
+        protocol: tcp
+      - target: 8443
+        published: '${HTTPS_PORT:-443}'
+        protocol: tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${TRAEFIK_DYNAMIC_CONFIG:-./infrastructure/traefik/dynamic/development.yaml}:/etc/traefik/dynamic/security.yaml:ro
+      - letsencrypt:/letsencrypt
+    networks: [edge]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    pids_limit: 100
+    mem_limit: 256m
+    cpus: 0.5
+    logging: *service-logging
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8082/ping]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 networks:
   internal: {}
+  edge:
+    name: openshopfront-edge
 volumes:
   pgdata: {}
   cmsuploads: {}
+  productuploads: {}
+  letsencrypt: {}

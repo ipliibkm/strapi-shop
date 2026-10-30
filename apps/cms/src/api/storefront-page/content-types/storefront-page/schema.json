@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "storefront_pages",
+  "info": {
+    "singularName": "storefront-page",
+    "pluralName": "storefront-pages",
+    "displayName": "Storefront Page",
+    "description": "Controls storefront page availability and content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 64
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "blocks": {
+      "type": "json",
+      "required": true
+    }
+  }
+}
