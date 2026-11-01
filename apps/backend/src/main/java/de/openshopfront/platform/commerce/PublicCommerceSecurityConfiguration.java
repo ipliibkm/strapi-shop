@@ -31,6 +31,8 @@ public class PublicCommerceSecurityConfiguration {
             return true;
           if ("/api/v1/public/settings".equals(path) && "GET".equals(request.getMethod()))
             return true;
+          if (("/robots.txt".equals(path) || "/sitemap.xml".equals(path))
+              && "GET".equals(request.getMethod())) return true;
           return false;
         };
     return http.securityMatcher(endpoints)

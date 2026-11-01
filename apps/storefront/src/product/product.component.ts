@@ -33,6 +33,10 @@ export class ProductComponent implements OnInit {
   readonly backToShop = output<void>();
   /** Requests the shell to open the cart after adding an item. */
   readonly goToCart = output<void>();
+  /** Reports loaded product data so the shell can update document metadata. */
+  readonly productLoaded = output<ProductDetail>();
+  /** Reports an unavailable product so the shell can prevent indexing the URL. */
+  readonly productMissing = output<void>();
 
   ngOnInit(): void {
     // Inputs are only guaranteed to be bound from ngOnInit onwards, so the load starts here.
@@ -74,10 +78,12 @@ export class ProductComponent implements OnInit {
       );
       const flat: ProductDetail = { ...detail.product, variants: detail.variants };
       this.product.set(flat);
+      this.productLoaded.emit(flat);
       if (flat.variants.length === 1) this.selectVariant(flat.variants[0]);
       else this.selectedVariantId.set('');
     } catch {
       // The product may have been hidden; show the not-found state.
+      this.productMissing.emit();
     }
   }
 

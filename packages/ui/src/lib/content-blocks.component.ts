@@ -26,6 +26,8 @@ export interface ContentProduct {
   name: string;
   /** The formatted price to display for this product. */
   priceLabel: string;
+  /** The crawlable product detail URL. */
+  href?: string;
 }
 
 /** Translated strings for the blocks renderer, supplied by the consuming app. */

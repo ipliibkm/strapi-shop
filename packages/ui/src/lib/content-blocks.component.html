@@ -37,10 +37,11 @@
       @case ('products') {
         <div class="grid md:grid-cols-3 gap-5 dyn-product-grid">
           @for (item of products(); track item.id) {
-            <button
+            <a
               mat-card
               class="product-card !rounded-2xl !p-0 text-left"
-              (click)="openProduct.emit(item)"
+              [href]="item.href"
+              (click)="$event.preventDefault(); openProduct.emit(item)"
             >
               <div class="product-media">
                 <span>{{ initialOf(item.name) }}</span>
@@ -49,7 +50,7 @@
                 <h3 class="font-semibold">{{ item.name }}</h3>
                 <p class="mt-2 text-sm font-medium">{{ item.priceLabel }}</p>
               </div>
-            </button>
+            </a>
           } @empty {
             <p class="muted md:col-span-3">{{ labels().productsNone }}</p>
           }

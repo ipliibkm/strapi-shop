@@ -52,6 +52,7 @@ export class ShopComponent {
       name: item.name,
       description: item.description,
       url: item.imageUrl || undefined,
+      href: `/products/${encodeURIComponent(item.slug)}`,
       priceLabel: this.minPrice(item),
     }));
   }
@@ -77,6 +78,7 @@ export class ShopComponent {
       id: item.id,
       name: item.name,
       url: item.imageUrl || undefined,
+      href: `/products/${encodeURIComponent(item.slug)}`,
       priceLabel: this.minPrice(item),
     }));
   }

@@ -51,6 +51,7 @@ export class ServicesComponent {
       id: item.id,
       name: item.name,
       priceLabel: this.minPrice(item),
+      href: `/products/${encodeURIComponent(item.slug)}`,
     }));
   }
 

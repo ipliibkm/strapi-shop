@@ -10,31 +10,40 @@
     class="site-header sticky top-0 z-20 theme-bg-blur backdrop-blur-xl border-b theme-border"
   >
     <div class="header-inner mx-auto max-w-7xl px-5 md:px-10 h-20 flex items-center gap-6">
-      <button
+      <a
         class="brand flex items-center gap-3"
-        (click)="navigate('home')"
+        href="/"
+        (click)="navigate('home', undefined, $event)"
         [attr.aria-label]="t('aria.openHome')"
       >
         <span class="brand-mark">S</span
         ><span class="text-xl font-bold tracking-tight"
           >STUDIO<span class="text-amber-600">.</span></span
         >
-      </button>
+      </a>
       <nav class="hidden md:flex items-center gap-8 ml-auto" [attr.aria-label]="t('aria.mainNav')">
         @for (item of visibleNav(); track item.key) {
-        <button
-          (click)="navigate(item.key)"
+        <a
+          [href]="pagePath(item.key)"
+          (click)="navigate(item.key, undefined, $event)"
           [class.active-link]="page() === item.key"
+          [attr.aria-current]="page() === item.key ? 'page' : null"
           class="nav-link text-sm font-medium"
         >
           {{ t('nav.' + item.key) }}
-        </button>
+        </a>
         }
       </nav>
       @if (cart.count() > 0) {
-      <button mat-stroked-button class="!rounded-full cart-pill" (click)="navigate('cart')">
+      <a
+        mat-stroked-button
+        class="!rounded-full cart-pill"
+        href="/cart"
+        (click)="navigate('cart', undefined, $event)"
+        rel="nofollow"
+      >
         <mat-icon>shopping_bag</mat-icon>{{ cart.count() }}
-      </button>
+      </a>
       } @if (enabledLanguageOptions().length > 1) {
       <label class="lang-switcher">
         <mat-icon>translate</mat-icon>
@@ -48,13 +57,14 @@
         </select>
       </label>
       } @if (pageIsEnabled('booking')) {
-      <button
+      <a
         mat-flat-button
         class="header-booking !rounded-full ml-auto md:ml-3"
-        (click)="navigate('booking')"
+        href="/booking"
+        (click)="navigate('booking', undefined, $event)"
       >
         {{ t('header.bookVisit') }} <mat-icon iconPositionEnd>arrow_outward</mat-icon>
-      </button>
+      </a>
       }
       <button
         class="md:hidden p-2"
@@ -73,14 +83,15 @@
       [attr.aria-label]="t('aria.mobileNav')"
     >
       @for (item of visibleNav(); track item.key) {
-      <button
+      <a
         class="mobile-nav-link text-left"
+        [href]="pagePath(item.key)"
         [class.active]="page() === item.key"
         [attr.aria-current]="page() === item.key ? 'page' : null"
-        (click)="navigate(item.key)"
+        (click)="navigate(item.key, undefined, $event)"
       >
         {{ t('nav.' + item.key) }}
-      </button>
+      </a>
       }
     </nav>
     }
@@ -122,7 +133,13 @@
       (open)="openProduct($event)"
     />
     } @else if (page() === 'product') { @if (productSlug(); as slug) {
-    <ip-product [slug]="slug" (backToShop)="navigate('shop')" (goToCart)="navigate('cart')" />
+    <ip-product
+      [slug]="slug"
+      (productLoaded)="onProductLoaded($event)"
+      (productMissing)="onProductMissing()"
+      (backToShop)="navigate('shop')"
+      (goToCart)="navigate('cart')"
+    />
     } @else {
     <section class="inner-hero">
       <h1 class="section-title mt-5">{{ t('product.notFound') }}</h1>
@@ -159,9 +176,13 @@
         <p class="font-semibold mb-5">{{ t('footer.explore') }}</p>
         <div class="grid gap-3">
           @for (item of visibleNav(); track item.key) {
-          <button class="text-left text-slate-400 hover:text-white" (click)="navigate(item.key)">
+          <a
+            class="text-left text-slate-400 hover:text-white"
+            [href]="pagePath(item.key)"
+            (click)="navigate(item.key, undefined, $event)"
+          >
             {{ t('nav.' + item.key) }}
-          </button>
+          </a>
           }
         </div>
       </div>

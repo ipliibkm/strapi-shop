@@ -53,11 +53,11 @@ public class StripePaymentProvider implements PaymentProvider {
     if (!active()) throw new IllegalStateException("No payment provider is configured.");
     String successUrl =
         storefrontBaseUrl
-            + "/#/order/"
+            + "/order/"
             + encode(order.orderNumber())
-            + "?token="
+            + "#token="
             + encode(accessToken);
-    String cancelUrl = storefrontBaseUrl + "/#/cart?cancelled=1";
+    String cancelUrl = storefrontBaseUrl + "/cart?cancelled=1";
     List<String> form =
         List.of(
             "mode=" + encode("payment"),

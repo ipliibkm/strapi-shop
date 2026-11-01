@@ -13,6 +13,8 @@ export interface OpenShopfrontProductListItem {
   badge?: string;
   /** The product image address. Empty shows an initial placeholder. */
   url?: string;
+  /** The crawlable product detail URL. */
+  href?: string;
 }
 
 /** Translated strings for the list, supplied by the consuming app. */

@@ -4,48 +4,66 @@
       <article
         class="product-list-card group relative flex flex-col rounded-3xl border theme-border bg-surface overflow-hidden transition-shadow hover:shadow-lg"
       >
-        <button type="button" class="flex flex-col h-full text-left" (click)="open.emit(item)">
-          <div class="relative aspect-square product-media">
-            @if (item.url) {
-              <img
-                [src]="item.url"
-                [alt]="item.name"
-                class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+        <div class="relative aspect-square product-media">
+          @if (item.url) {
+            <img
+              [src]="item.url"
+              [alt]="item.name"
+              width="640"
+              height="640"
+              loading="lazy"
+              decoding="async"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          } @else {
+            <span class="flex items-center justify-center text-6xl font-light">{{
+              initialOf(item.name)
+            }}</span>
+          }
+          @if (item.badge) {
+            <span class="absolute top-3 left-3 badge-chip">{{ item.badge }}</span>
+          }
+        </div>
+        <div class="flex flex-col grow p-5">
+          <h3 class="text-lg font-semibold leading-snug">{{ item.name }}</h3>
+          @if (item.description) {
+            <p class="mt-1 text-sm text-slate-500 line-clamp-2 grow">{{ item.description }}</p>
+          }
+          <div class="mt-4 flex items-center justify-between">
+            <span class="font-semibold">{{ item.priceLabel || '' }}</span>
+            @if (labels().addToCart) {
+              <button
+                type="button"
+                mat-icon-button
+                color="primary"
+                class="product-card-action"
+                [attr.aria-label]="labels().addToCart + ': ' + item.name"
+                (click)="$event.stopPropagation(); addToCart.emit(item)"
+              >
+                <mat-icon>shopping_bag</mat-icon>
+              </button>
             } @else {
-              <span class="flex items-center justify-center text-6xl font-light">{{
-                initialOf(item.name)
-              }}</span>
-            }
-            @if (item.badge) {
-              <span class="absolute top-3 left-3 badge-chip">{{ item.badge }}</span>
+              <mat-icon class="text-slate-400 transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </mat-icon>
             }
           </div>
-          <div class="flex flex-col grow p-5">
-            <h3 class="text-lg font-semibold leading-snug">{{ item.name }}</h3>
-            @if (item.description) {
-              <p class="mt-1 text-sm text-slate-500 line-clamp-2 grow">{{ item.description }}</p>
-            }
-            <div class="mt-4 flex items-center justify-between">
-              <span class="font-semibold">{{ item.priceLabel || '' }}</span>
-              @if (labels().addToCart) {
-                <button
-                  type="button"
-                  mat-icon-button
-                  color="primary"
-                  [attr.aria-label]="labels().addToCart + ': ' + item.name"
-                  (click)="$event.stopPropagation(); addToCart.emit(item)"
-                >
-                  <mat-icon>shopping_bag</mat-icon>
-                </button>
-              } @else {
-                <mat-icon class="text-slate-400 transition-transform group-hover:translate-x-1">
-                  arrow_forward
-                </mat-icon>
-              }
-            </div>
-          </div>
-        </button>
+        </div>
+        @if (item.href) {
+          <a
+            class="product-card-link"
+            [href]="item.href"
+            [attr.aria-label]="item.name"
+            (click)="$event.preventDefault(); open.emit(item)"
+          ></a>
+        } @else {
+          <button
+            type="button"
+            class="product-card-link"
+            [attr.aria-label]="item.name"
+            (click)="open.emit(item)"
+          ></button>
+        }
       </article>
     }
   </div>
