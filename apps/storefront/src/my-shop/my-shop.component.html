@@ -1,0 +1,61 @@
+<section class="inner-hero">
+  <p class="eyebrow">{{ t('account.eyebrow') }}</p>
+  <h1 class="section-title mt-5">{{ t('account.title') }}</h1>
+</section>
+<section class="account-panel">
+  @if (account.customer(); as customer) {
+    <p>
+      {{ t('account.signedIn') }} <strong>{{ customer.email }}</strong>
+    </p>
+    <button mat-stroked-button (click)="logout()">{{ t('account.logout') }}</button>
+    <h2>{{ t('account.orders') }}</h2>
+    @for (order of orders(); track order.orderNumber) {
+      <div class="account-order">
+        <strong>{{ order.orderNumber }}</strong>
+        <span>{{ order.status }}</span>
+        <span>{{ (order.totalCents / 100).toFixed(2) }} {{ order.currency }}</span>
+      </div>
+    } @empty {
+      <p>{{ t('account.noOrders') }}</p>
+    }
+  } @else {
+    <p>{{ t('account.help') }}</p>
+    <div class="account-actions">
+      <button
+        mat-stroked-button
+        (click)="mode.set('login')"
+        [attr.aria-pressed]="mode() === 'login'"
+      >
+        {{ t('account.login') }}
+      </button>
+      <button
+        mat-stroked-button
+        (click)="mode.set('register')"
+        [attr.aria-pressed]="mode() === 'register'"
+      >
+        {{ t('account.register') }}
+      </button>
+    </div>
+    <form (submit)="$event.preventDefault(); submit(email.value, password.value)">
+      <label
+        >{{ t('field.email') }} <input #email type="email" autocomplete="email" required
+      /></label>
+      <label
+        >{{ t('account.password') }}
+        <input
+          #password
+          type="password"
+          [attr.autocomplete]="mode() === 'register' ? 'new-password' : 'current-password'"
+          minlength="6"
+          required
+      /></label>
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ t(mode() === 'login' ? 'account.login' : 'account.register') }}
+      </button>
+    </form>
+  }
+  @if (error()) {
+    <p role="alert">{{ error() }}</p>
+  }
+  <button mat-stroked-button (click)="checkout.emit()">{{ t('account.shop') }}</button>
+</section>

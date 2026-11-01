@@ -20,11 +20,11 @@ class CommerceSettingsServiceTest {
   @SuppressWarnings("unchecked")
   void savesNullWhenFreeShippingHasNoThreshold() {
     NamedParameterJdbcTemplate db = mock(NamedParameterJdbcTemplate.class);
-    var saved = new CommerceSettingsService.Settings(true, 1900, 499, null);
+    var saved = new CommerceSettingsService.Settings(true, false, 1900, 499, null);
     when(db.query(startsWith("select"), anyMap(), any(RowMapper.class))).thenReturn(List.of(saved));
 
     CommerceSettingsService.Settings result =
-        new CommerceSettingsService(db).update(true, 1900, 499, null);
+        new CommerceSettingsService(db).update(true, false, 1900, 499, null);
 
     ArgumentCaptor<Map<String, ?>> parameters = ArgumentCaptor.forClass(Map.class);
     verify(db).update(startsWith("update commerce_settings"), parameters.capture());

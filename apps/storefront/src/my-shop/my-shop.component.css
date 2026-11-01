@@ -1,0 +1,32 @@
+.account-panel {
+  max-width: 40rem;
+  margin: 2rem auto 5rem;
+  padding: 2rem;
+  display: grid;
+  gap: 1.25rem;
+}
+.account-panel form {
+  display: grid;
+  gap: 1rem;
+}
+.account-panel label {
+  display: grid;
+  gap: 0.35rem;
+}
+.account-panel input {
+  padding: 0.7rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.4rem;
+  color: #111827;
+}
+.account-actions {
+  display: flex;
+  gap: 1rem;
+}
+.account-order {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #94a3b8;
+}

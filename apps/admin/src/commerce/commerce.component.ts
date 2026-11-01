@@ -76,6 +76,7 @@ interface VariantAdmin {
 }
 interface Settings {
   shopEnabled: boolean;
+  customerAreaEnabled: boolean;
   taxRateBps: number;
   shippingFlatCents: number;
   freeShippingThresholdCents?: number | null;
@@ -121,6 +122,7 @@ class CommerceComponent {
   readonly variants = signal<VariantInput[]>([]);
   readonly settings = signal<Settings>({
     shopEnabled: true,
+    customerAreaEnabled: false,
     taxRateBps: 0,
     shippingFlatCents: 499,
   });
@@ -534,6 +536,13 @@ class CommerceComponent {
     this.settings.set({ ...this.settings(), shopEnabled: checked });
   }
 
+  private setCustomerAreaEnabled(event: Event) {
+    this.settings.set({
+      ...this.settings(),
+      customerAreaEnabled: (event.target as HTMLInputElement).checked,
+    });
+  }
+
   async saveSettings(taxValue: string, flatValue: string, thresholdValue: string) {
     const taxRateBps = Math.round(parseFloat(taxValue || '0') * 100);
     const shippingFlatCents = Math.round(parseFloat(flatValue || '0') * 100);
@@ -544,6 +553,7 @@ class CommerceComponent {
       firstValueFrom(
         this.http.put<Settings>('/api/v1/admin/commerce/settings', {
           shopEnabled: this.settings().shopEnabled,
+          customerAreaEnabled: this.settings().customerAreaEnabled,
           taxRateBps,
           shippingFlatCents,
           freeShippingThresholdCents,

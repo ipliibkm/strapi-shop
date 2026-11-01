@@ -85,7 +85,11 @@ public class CommerceAdminController {
     Long threshold =
         request.freeShippingThresholdCents() == null ? null : request.freeShippingThresholdCents();
     return settings.update(
-        request.shopEnabled(), request.taxRateBps(), request.shippingFlatCents(), threshold);
+        request.shopEnabled(),
+        request.customerAreaEnabled(),
+        request.taxRateBps(),
+        request.shippingFlatCents(),
+        threshold);
   }
 
   /** Carries shipment details for a paid order. */
@@ -94,6 +98,7 @@ public class CommerceAdminController {
   /** Carries commerce configuration input from the administrator. */
   public record SettingsRequest(
       boolean shopEnabled,
+      boolean customerAreaEnabled,
       int taxRateBps,
       long shippingFlatCents,
       Long freeShippingThresholdCents) {}

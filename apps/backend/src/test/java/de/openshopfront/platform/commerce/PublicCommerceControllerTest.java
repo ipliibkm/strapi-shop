@@ -16,7 +16,8 @@ class PublicCommerceControllerTest {
           mock(OrderService.class),
           mock(CommerceSettingsService.class),
           mock(StripePaymentProvider.class),
-          mock(OrderLookupRateLimiter.class));
+          mock(OrderLookupRateLimiter.class),
+          mock(CustomerAccountService.class));
 
   @SuppressWarnings("unchecked")
   private Map<String, String> body(ResponseEntity<?> response) {

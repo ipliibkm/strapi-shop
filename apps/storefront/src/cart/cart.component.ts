@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { StorefrontCartService } from '../shared/cart.service';
 import { StorefrontI18n } from '../shared/i18n.service';
 import { CheckoutResult } from '../shared/types';
+import { CustomerAccountService } from '../shared/customer-account.service';
 
 /** The cart page: line editing, checkout form and order confirmation. */
 @Component({
@@ -19,6 +20,9 @@ export class CartComponent {
   private http = inject(HttpClient);
   readonly i18n = inject(StorefrontI18n);
   readonly cart = inject(StorefrontCartService);
+  readonly account = inject(CustomerAccountService);
+  readonly createAccount = signal(false);
+  readonly openAccount = output<void>();
 
   readonly placingOrder = signal(false);
   readonly checkoutError = signal('');
@@ -73,6 +77,7 @@ export class CartComponent {
     city: string,
     postalCode: string,
     country: string,
+    password: string,
   ) {
     if (!name.trim() || !email.trim()) {
       this.checkoutError.set(this.t('error.nameEmail'));
@@ -86,16 +91,34 @@ export class CartComponent {
     this.placingOrder.set(true);
     this.checkoutError.set('');
     try {
+      if (this.account.enabled() && this.createAccount() && !this.account.customer()) {
+        const signedIn = await this.account.authenticate('register', email.trim(), password);
+        if (!signedIn) {
+          this.checkoutError.set(this.t('account.confirmEmail'));
+          return;
+        }
+      }
+      if (
+        this.account.customer() &&
+        this.account.customer()!.email.toLowerCase() !== email.trim().toLowerCase()
+      ) {
+        this.checkoutError.set(this.t('account.emailMismatch'));
+        return;
+      }
       const result = await firstValueFrom(
-        this.http.post<CheckoutResult>('/api/v1/public/checkout', {
-          customerName: name.trim(),
-          customerEmail: email.trim(),
-          street: street.trim() || null,
-          city: city.trim() || null,
-          postalCode: postalCode.trim() || null,
-          country: country.trim().toUpperCase() || null,
-          lines: lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
-        }),
+        this.http.post<CheckoutResult>(
+          '/api/v1/public/checkout',
+          {
+            customerName: name.trim(),
+            customerEmail: email.trim(),
+            street: street.trim() || null,
+            city: city.trim() || null,
+            postalCode: postalCode.trim() || null,
+            country: country.trim().toUpperCase() || null,
+            lines: lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
+          },
+          { headers: this.account.customer() ? this.account.headers() : undefined },
+        ),
       );
       this.cart.clear();
       this.quantityNotice.set('');

@@ -37,7 +37,8 @@ class StorefrontSeoControllerTest {
             List.of(
                 new PageService.PublicPageSummary("home", "Home"),
                 new PageService.PublicPageSummary("about", "About")));
-    when(commerce.require()).thenReturn(new CommerceSettingsService.Settings(true, 0, 0, null));
+    when(commerce.require())
+        .thenReturn(new CommerceSettingsService.Settings(true, false, 0, 0, null));
     when(catalog.list(true))
         .thenReturn(
             List.of(

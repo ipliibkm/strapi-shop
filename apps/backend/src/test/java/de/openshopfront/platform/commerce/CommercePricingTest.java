@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 /** Verifies server-side total calculation with half-up rounding. */
 class CommercePricingTest {
   private final CommerceSettingsService.Settings settings =
-      new CommerceSettingsService.Settings(true, 1900, 499L, 6000L);
+      new CommerceSettingsService.Settings(true, false, 1900, 499L, 6000L);
 
   @Test
   void roundsTaxHalfUp() {

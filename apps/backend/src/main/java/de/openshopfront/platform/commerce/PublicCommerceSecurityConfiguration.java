@@ -31,6 +31,11 @@ public class PublicCommerceSecurityConfiguration {
             return true;
           if ("/api/v1/public/settings".equals(path) && "GET".equals(request.getMethod()))
             return true;
+          if ("/api/v1/public/customer-area".equals(path) && "GET".equals(request.getMethod()))
+            return true;
+          if (path.startsWith("/api/v1/public/customer-area/")
+              && ("GET".equals(request.getMethod()) || "POST".equals(request.getMethod())))
+            return true;
           if (("/robots.txt".equals(path) || "/sitemap.xml".equals(path))
               && "GET".equals(request.getMethod())) return true;
           return false;

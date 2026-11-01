@@ -1,5 +1,5 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -19,6 +19,8 @@ import { OrderComponent } from './order/order.component';
 import { AboutComponent } from './about/about.component';
 import { HomeComponent } from './home/home.component';
 import { ServicesComponent } from './services/services.component';
+import { MyShopComponent } from './my-shop/my-shop.component';
+import { CustomerAccountService } from './shared/customer-account.service';
 import {
   Page,
   Product,
@@ -43,6 +45,7 @@ import {
     CartComponent,
     OrderComponent,
     AboutComponent,
+    MyShopComponent,
   ],
   templateUrl: './main.html',
 })
@@ -52,6 +55,7 @@ class StorefrontApp {
   readonly i18n = inject(StorefrontI18n);
   readonly cart = inject(StorefrontCartService);
   readonly shop = inject(StorefrontShopService);
+  readonly account = inject(CustomerAccountService);
   private readonly seo = inject(StorefrontSeoService);
   readonly page = signal<Page>(this.initialPage());
   readonly previewMode = new URLSearchParams(window.location.search).get('preview') === '1';
@@ -139,6 +143,9 @@ class StorefrontApp {
   ];
 
   constructor() {
+    effect(() => {
+      if (this.page() === 'my-shop') this.pageAvailable.set(this.account.enabled());
+    });
     inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
     this.theme.load('storefront');
     window.addEventListener('message', (event) => this.receivePreview(event));
@@ -164,8 +171,12 @@ class StorefrontApp {
       this.pageAvailable.set(false);
       return;
     }
+    if (page === 'my-shop' && !this.account.enabled()) {
+      this.pageAvailable.set(false);
+      return;
+    }
     this.page.set(page);
-    this.pageAvailable.set(true);
+    this.pageAvailable.set(page !== 'my-shop' || this.account.enabled());
     const path = this.pagePath(page, params);
     const search = this.previewMode ? window.location.search : '';
     window.history.pushState({}, '', `${path}${search}`);
@@ -181,7 +192,7 @@ class StorefrontApp {
   private restorePageFromHistory() {
     const page = this.initialPage();
     this.page.set(page);
-    this.pageAvailable.set(true);
+    this.pageAvailable.set(page !== 'my-shop' || this.account.enabled());
     this.menuOpen.set(false);
     if (this.contentPages.includes(page)) void this.loadPage(page);
     if (page === 'shop' || page === 'product') void this.shop.load();
@@ -342,13 +353,13 @@ class StorefrontApp {
     const path = window.location.pathname.split('/').filter(Boolean);
     if (path[0] === 'products') return 'product';
     if (path[0] === 'order') return 'order';
-    if (['services', 'booking', 'shop', 'cart', 'about', 'contact'].includes(path[0]))
+    if (['services', 'booking', 'shop', 'cart', 'about', 'contact', 'my-shop'].includes(path[0]))
       return path[0] as Page;
 
     const legacy = window.location.hash.slice(1).split('?', 1)[0];
     if (legacy.startsWith('product/')) return 'product';
     if (legacy.startsWith('order/')) return 'order';
-    return ['services', 'booking', 'shop', 'cart', 'about', 'contact'].includes(legacy)
+    return ['services', 'booking', 'shop', 'cart', 'about', 'contact', 'my-shop'].includes(legacy)
       ? (legacy as Page)
       : 'home';
   }
@@ -390,7 +401,12 @@ class StorefrontApp {
       title,
       description: this.pageDescription(page, content),
       path,
-      index: !this.previewMode && this.pageAvailable() && page !== 'cart' && page !== 'order',
+      index:
+        !this.previewMode &&
+        this.pageAvailable() &&
+        page !== 'cart' &&
+        page !== 'order' &&
+        page !== 'my-shop',
     });
   }
 
@@ -415,6 +431,7 @@ class StorefrontApp {
       contact: this.t('footer.tagline'),
       cart: this.t('cart.titleA') + this.t('cart.accent'),
       order: this.t('order.placed.text'),
+      'my-shop': this.t('account.help'),
     };
     return fallback[page] || titleForDescription(page);
   }

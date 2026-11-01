@@ -15,18 +15,21 @@ public class PublicCommerceController {
   private final CommerceSettingsService settings;
   private final StripePaymentProvider stripe;
   private final OrderLookupRateLimiter orderLookupRateLimiter;
+  private final CustomerAccountService accounts;
 
   public PublicCommerceController(
       CatalogService catalog,
       OrderService orders,
       CommerceSettingsService settings,
       StripePaymentProvider stripe,
-      OrderLookupRateLimiter orderLookupRateLimiter) {
+      OrderLookupRateLimiter orderLookupRateLimiter,
+      CustomerAccountService accounts) {
     this.catalog = catalog;
     this.orders = orders;
     this.settings = settings;
     this.stripe = stripe;
     this.orderLookupRateLimiter = orderLookupRateLimiter;
+    this.accounts = accounts;
   }
 
   /** Lists active products for the storefront. */
@@ -47,8 +50,15 @@ public class PublicCommerceController {
   /** Creates the order and returns a checkout link or the pending order number. */
   @PostMapping("/checkout")
   @ResponseStatus(HttpStatus.CREATED)
-  public CheckoutResponse checkout(@RequestBody OrderService.CheckoutRequest request) {
-    OrderService.CheckoutResult result = orders.checkout(request);
+  public CheckoutResponse checkout(
+      @RequestBody OrderService.CheckoutRequest request,
+      @RequestHeader(value = "Authorization", required = false) String authorization) {
+    CustomerAccountService.Customer customer =
+        authorization == null ? null : accounts.requireCustomer(authorization);
+    Long customerId = customer == null ? null : customer.id();
+    if (customer != null && !customer.email().equalsIgnoreCase(request.customerEmail()))
+      throw new IllegalArgumentException("Use your account email at checkout.");
+    OrderService.CheckoutResult result = orders.checkout(request, customerId);
     if (!stripe.active())
       return new CheckoutResponse(
           result.orderNumber(), result.accessToken(), "PENDING_PAYMENT", null, false);

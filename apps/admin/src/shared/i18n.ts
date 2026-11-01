@@ -20,6 +20,21 @@ type Dict = Record<string, string>;
 const de: Dict = {};
 const ru: Dict = {};
 const tr: Dict = {};
+de['Allow customer accounts'] = 'Kundenkonten erlauben';
+ru['Allow customer accounts'] = 'Разрешить аккаунты покупателей';
+tr['Allow customer accounts'] = 'Müşteri hesaplarına izin ver';
+de[
+  'Customers can register in My shop or during checkout. Strapi manages their accounts and roles. Enable registration in Strapi Users & Permissions settings too.'
+] =
+  'Kunden können sich in Mein Shop oder beim Kauf registrieren. Strapi verwaltet Konten und Rollen. Aktivieren Sie die Registrierung auch in den Strapi-Einstellungen für Benutzer und Berechtigungen.';
+ru[
+  'Customers can register in My shop or during checkout. Strapi manages their accounts and roles. Enable registration in Strapi Users & Permissions settings too.'
+] =
+  'Покупатели могут зарегистрироваться в личном кабинете или при покупке. Strapi управляет аккаунтами и ролями. Включите регистрацию в настройках пользователей и разрешений Strapi.';
+tr[
+  'Customers can register in My shop or during checkout. Strapi manages their accounts and roles. Enable registration in Strapi Users & Permissions settings too.'
+] =
+  'Müşteriler Mağazam bölümünde veya alışveriş sırasında kayıt olabilir. Hesapları ve rolleri Strapi yönetir. Strapi Kullanıcılar ve İzinler ayarlarında da kaydı açın.';
 
 /** English is the source language and needs no dictionary. */
 const dictionaries: Record<Lang, Dict> = { en: {}, de, ru, tr };

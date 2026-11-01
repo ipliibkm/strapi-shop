@@ -27,6 +27,7 @@ public class CommerceSettingsService {
   @Transactional
   public Settings update(
       boolean shopEnabled,
+      boolean customerAreaEnabled,
       int taxRateBps,
       long shippingFlatCents,
       Long freeShippingThresholdCents) {
@@ -39,23 +40,25 @@ public class CommerceSettingsService {
       throw new IllegalArgumentException("Enter a free-shipping threshold in this range.");
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("enabled", shopEnabled);
+    parameters.put("customerArea", customerAreaEnabled);
     parameters.put("tax", taxRateBps);
     parameters.put("flat", shippingFlatCents);
     parameters.put("threshold", freeShippingThresholdCents);
     db.update(
-        "update commerce_settings set shop_enabled=:enabled,tax_rate_bps=:tax,shipping_flat_cents=:flat,free_shipping_threshold_cents=:threshold,updated_at=now() where id=1",
+        "update commerce_settings set shop_enabled=:enabled,customer_area_enabled=:customerArea,tax_rate_bps=:tax,shipping_flat_cents=:flat,free_shipping_threshold_cents=:threshold,updated_at=now() where id=1",
         parameters);
     return require();
   }
 
   private java.util.List<Settings> query(String where) {
     return db.query(
-        "select shop_enabled,tax_rate_bps,shipping_flat_cents,free_shipping_threshold_cents from commerce_settings"
+        "select shop_enabled,customer_area_enabled,tax_rate_bps,shipping_flat_cents,free_shipping_threshold_cents from commerce_settings"
             + where,
         Map.of(),
         (rs, row) ->
             new Settings(
                 rs.getBoolean("shop_enabled"),
+                rs.getBoolean("customer_area_enabled"),
                 rs.getInt("tax_rate_bps"),
                 rs.getLong("shipping_flat_cents"),
                 getNullableLong(rs, "free_shipping_threshold_cents")));
@@ -70,6 +73,7 @@ public class CommerceSettingsService {
   /** Contains the validated commerce configuration. */
   public record Settings(
       boolean shopEnabled,
+      boolean customerAreaEnabled,
       int taxRateBps,
       long shippingFlatCents,
       Long freeShippingThresholdCents) {}

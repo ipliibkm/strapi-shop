@@ -34,7 +34,14 @@
         </a>
         }
       </nav>
-      @if (cart.count() > 0) {
+      @if (account.enabled()) {
+      <a
+        class="nav-link text-sm font-medium"
+        href="/my-shop"
+        (click)="navigate('my-shop', undefined, $event)"
+        >{{ t('account.title') }}</a
+      >
+      } @if (cart.count() > 0) {
       <a
         mat-stroked-button
         class="!rounded-full cart-pill"
@@ -92,6 +99,10 @@
       >
         {{ t('nav.' + item.key) }}
       </a>
+      } @if (account.enabled()) {
+      <a class="mobile-nav-link" href="/my-shop" (click)="navigate('my-shop', undefined, $event)"
+        >{{ t('account.title') }}</a
+      >
       }
     </nav>
     }
@@ -148,7 +159,9 @@
       </button>
     </section>
     } } @else if (page() === 'cart') {
-    <ip-cart (browseShop)="navigate('shop')" />
+    <ip-cart (browseShop)="navigate('shop')" (openAccount)="navigate('my-shop')" />
+    } @else if (page() === 'my-shop' && account.enabled()) {
+    <ip-my-shop (checkout)="navigate('shop')" />
     } @else if (page() === 'order') { @if (productSlug(); as slug) {
     <ip-order
       [orderNumber]="slug"

@@ -118,7 +118,8 @@ class OrderServiceTest {
   @SuppressWarnings("unchecked")
   void checkoutRetriesAnIdentifierConflictAndReturnsStrongIdentifiers() {
     UUID variantId = UUID.randomUUID();
-    when(commerce.require()).thenReturn(new CommerceSettingsService.Settings(true, 0, 0, null));
+    when(commerce.require())
+        .thenReturn(new CommerceSettingsService.Settings(true, false, 0, 0, null));
     org.mockito.Mockito.doAnswer(
             invocation -> {
               RowMapper<?> mapper = invocation.getArgument(2);

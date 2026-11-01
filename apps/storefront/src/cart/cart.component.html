@@ -76,6 +76,7 @@
               #coEmail
               type="email"
               autocomplete="email"
+              [value]="account.customer()?.email ?? ''"
               [placeholder]="t('placeholder.email')"
           /></label>
           <label class="customer-field wide"
@@ -98,6 +99,35 @@
           </div>
         </div>
 
+        @if (account.enabled()) {
+          @if (account.customer(); as customer) {
+            <p class="notice-line">{{ t('account.signedIn') }} {{ customer.email }}</p>
+          } @else {
+            <label class="customer-field"
+              ><input
+                type="checkbox"
+                [checked]="createAccount()"
+                (change)="createAccount.set($any($event.target).checked)"
+              />
+              {{ t('account.createAtCheckout') }}</label
+            >
+            <button mat-stroked-button (click)="openAccount.emit()">
+              {{ t('account.existing') }}
+            </button>
+          }
+        }
+        <label
+          class="customer-field"
+          [hidden]="!account.enabled() || !createAccount() || !!account.customer()"
+          ><span>{{ t('account.password') }}</span
+          ><input
+            #coPassword
+            type="password"
+            autocomplete="new-password"
+            [required]="account.enabled() && createAccount() && !account.customer()"
+            minlength="6"
+        /></label>
+
         <button
           mat-flat-button
           class="!rounded-full checkout-btn"
@@ -109,7 +139,8 @@
               coStreet.value,
               coCity.value,
               coPostal.value,
-              coCountry.value
+              coCountry.value,
+              account.enabled() && !account.customer() ? coPassword.value : ''
             )
           "
         >

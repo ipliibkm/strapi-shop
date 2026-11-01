@@ -58,6 +58,11 @@ public class OrderService {
   /** Creates an unpaid order and holds stock before the customer pays. */
   @Transactional
   public CheckoutResult checkout(CheckoutRequest request) {
+    return checkout(request, null);
+  }
+
+  @Transactional
+  public CheckoutResult checkout(CheckoutRequest request, Long customerId) {
     CommerceSettingsService.Settings config = commerce.require();
     if (!config.shopEnabled()) throw new ShopDisabledException();
     String name = clean(request.customerName(), 200, "Enter your full name.");
@@ -93,6 +98,7 @@ public class OrderService {
       params.put("accessTokenHash", tokenHash(accessToken));
       params.put("name", name);
       params.put("email", email);
+      params.put("customerId", customerId);
       params.put("street", optional(request.street()));
       params.put("city", optional(request.city()));
       params.put("postal", optional(request.postalCode()));
@@ -109,10 +115,10 @@ public class OrderService {
       int inserted =
           db.update(
               """
-              insert into shop_order (id,order_number,public_access_token_hash,status,customer_name,customer_email,
+               insert into shop_order (id,order_number,public_access_token_hash,status,customer_name,customer_email,strapi_customer_id,
                    street,city,postal_code,country,currency,subtotal_cents,tax_cents,shipping_cents,total_cents,
                    expires_at,locale)
-               values (:id,:number,:accessTokenHash,'PENDING_PAYMENT',:name,:email,:street,:city,:postal,:country,
+                values (:id,:number,:accessTokenHash,'PENDING_PAYMENT',:name,:email,:customerId,:street,:city,:postal,:country,
                    'EUR',:subtotal,:tax,:shipping,:total,:expires,:locale)
                on conflict do nothing""",
               params);
@@ -484,6 +490,16 @@ public class OrderService {
     return db.query(
         orderSelect() + " where " + where + " order by o.created_at desc limit :limit",
         params,
+        ORDER_MAPPER);
+  }
+
+  /** Only orders linked at checkout to this Strapi user are visible here. */
+  @Transactional(readOnly = true)
+  public List<Order> customerOrders(long customerId) {
+    return db.query(
+        orderSelect()
+            + " where o.strapi_customer_id=:customerId order by o.created_at desc limit 100",
+        Map.of("customerId", customerId),
         ORDER_MAPPER);
   }
 

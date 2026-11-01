@@ -80,3 +80,5 @@ databaseChangeLog:
       file: db/changelog/024-email-settings-i18n.yaml
   - include:
       file: db/changelog/025-order-public-access-token.yaml
+  - include:
+      file: db/changelog/026-customer-area.yaml

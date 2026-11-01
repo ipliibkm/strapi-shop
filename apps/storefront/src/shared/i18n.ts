@@ -18,6 +18,25 @@ export function localeOf(lang: Lang): string {
 type Dict = Record<string, string>;
 
 const en: Dict = {};
+en['account.eyebrow'] = 'CUSTOMER AREA';
+en['account.title'] = 'My shop';
+en['nav.my-shop'] = 'My shop';
+en['account.help'] = 'Create an account to see orders you place while signed in.';
+en['account.login'] = 'Sign in';
+en['account.register'] = 'Create account';
+en['account.logout'] = 'Sign out';
+en['account.password'] = 'Password';
+en['account.signedIn'] = 'Signed in as';
+en['account.orders'] = 'Your orders';
+en['account.noOrders'] = 'No orders linked to this account yet.';
+en['account.ordersError'] = 'Your orders could not be loaded. Try again.';
+en['account.authError'] = 'Strapi did not accept your details. Check your email and password.';
+en['account.confirmEmail'] =
+  'Check your email to confirm your account. Then sign in before checkout.';
+en['account.emailMismatch'] = 'Use your account email at checkout.';
+en['account.createAtCheckout'] = 'Create an account with this order';
+en['account.existing'] = 'Already have an account? Sign in';
+en['account.shop'] = 'Browse the shop';
 en['announcement'] = 'Welcome to our website. Contact us to learn more about our services.';
 en['nav.home'] = 'Home';
 en['nav.services'] = 'Services';
@@ -191,6 +210,27 @@ en['booking.confirmFailed'] =
   'The booking could not be confirmed. Check your details and try again.';
 
 const de: Dict = {};
+de['account.eyebrow'] = 'KUNDENBEREICH';
+de['account.title'] = 'Mein Shop';
+de['nav.my-shop'] = 'Mein Shop';
+de['account.help'] =
+  'Erstellen Sie ein Konto, um Bestellungen zu sehen, die Sie angemeldet aufgeben.';
+de['account.login'] = 'Anmelden';
+de['account.register'] = 'Konto erstellen';
+de['account.logout'] = 'Abmelden';
+de['account.password'] = 'Passwort';
+de['account.signedIn'] = 'Angemeldet als';
+de['account.orders'] = 'Ihre Bestellungen';
+de['account.noOrders'] = 'Noch keine Bestellungen für dieses Konto.';
+de['account.ordersError'] =
+  'Ihre Bestellungen konnten nicht geladen werden. Versuchen Sie es erneut.';
+de['account.authError'] = 'Strapi hat Ihre Angaben abgelehnt. Prüfen Sie E-Mail und Passwort.';
+de['account.confirmEmail'] =
+  'Bestätigen Sie Ihr Konto per E-Mail. Melden Sie sich dann vor dem Kauf an.';
+de['account.emailMismatch'] = 'Verwenden Sie beim Kauf die E-Mail-Adresse Ihres Kontos.';
+de['account.createAtCheckout'] = 'Mit dieser Bestellung ein Konto erstellen';
+de['account.existing'] = 'Sie haben schon ein Konto? Anmelden';
+de['account.shop'] = 'Zum Shop';
 de['announcement'] =
   'Willkommen auf unserer Website. Kontaktieren Sie uns für weitere Informationen zu unseren Leistungen.';
 de['nav.home'] = 'Start';
@@ -369,6 +409,24 @@ de['booking.confirmFailed'] =
   'Die Buchung konnte nicht bestätigt werden. Prüfen Sie Ihre Angaben und versuchen Sie es erneut.';
 
 const ru: Dict = {};
+ru['account.eyebrow'] = 'ЛИЧНЫЙ КАБИНЕТ';
+ru['account.title'] = 'Мой магазин';
+ru['nav.my-shop'] = 'Мой магазин';
+ru['account.help'] = 'Создайте аккаунт, чтобы видеть заказы, сделанные после входа.';
+ru['account.login'] = 'Войти';
+ru['account.register'] = 'Создать аккаунт';
+ru['account.logout'] = 'Выйти';
+ru['account.password'] = 'Пароль';
+ru['account.signedIn'] = 'Вы вошли как';
+ru['account.orders'] = 'Ваши заказы';
+ru['account.noOrders'] = 'Заказов, связанных с аккаунтом, пока нет.';
+ru['account.ordersError'] = 'Не удалось загрузить заказы. Повторите попытку.';
+ru['account.authError'] = 'Strapi отклонил данные. Проверьте адрес почты и пароль.';
+ru['account.confirmEmail'] = 'Подтвердите аккаунт по почте и войдите перед покупкой.';
+ru['account.emailMismatch'] = 'Используйте почту вашего аккаунта при покупке.';
+ru['account.createAtCheckout'] = 'Создать аккаунт при покупке';
+ru['account.existing'] = 'Уже есть аккаунт? Войти';
+ru['account.shop'] = 'В магазин';
 ru['announcement'] =
   'Добро пожаловать на наш сайт. Свяжитесь с нами, чтобы узнать больше о наших услугах.';
 ru['nav.home'] = 'Главная';
@@ -544,6 +602,24 @@ ru['booking.confirmFailed'] =
   'Не удалось подтвердить запись. Проверьте данные и попробуйте ещё раз.';
 
 const tr: Dict = {};
+tr['account.eyebrow'] = 'MÜŞTERİ ALANI';
+tr['account.title'] = 'Mağazam';
+tr['nav.my-shop'] = 'Mağazam';
+tr['account.help'] = 'Giriş yaparak verdiğiniz siparişleri görmek için hesap oluşturun.';
+tr['account.login'] = 'Giriş yap';
+tr['account.register'] = 'Hesap oluştur';
+tr['account.logout'] = 'Çıkış yap';
+tr['account.password'] = 'Şifre';
+tr['account.signedIn'] = 'Giriş yapılan hesap';
+tr['account.orders'] = 'Siparişleriniz';
+tr['account.noOrders'] = 'Bu hesaba bağlı sipariş yok.';
+tr['account.ordersError'] = 'Siparişler yüklenemedi. Tekrar deneyin.';
+tr['account.authError'] = 'Strapi bilgilerinizi kabul etmedi. E-posta ve şifrenizi kontrol edin.';
+tr['account.confirmEmail'] = 'Hesabınızı e-postayla doğrulayın. Alışverişten önce giriş yapın.';
+tr['account.emailMismatch'] = 'Alışverişte hesap e-postanızı kullanın.';
+tr['account.createAtCheckout'] = 'Bu siparişle hesap oluştur';
+tr['account.existing'] = 'Hesabınız var mı? Giriş yapın';
+tr['account.shop'] = 'Mağazaya git';
 tr['announcement'] =
   'Web sitemize hoş geldiniz. Hizmetlerimiz hakkında daha fazla bilgi için bize ulaşın.';
 tr['nav.home'] = 'Ana Sayfa';

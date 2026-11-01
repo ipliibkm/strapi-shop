@@ -1,6 +1,15 @@
 /** The storefront pages the shell can route to. */
 export type Page =
-  'home' | 'services' | 'booking' | 'shop' | 'product' | 'cart' | 'order' | 'about' | 'contact';
+  | 'home'
+  | 'services'
+  | 'booking'
+  | 'shop'
+  | 'product'
+  | 'cart'
+  | 'order'
+  | 'about'
+  | 'contact'
+  | 'my-shop';
 
 /** A website language published by the administrator. */
 export interface StorefrontLanguage {

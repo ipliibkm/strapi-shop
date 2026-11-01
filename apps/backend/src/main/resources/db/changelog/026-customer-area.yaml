@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 026-customer-area
+      author: platform
+      changes:
+        - addColumn:
+            tableName: commerce_settings
+            columns:
+              - column: {name: customer_area_enabled, type: boolean, defaultValueBoolean: false, constraints: {nullable: false}}
+        - addColumn:
+            tableName: shop_order
+            columns:
+              - column: {name: strapi_customer_id, type: bigint}
+        - createIndex:
+            tableName: shop_order
+            indexName: ix_shop_order_strapi_customer
+            columns:
+              - column: {name: strapi_customer_id}

@@ -475,6 +475,21 @@
               (change)="setShopEnabled($event)"
           /></label>
 
+          <label class="toggle-row"
+            ><span>{{ t('Allow customer accounts') }}</span
+            ><input
+              type="checkbox"
+              [checked]="settings().customerAreaEnabled"
+              (change)="setCustomerAreaEnabled($event)"
+          /></label>
+          <p class="field-help">
+            {{
+              t(
+                'Customers can register in My shop or during checkout. Strapi manages their accounts and roles. Enable registration in Strapi Users & Permissions settings too.'
+              )
+            }}
+          </p>
+
           <div class="row">
             <label class="field grow"
               ><span>{{ t('Tax rate (%)') }}</span
