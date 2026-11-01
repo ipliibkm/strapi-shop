@@ -323,6 +323,10 @@ export class FormsComponent {
     this.updateField(index, { [field]: value });
   }
 
+  fieldOptions(field: FormField): string[] {
+    return field.options;
+  }
+
   setFieldOptions(index: number, event: Event) {
     const options = (event.target as HTMLTextAreaElement).value
       .split('\n')

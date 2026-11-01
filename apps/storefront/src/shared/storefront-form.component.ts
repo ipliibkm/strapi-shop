@@ -3,7 +3,7 @@ import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { firstValueFrom } from 'rxjs';
 import { StorefrontI18n } from './i18n.service';
-import { StorefrontForm } from './types';
+import { StorefrontForm, StorefrontFormField } from './types';
 
 /**
  * A self-contained storefront form: loads its own definition by slug, renders the fields and
@@ -38,6 +38,10 @@ export class StorefrontFormComponent implements OnInit {
   }
   t(key: string, params?: Record<string, string | number>): string {
     return this.i18n.t(key, params);
+  }
+
+  fieldOptions(field: StorefrontFormField): string[] {
+    return field.options;
   }
 
   private async load() {

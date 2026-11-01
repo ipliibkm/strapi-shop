@@ -3,8 +3,8 @@
 }
 
 .product-media {
-  background: linear-gradient(135deg, var(--surface-2, #eef2f7), var(--surface, #ffffff));
-  color: var(--text-muted, #64748b);
+  background: linear-gradient(135deg, var(--surface-soft, #eef2f7), var(--surface, #ffffff));
+  color: var(--muted, #64748b);
 }
 
 .badge-chip {

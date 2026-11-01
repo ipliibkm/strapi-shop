@@ -179,7 +179,7 @@ class CommerceComponent {
       help: this.t('The first image is the main image. Upload up to 8 JPG, PNG, or WebP images.'),
       choose: this.t('Choose images or drop them here'),
       remove: this.t('Remove image'),
-      uploading: this.t('Uploading images…'),
+      uploading: this.t('Uploading images...'),
       limitReached: this.t('Image limit reached.'),
     };
   }

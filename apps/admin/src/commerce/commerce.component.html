@@ -8,7 +8,7 @@
   </div>
 </div>
 @if (!loaded()) {
-  <p class="muted">{{ t('Loading the commerce workspace…') }}</p>
+  <p class="muted">{{ t('Loading the commerce workspace...') }}</p>
 } @else {
   <section class="commerce-status">
     <span [class]="'badge ' + (stripeConfigured() ? 'live' : '')">{{
@@ -214,6 +214,7 @@
         </article>
 
         <article class="panel editor-panel" [class.empty]="!selectedProduct()">
+          @let product = selectedProduct();
           @if (editingNew()) {
             <header>
               <p class="label">{{ t('NEW PRODUCT') }}</p>
@@ -280,7 +281,7 @@
             >
               {{ t('Create product') }}
             </button>
-          } @else if (selectedProduct(); as product) {
+          } @else if (product) {
             <header class="row-between editor-header">
               <div>
                 <p class="label">{{ t('EDITING') }}</p>

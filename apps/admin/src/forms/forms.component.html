@@ -306,12 +306,7 @@
                     <span>{{ t('Dropdown options') }}</span>
                     <textarea
                       rows="4"
-                      [value]="
-                        field.options.join(
-                          '
-'
-                        )
-                      "
+                      [value]="field.options.join('\n')"
                       (change)="setFieldOptions($index, $event)"
                     ></textarea>
                     <small>{{ t('Enter one option on each line.') }}</small>
@@ -339,7 +334,7 @@
                 } @else if (field.type === 'select') {
                   <select>
                     <option value="">{{ t('Select an option') }}</option>
-                    @for (option of field.options; track option) {
+                    @for (option of fieldOptions(field); track option) {
                       <option>{{ option }}</option>
                     }
                   </select>

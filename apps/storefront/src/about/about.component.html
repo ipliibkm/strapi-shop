@@ -9,11 +9,12 @@
   </h1>
 </section>
 
+@let pageContent = content();
 @if (!loaded()) {
   <p class="muted center">{{ t('page.loading') }}</p>
-} @else if (content(); as page) {
+} @else if (pageContent) {
   <openshopfront-content-blocks
-    [blocks]="page.blocks"
+    [blocks]="pageContent.blocks"
     [products]="blockProducts()"
     [labels]="blockLabels()"
     (navigate)="onNavigate($event)"

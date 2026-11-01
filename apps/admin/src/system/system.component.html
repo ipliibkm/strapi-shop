@@ -25,7 +25,7 @@
         [disabled]="mockApplying() !== null"
         (click)="confirmMock(store.key)"
       >
-        {{ mockApplying() === store.key ? t('Applying…') : store.label }}
+        {{ mockApplying() === store.key ? t('Applying...') : store.label }}
         @if (mockApplying() === store.key) {
           <mat-icon iconPositionEnd>refresh</mat-icon>
         }

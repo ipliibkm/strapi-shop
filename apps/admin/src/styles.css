@@ -10,6 +10,7 @@
   --surface-soft: #f8f9fb;
   --border: #e0e4ea;
   --muted: #687386;
+  --on-surface-muted: #5f6878;
   --sidebar: #111827;
   --sidebar-on: #f3f5f9;
   --sidebar-text: #aab4c5;
@@ -2353,7 +2354,7 @@ main {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--surface-soft);
   color: var(--openshopfront-fg);
   font-size: 14px;
 }

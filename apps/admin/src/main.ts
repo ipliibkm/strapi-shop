@@ -99,6 +99,10 @@ class AdminApp {
   t(text: string, params?: Record<string, string | number>): string {
     return this.i18n.t(text, params);
   }
+  sidebarStatusLabel(): string {
+    if (!this.auth.user()?.superAdmin) return this.t('Strapi content access');
+    return this.status.backendOnline() ? this.t('Backend online') : this.t('Backend unavailable');
+  }
   setLang(code: Lang) {
     this.i18n.setLang(code);
   }

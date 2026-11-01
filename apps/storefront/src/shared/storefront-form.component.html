@@ -32,7 +32,7 @@
           } @else if (field.type === 'select') {
             <select [name]="field.key" [required]="field.required">
               <option value="">{{ t('form.selectOption') }}</option>
-              @for (option of field.options; track option) {
+              @for (option of fieldOptions(field); track option) {
                 <option [value]="option">{{ option }}</option>
               }
             </select>

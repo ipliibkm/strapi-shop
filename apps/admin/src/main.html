@@ -41,10 +41,7 @@
       </button>
       }
     </nav>
-    <div class="sidebar-footer">
-      {{ auth.user()?.superAdmin ? status.backendOnline() ? t('Backend online') : t('Backend
-      unavailable') : t('Strapi content access') }}
-    </div>
+    <div class="sidebar-footer">{{ sidebarStatusLabel() }}</div>
   </aside>
 
   <div class="workspace">

@@ -2,6 +2,22 @@
 @import 'material-symbols/outlined.css';
 @import '@angular/material/prebuilt-themes/azure-blue.css';
 @import 'tailwindcss';
+:root {
+  --openshopfront-bg: #f5f0e8;
+  --openshopfront-fg: #2a241e;
+  --openshopfront-accent: #a65e37;
+  --surface: #fff;
+  --surface-soft: #faf6ef;
+  --border: #e2d8c9;
+  --muted: #7c7166;
+  --on-surface-muted: #5f554b;
+  --sidebar: #211b15;
+  --sidebar-text: #cbbfb0;
+  --sidebar-on: #f7f3ee;
+  --hero-a: #f8f4ec;
+  --hero-mid: #fdfaf4;
+  --hero-b: #efe8db;
+}
 *,
 *:before,
 *:after {

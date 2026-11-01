@@ -7,6 +7,7 @@
     <p>{{ t('Strapi applies the permissions of your administrator role.') }}</p>
   </div>
 </div>
+@let item = profile();
 @if (loading()) {
   <section class="content-state" role="status">{{ t('Load content.') }}</section>
 } @else if (forbidden()) {
@@ -15,7 +16,7 @@
     <h3>{{ t('Your Strapi role cannot open this content.') }}</h3>
     <p>{{ t('Ask a Strapi Super Admin to change your Content Manager permissions.') }}</p>
   </section>
-} @else if (profile(); as item) {
+} @else if (item) {
   <form
     class="content-editor"
     (submit)="
