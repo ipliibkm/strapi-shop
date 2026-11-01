@@ -2,7 +2,7 @@
 set -eu
 
 root_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-config_file=$(mktemp /private/var/folders/zk/13r8g18x70g3yfsqc4153zgdy84g11/T/opencode/compose-prod.XXXXXX.json)
+config_file=$(mktemp "${TMPDIR:-/tmp}/compose-prod.XXXXXX.json")
 trap 'rm -f "$config_file"' EXIT INT TERM
 
 cd "$root_dir"
